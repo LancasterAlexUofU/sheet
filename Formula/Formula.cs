@@ -94,7 +94,13 @@ public class Formula
     /// <param name="formula"> The string representation of the formula to be created.</param>
     public Formula(string formula)
     {
-        // FIXME: implement your code here
+        // --- Tests for One Token Rule ---
+        if (formula == string.Empty)
+        {
+            throw new FormulaFormatException("Formula must not be empty");
+        }
+
+        // --- End of One Token Rule Test ---
     }
 
     /// <summary>

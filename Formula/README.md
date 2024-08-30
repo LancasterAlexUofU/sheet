@@ -30,3 +30,5 @@ Work stands on its own.
 # Consulted Peers
 
 # References
+1) Microsoft RegEx Documentation - https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
+2) Best Practices for Exceptions - https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions 
