@@ -15,7 +15,14 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 2 | 12 | 2|
+| Assignment 2 | 12 | 3 |
+
+
+ ## Hour Breakdown
+
+| Task | Number of Hours |
+| :--------:| :--------:
+| Setting up coding environment & <br /> reading documentation | 3 |
 
 # Comments for Evaluators
 Work stands on its own.
