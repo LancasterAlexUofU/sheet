@@ -7,6 +7,7 @@
 //     by Profs Joe, Danny, and Jim.  You should keep this attribution
 //     at the top of your code where you have your header comment, along
 //     with the other required information.
+//   </para>
 //
 // Author:    Alex Lancaster
 // Partner:   None
