@@ -23,6 +23,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Task | Number of Hours |
 | :--------:| :--------:
 | Setting up coding environment & <br /> reading documentation | 3 |
+| Implementing formula syntax logic | 1 |
 
 # Comments for Evaluators
 Work stands on its own.
