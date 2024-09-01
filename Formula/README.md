@@ -15,7 +15,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 2 | 12 | 6 |
+| Assignment 2 | 12 | 6.5 |
 
 
  ## Hour Breakdown
@@ -23,7 +23,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Task | Number of Hours |
 | :--------:| :--------:
 | Setting up coding environment & <br /> reading documentation | 3 |
-| Implementing formula syntax logic | 3 |
+| Implementing formula syntax logic | 3.5 |
 
 # Comments for Evaluators
 Work stands on its own.
@@ -35,3 +35,4 @@ Work stands on its own.
 2) Best Practices for Exceptions - https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions
 3) RegEx Translator - https://www.regextranslator.com
 4) RegEx 101 - https://regex101.com
+5) Stack Class - https://learn.microsoft.com/en-us/dotnet/api/system.collections.stack?view=net-8.0

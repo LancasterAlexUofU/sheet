@@ -29,6 +29,7 @@
 namespace CS3500.Formula;
 
 using System.Text.RegularExpressions;
+using System.Collections;
 
 /// <summary>
 ///   <para>
@@ -116,6 +117,7 @@ public class Formula
         }
 
         // --- End of One Token Rule Test ---
+        // ----------------------------------
 
         // --- Tests for Valid Token Rule ---
         List<string> tokens = GetTokens(formula);
@@ -128,6 +130,28 @@ public class Formula
         }
 
         // --- End of Valid Token Rule ---
+        // -------------------------------
+
+        // --- Tests for Closing Parentheses, Balanced Parentheses Rule---
+        int ValidParenthesesFlag = 1;
+
+        Stack parenthesesStack = new Stack();
+        foreach (string token in tokens)
+        {
+            if (token == "(")
+            {
+                parenthesesStack.Push(token);
+            }
+
+            if (token == ")")
+            {
+                if (parenthesesStack.Count == 0)
+                {
+                    throw new FormulaFormatException("At no point should the number of closing parentheses seen so far be greater than the number of opening parentheses seen so far.");
+                }
+            }
+        }
+
     }
 
     /// <summary>
