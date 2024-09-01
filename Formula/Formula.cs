@@ -133,8 +133,9 @@ public class Formula
         // -------------------------------
 
         // --- Tests for Closing Parentheses, Balanced Parentheses Rule---
-        int ValidParenthesesFlag = 1;
-
+        // When an open parenthesis is seen, it is pushed to a stack.
+        // Whenever a closed parenthesis is seen (assuming the stack is not empty), one parenthesis is popped from the stack.
+        // If the stack of parentheses is empty after processing the formula, then the opening and closing parentheses are balanced.
         Stack parenthesesStack = new Stack();
         foreach (string token in tokens)
         {
@@ -143,15 +144,24 @@ public class Formula
                 parenthesesStack.Push(token);
             }
 
-            if (token == ")")
+            // If '(' is pushed on an empty stack, then the number of closing parentheses is greater than opening parenthesis at one point.
+            if (token == ")" & parenthesesStack.Count == 0)
             {
-                if (parenthesesStack.Count == 0)
-                {
-                    throw new FormulaFormatException("At no point should the number of closing parentheses seen so far be greater than the number of opening parentheses seen so far.");
-                }
+                throw new FormulaFormatException("The number of closing parentheses is greater at one point than the number of opening parentheses.");
+            }
+            else if (token == ")")
+            {
+                parenthesesStack.Pop();
             }
         }
 
+        if (parenthesesStack.Count != 0)
+        {
+            throw new FormulaFormatException("Formula has unbalanced number of parentheses.");
+        }
+
+        // --- End of Closing Parentheses, Balanced Parentheses Test ---
+        // -------------------------------------------------------------
     }
 
     /// <summary>
