@@ -63,7 +63,22 @@ public class Formula
     ///   All variables are letters followed by numbers.  This pattern
     ///   represents valid variable name strings.
     /// </summary>
+
+    // Matches (, ), +, -, *, /
+    private const string OperandsRegExPattern = @"[\(\)\+\-*/]";
+
+    // Matches one or more letters, upper or lowercase, followed by one or more numbers
     private const string VariableRegExPattern = @"[a-zA-Z]+\d+";
+
+    /// <summary>
+    /// \d+\.\d*: Matches numbers with a decimal point where the digits appear before the decimal, e.g., 123., 123.45. <br />
+    /// \d*\.\d+: Matches numbers with a decimal point where digits must appear after the decimal but may be absent before, e.g., .45, 0.45. <br />
+    /// (?: [eE][\+-]?\d+)?: Matches scientific notation. <br />
+    /// </summary>
+    private const string NumberRegExPattern = @"(?:\d+\.\d*|\d*\.\d+|\d+)(?:[eE][\+-]?\d+)?";
+
+    // The only tokens in the expression are (, ), +, -, *, /, valid variables, and valid numbers.
+    private const string ValidTokens = $"{OperandsRegExPattern}|{VariableRegExPattern}|{NumberRegExPattern}";
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Formula"/> class.
@@ -101,6 +116,18 @@ public class Formula
         }
 
         // --- End of One Token Rule Test ---
+
+        // --- Tests for Valid Token Rule ---
+        List<string> tokens = GetTokens(formula);
+        foreach (string token in tokens)
+        {
+            if (!Regex.IsMatch(token, ValidTokens))
+            {
+                throw new FormulaFormatException($"Formula may only contain (, ), +, -, *, /, valid variables, and valid numbers. {token} is not valid.");
+            }
+        }
+
+        // --- End of Valid Token Rule ---
     }
 
     /// <summary>

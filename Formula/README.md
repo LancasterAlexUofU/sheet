@@ -15,7 +15,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 2 | 12 | 3 |
+| Assignment 2 | 12 | 6 |
 
 
  ## Hour Breakdown
@@ -23,7 +23,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Task | Number of Hours |
 | :--------:| :--------:
 | Setting up coding environment & <br /> reading documentation | 3 |
-| Implementing formula syntax logic | 1 |
+| Implementing formula syntax logic | 3 |
 
 # Comments for Evaluators
 Work stands on its own.
@@ -32,4 +32,6 @@ Work stands on its own.
 
 # References
 1) Microsoft RegEx Documentation - https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
-2) Best Practices for Exceptions - https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions 
+2) Best Practices for Exceptions - https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions
+3) RegEx Translator - https://www.regextranslator.com
+4) RegEx 101 - https://regex101.com
