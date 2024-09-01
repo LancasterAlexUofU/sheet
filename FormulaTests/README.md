@@ -10,7 +10,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 ```
 
 # Overview of the FormulaTests Project
-FormulaTests runs 25 various tests on Formula.dll to ensure that the formula constructor is properly working.
+FormulaTests runs 27 various tests on Formula.dll to ensure that the formula constructor is properly working.
 
 This is done by checking the 10 Formula Syntax and Validation Rules for a formula in infix notation.
 

@@ -205,6 +205,36 @@ public class FormulaSyntaxTests
 
     /// <summary>
     ///   <para>
+    ///     This test assures that an operand isn't the first token in a formula. <br/>
+    ///     (Side note: an opening parenthesis at the end or a closed parenthesis should be caught by the Closing Parentheses or Balanced Parentheses Test.)
+    ///   </para>
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void FormulaConstructor_TestFirstToken_Invalid()
+    {
+        _ = new Formula("+ (x1)");
+    }
+
+    // --- Tests for First Token Rule ---
+
+    /// <summary>
+    ///   <para>
+    ///     This test assures that an operand isn't the last token in a formula. <br/>
+    ///     (Side note: an opening parenthesis at the end or a closed parenthesis should be caught by the Closing Parentheses or Balanced Parentheses Test.)
+    ///   </para>
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void FormulaConstructor_TestLastToken_Invalid()
+    {
+        _ = new Formula("(x1) -");
+    }
+
+    // --- Tests for Last Token Rule ---
+
+    /// <summary>
+    ///   <para>
     ///     This test checks that no operand is followed by another operand.
     ///   </para>
     /// </summary>

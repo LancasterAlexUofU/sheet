@@ -25,6 +25,7 @@ Future extensions are:
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 1 | 12 | 8|
+| Assignment 2 | 12 | 7.5 |
 
 # Comments for Evaluators
 Work stands on its own.

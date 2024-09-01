@@ -81,6 +81,14 @@ public class Formula
     // The only tokens in the expression are (, ), +, -, *, /, valid variables, and valid numbers.
     private const string ValidTokens = $"{OperandsRegExPattern}|{VariableRegExPattern}|{NumberRegExPattern}";
 
+    // The first token of an expression must be a number, a variable, or an opening parenthesis.
+    private const string FirstTokenRegex = $@"{NumberRegExPattern}|{VariableRegExPattern}|\(";
+
+    // The last token of an expression must be a number, a variable, or a closing parenthesis.
+    private const string LastTokenRegex = $@"{NumberRegExPattern}|{VariableRegExPattern}|\)";
+
+    // Combination of First and Last Token Rules
+
     /// <summary>
     ///   Initializes a new instance of the <see cref="Formula"/> class.
     ///   <para>
@@ -162,6 +170,24 @@ public class Formula
 
         // --- End of Closing Parentheses, Balanced Parentheses Test ---
         // -------------------------------------------------------------
+
+        // --- Test for First Token Rule
+        if (!Regex.IsMatch(tokens[0], FirstTokenRegex))
+        {
+            throw new FormulaFormatException($"Formula is invalid with '{tokens[0]}' as the first character");
+        }
+
+        // --- End of First Token Test ---
+        // -------------------------------
+
+        // Test for Last Token Rule
+        if (!Regex.IsMatch(tokens[tokens.Count - 1], LastTokenRegex))
+        {
+            throw new FormulaFormatException($"Formula is invalid with '{tokens.Count - 1}' as the last character");
+        }
+
+        // --- End of Last Token Test ---
+        // ------------------------------
     }
 
     /// <summary>
