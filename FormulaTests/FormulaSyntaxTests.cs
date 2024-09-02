@@ -326,7 +326,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void FormulaConstructor_TestScientificNotationZero_Valid()
     {
-        _ = new Formula("0e0");
+        _ = new Formula("0.0e-0");
     }
 
     // --- Tests for One Token Rule ---

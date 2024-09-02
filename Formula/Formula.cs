@@ -61,31 +61,43 @@ using System.Collections;
 public class Formula
 {
     /// <summary>
-    ///   All variables are letters followed by numbers.  This pattern
-    ///   represents valid variable name strings.
+    ///     Matches +, -, *, /
     /// </summary>
-
-    // Matches (, ), +, -, *, /
-    private const string OperandsRegExPattern = @"[\(\)\+\-*/]";
-
-    // Matches one or more letters, upper or lowercase, followed by one or more numbers
-    private const string VariableRegExPattern = @"[a-zA-Z]+\d+";
+    private const string OperandRegex = @"[\+\-*/]";
 
     /// <summary>
-    /// \d+\.\d*: Matches numbers with a decimal point where the digits appear before the decimal, e.g., 123., 123.45. <br />
-    /// \d*\.\d+: Matches numbers with a decimal point where digits must appear after the decimal but may be absent before, e.g., .45, 0.45. <br />
-    /// (?: [eE][\+-]?\d+)?: Matches scientific notation. <br />
+    ///     Matches (, ), +, -, *, /
     /// </summary>
-    private const string NumberRegExPattern = @"(?:\d+\.\d*|\d*\.\d+|\d+)(?:[eE][\+-]?\d+)?";
+    private const string OperandParenthesesRegex = @"[\(\)\+\-*/]";
 
-    // The only tokens in the expression are (, ), +, -, *, /, valid variables, and valid numbers.
-    private const string ValidTokens = $"{OperandsRegExPattern}|{VariableRegExPattern}|{NumberRegExPattern}";
+    /// <summary>
+    ///     All variables are letters followed by numbers.  This pattern
+    ///     represents valid variable name strings. <br />
+    ///     Matches one or more letters, upper or lowercase, followed by one or more numbers.
+    /// </summary>
+    private const string VariableRegexPattern = @"[a-zA-Z]+\d+";
 
-    // The first token of an expression must be a number, a variable, or an opening parenthesis.
-    private const string FirstTokenRegex = $@"{NumberRegExPattern}|{VariableRegExPattern}|\(";
+    /// <summary>
+    ///     \d+\.\d*: Matches numbers with a decimal point where the digits appear before the decimal, e.g., 123., 123.45. <br />
+    ///     \d*\.\d+: Matches numbers with a decimal point where digits must appear after the decimal but may be absent before, e.g., .45, 0.45. <br />
+    ///     (?: [eE][\+-]?\d+)?: Matches scientific notation. <br />
+    /// </summary>
+    private const string NumberRegexPattern = @"(?:\d+\.\d*|\d*\.\d+|\d+)(?:[eE][\+-]?\d+)?";
 
-    // The last token of an expression must be a number, a variable, or a closing parenthesis.
-    private const string LastTokenRegex = $@"{NumberRegExPattern}|{VariableRegExPattern}|\)";
+    /// <summary>
+    ///     The only tokens in the expression are (, ), +, -, *, /, valid variables, and valid numbers.
+    /// </summary>
+    private const string ValidTokens = $"{OperandParenthesesRegex}|{VariableRegexPattern}|{NumberRegexPattern}";
+
+    /// <summary>
+    ///     The first token of an expression must be a number, a variable, or an opening parenthesis.
+    /// </summary>
+    private const string FirstTokenRegex = $@"{NumberRegexPattern}|{VariableRegexPattern}|\(";
+
+    /// <summary>
+    ///     The last token of an expression must be a number, a variable, or a closing parenthesis.
+    /// </summary>
+    private const string LastTokenRegex = $@"{NumberRegexPattern}|{VariableRegexPattern}|\)";
 
     // Combination of First and Last Token Rules
 
@@ -180,7 +192,7 @@ public class Formula
         // --- End of First Token Test ---
         // -------------------------------
 
-        // Test for Last Token Rule
+        // --- Test for Last Token Rule ---
         if (!Regex.IsMatch(tokens[tokens.Count - 1], LastTokenRegex))
         {
             throw new FormulaFormatException($"Formula is invalid with '{tokens.Count - 1}' as the last character");
@@ -188,6 +200,31 @@ public class Formula
 
         // --- End of Last Token Test ---
         // ------------------------------
+
+        // --- Test for Parenthesis/Operator Following Rule ---
+        for (int i = 0; i < tokens.Count - 1; i++)
+        {
+            // Check that the length is equal to one to ensure that no numbers in scientific notation are counted as operands.
+            if ((tokens[i].Length == 1) && (tokens[i] == "(" || Regex.IsMatch(tokens[i], OperandRegex)))
+            {
+                if (!Regex.IsMatch(tokens[i + 1], FirstTokenRegex))
+                {
+                    throw new FormulaFormatException($"Formula is invalid with '{tokens[i + 1]}' following '{tokens[i]}'");
+                }
+            }
+        }
+
+        // --- End of Parenthesis/Operator Following Test ---
+        // --------------------------------------------------
+
+        // --- Test for Extra Following Rule ---
+        for (int i = 0; i < tokens.Count - 1; i++)
+        {
+            if (Regex.IsMatch(tokens[i], LastTokenRegex))
+            {
+                // Implement rest of Extra Following Rule logic
+            }
+        }
     }
 
     /// <summary>
@@ -258,7 +295,7 @@ public class Formula
     private static bool IsVar(string token)
     {
         // notice the use of ^ and $ to denote that the entire string being matched is just the variable
-        string standaloneVarPattern = $"^{VariableRegExPattern}$";
+        string standaloneVarPattern = $"^{VariableRegexPattern}$";
         return Regex.IsMatch(token, standaloneVarPattern);
     }
 
@@ -299,7 +336,7 @@ public class Formula
                                         lpPattern,
                                         rpPattern,
                                         opPattern,
-                                        VariableRegExPattern,
+                                        VariableRegexPattern,
                                         doublePattern,
                                         spacePattern);
 
