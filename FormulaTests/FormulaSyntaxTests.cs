@@ -281,6 +281,20 @@ public class FormulaSyntaxTests
 
     // --- Tests for Extra Following Rule ---
 
+
+    /// <summary>
+    ///     Tests that even though a number in scientific notation has an operand in the number, <br />
+    ///     it is still treated as a number and not an operand for the Extra Following Rule.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void FormulaConstructor_TestExtraFollowingScientificNumber_Invalid()
+    {
+        _ = new Formula("(x1)7e-7");
+    }
+
+    // --- Tests for Extra Following Rule
+
     /// <summary>
     /// Tests that the number zero is a valid formula. [ExpectedException] is not used so the test should not throw an error.
     /// </summary>

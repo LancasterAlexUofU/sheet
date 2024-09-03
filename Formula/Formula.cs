@@ -61,12 +61,12 @@ using System.Collections;
 public class Formula
 {
     /// <summary>
-    ///     Matches +, -, *, /
+    ///     This regex matches the operands: [+, -, *, /].
     /// </summary>
     private const string OperandRegex = @"[\+\-*/]";
 
     /// <summary>
-    ///     Matches (, ), +, -, *, /
+    ///     This regex matches the operands: [(, ), +, -, *, /].
     /// </summary>
     private const string OperandParenthesesRegex = @"[\(\)\+\-*/]";
 
@@ -204,12 +204,13 @@ public class Formula
         // --- Test for Parenthesis/Operator Following Rule ---
         for (int i = 0; i < tokens.Count - 1; i++)
         {
-            // Check that the length is equal to one to ensure that no numbers in scientific notation are counted as operands.
-            if ((tokens[i].Length == 1) && (tokens[i] == "(" || Regex.IsMatch(tokens[i], OperandRegex)))
+            // Statement checks for an opening parenthesis or a single operand.
+            // If "^ $" is not included for OperandRegex, numbers in scientific notation would be mistakingly passed as an operand.
+            if (tokens[i] == "(" || Regex.IsMatch(tokens[i], $"^{OperandRegex}$"))
             {
                 if (!Regex.IsMatch(tokens[i + 1], FirstTokenRegex))
                 {
-                    throw new FormulaFormatException($"Formula is invalid with '{tokens[i + 1]}' following '{tokens[i]}'");
+                    throw new FormulaFormatException($"Formula is invalid with '{tokens[i + 1]}' following '{tokens[i]}.' Formula fails to meet Parenthesis/Operator Following Rule.");
                 }
             }
         }
@@ -222,9 +223,17 @@ public class Formula
         {
             if (Regex.IsMatch(tokens[i], LastTokenRegex))
             {
-                // Implement rest of Extra Following Rule logic
+                // Statement checks for the absence of a closing parenthesis or absence of an operand to make formula invalid.
+                // Must check that OperandRegex is just one character using "^ $" as numbers in scientific notation would mistakingly be passed as an operand.
+                if (tokens[i + 1] != ")" && !Regex.IsMatch(tokens[i + 1], $"^{OperandRegex}$"))
+                {
+                    throw new FormulaFormatException($"Formula is invalid with '{tokens[i + 1]}' following '{tokens[i]}.' Formula fails to meet Extra Following Rule.");
+                }
             }
         }
+
+        // --- End of Extra Following Rule Test ---
+        // ----------------------------------------
     }
 
     /// <summary>
@@ -326,8 +335,6 @@ public class Formula
 
         string lpPattern = @"\(";
         string rpPattern = @"\)";
-        string opPattern = @"[\+\-*/]";
-        string doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
         string spacePattern = @"\s+";
 
         // Overall pattern
@@ -335,9 +342,9 @@ public class Formula
                                         "({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
                                         lpPattern,
                                         rpPattern,
-                                        opPattern,
+                                        OperandRegex,
                                         VariableRegexPattern,
-                                        doublePattern,
+                                        NumberRegexPattern,
                                         spacePattern);
 
         // Enumerate matching tokens that don't consist solely of white space.
