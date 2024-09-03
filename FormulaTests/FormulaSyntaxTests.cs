@@ -17,12 +17,9 @@
 ///
 /// File Contents
 ///
-///  FormulaTests runs 25 various tests on Formula.dll to ensure that the formula constructor is properly working.
+///  FormulaTests runs 28 various tests on Formula.dll to ensure that the formula constructor is properly working.
 ///  This is done by checking the 10 Formula Syntax and Validation Rules for a formula in infix notation.
 ///  This test additionally checks for valid variables as well as numbers in proper scientific notation.
-///
-///  The test can be applied to CS3500.Formula1, CS3500.Formula2, or CS3500.Formula3. Just change the using line.
-///  Of the 25 tests, Formula1 has 8 errors, Formula2 has 0 errors, and Formula3 has 15 errors.
 /// </summary>
 
 namespace CS3500.Formula;
@@ -477,7 +474,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void FormulaConstructor_TestVariablesContainingE_Invalid()
     {
-        string[] testCases = { "e", "e1e", "1e", "1ee" };
+        string[] testCases = ["e", "e1e", "1e", "1ee"];
 
         foreach (string testCase in testCases)
         {

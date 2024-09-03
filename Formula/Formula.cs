@@ -156,7 +156,7 @@ public class Formula
         // When an open parenthesis is seen, it is pushed to a stack.
         // Whenever a closed parenthesis is seen (assuming the stack is not empty), one parenthesis is popped from the stack.
         // If the stack of parentheses is empty after processing the formula, then the opening and closing parentheses are balanced.
-        Stack parenthesesStack = new Stack();
+        Stack parenthesesStack = new ();
         foreach (string token in tokens)
         {
             if (token == "(")
@@ -193,7 +193,7 @@ public class Formula
         // -------------------------------
 
         // --- Test for Last Token Rule ---
-        if (!Regex.IsMatch(tokens[tokens.Count - 1], LastTokenRegex))
+        if (!Regex.IsMatch(tokens[^1], LastTokenRegex))
         {
             throw new FormulaFormatException($"Formula is invalid with '{tokens.Count - 1}' as the last character");
         }
