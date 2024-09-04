@@ -512,4 +512,14 @@ public class FormulaSyntaxTests
     // --- Tests for Parenthesis/Operator Following Rule ---
 
     // --- Tests for Extra Following Rule ---
+
+    [TestMethod]
+    public void FormulaConstructor_TestLowercaseVariable_Valid()
+    {
+        HashSet<string> expectedVariables = new HashSet<string>{ "X1", "Y1" };
+        Formula formula = new Formula("x1 + x2");
+
+        HashSet<string> actualVariables = (HashSet<string>)formula.GetVariables();
+        Assert.IsTrue(expectedVariables.SetEquals(actualVariables), "Variable Hashsets are not equal.");
+    }
 }

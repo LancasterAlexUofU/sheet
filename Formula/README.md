@@ -15,7 +15,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 2 | 12 | 9 |
+| Assignment 2 | 12 | 9.5 |
 
 
  ## Hour Breakdown
@@ -23,7 +23,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Task | Number of Hours |
 | :--------:| :--------:
 | Setting up coding environment & <br /> reading documentation | 3 |
-| Implementing formula syntax logic | 6 |
+| Implementing formula syntax logic | 6.5 |
 
 # Comments for Evaluators
 Work stands on its own.
