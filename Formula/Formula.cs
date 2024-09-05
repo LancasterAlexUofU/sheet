@@ -99,11 +99,9 @@ public class Formula
     /// </summary>
     private const string LastTokenRegex = $@"{NumberRegexPattern}|{VariableRegexPattern}|\)";
 
-    private string formulaCanonicalString;
-
-    private List<string> tokensCanonical = [];
-
     private static List<string> tokens = [];
+
+    private static string formula;
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Formula"/> class.
@@ -131,22 +129,72 @@ public class Formula
     ///     </item>
     ///   </list>
     /// </summary>
-    /// <param name="formula"> The string representation of the formula to be created.</param>
-    public Formula(string formula)
+    /// <param name="inputFormula"> The string representation of the formula to be created.</param>
+    public Formula(string inputFormula)
     {
-
-        OneTokenRule(formula);
+        formula = inputFormula;
         tokens = GetTokens(formula);
-        ValidTokenRule(formula);
 
-        // --- End of Valid Token Rule ---
-        // -------------------------------
+        OneTokenRule();
+        ValidTokenRule();
+        ClosingBalancedParenthesesRule();
+        FirstTokenRule();
+        LastTokenRule();
+        ParenthesisOperatingFollowingRule();
+        ExtraFollowingRule();
 
-        // --- Tests for Closing Parentheses, Balanced Parentheses Rule---
+        NumberParse();
+        LetterUpper();
+    }
+
+    /// <summary>
+    /// Tests for the One Token Rule: <br/>
+    /// There must be at least one token.
+    /// </summary>
+    /// <exception cref="FormulaFormatException">Exception throw if formula is empty.</exception>
+    private static void OneTokenRule()
+    {
+        if (formula == string.Empty)
+        {
+            throw new FormulaFormatException("Formula must not be empty");
+        }
+    }
+
+    /// <summary>
+    /// Tests for the Valid Token Rule: <br/>
+    /// The only tokens in the expression are (, ), +, -, *, /, variables, and numbers.
+    /// </summary>
+    /// <exception cref="FormulaFormatException">Exception is thrown if a token is not a valid token.</exception>
+    private static void ValidTokenRule()
+    {
+        // --- Tests for Valid Token Rule ---
+        foreach (string token in tokens)
+        {
+            if (!Regex.IsMatch(token, ValidTokens))
+            {
+                throw new FormulaFormatException($"Formula may only contain (, ), +, -, *, /, valid variables, and valid numbers. {token} is not valid.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Tests for the Closing Parentheses and Balanced Parentheses Rule: <br/> <br/>
+    /// Closed Parentheses Rule: <br/>
+    /// When reading tokens from left to right, at no point should the number of closing parentheses seen so far <br/>
+    /// be greater than the number of opening parentheses seen so far. <br/> <br/>
+    /// Balanced Parentheses Rule: <br/>
+    /// The total number of opening parentheses must equal the total number of closing parentheses.
+    /// </summary>
+    /// <exception cref="FormulaFormatException">
+    /// Exception is thrown if The number of closing parentheses is greater at one point than the number of opening parentheses or if <br/>
+    /// the Formula has an unbalanced number of parentheses.
+    /// </exception>
+    private static void ClosingBalancedParenthesesRule()
+    {
         // When an open parenthesis is seen, it is pushed to a stack.
         // Whenever a closed parenthesis is seen (assuming the stack is not empty), one parenthesis is popped from the stack.
         // If the stack of parentheses is empty after processing the formula, then the opening and closing parentheses are balanced.
-        Stack parenthesesStack = new ();
+        Stack parenthesesStack = new();
         foreach (string token in tokens)
         {
             if (token == "(")
@@ -169,29 +217,41 @@ public class Formula
         {
             throw new FormulaFormatException("Formula has unbalanced number of parentheses.");
         }
+    }
 
-        // --- End of Closing Parentheses, Balanced Parentheses Test ---
-        // -------------------------------------------------------------
-
-        // --- Test for First Token Rule
+    /// <summary>
+    /// This tests the First Token Rule: <br/>
+    /// The first token of an expression must be a number, a variable, or an opening parenthesis.
+    /// </summary>
+    /// <exception cref="FormulaFormatException">Exception is thrown whenever the first character is not a number, a variable, or an opening parenthesis.</exception>
+    private static void FirstTokenRule()
+    {
         if (!Regex.IsMatch(tokens[0], FirstTokenRegex))
         {
             throw new FormulaFormatException($"Formula is invalid with '{tokens[0]}' as the first character");
         }
+    }
 
-        // --- End of First Token Test ---
-        // -------------------------------
-
-        // --- Test for Last Token Rule ---
+    /// <summary>
+    /// This tests the Last Token Rule: <br/>
+    /// The last token of an expression must be a number, a variable, or a closing parenthesis.
+    /// </summary>
+    /// <exception cref="FormulaFormatException">Exception is thrown when the last character is not a number, a variable, or a closing parenthesis.</exception>
+    private static void LastTokenRule()
+    {
         if (!Regex.IsMatch(tokens[^1], LastTokenRegex))
         {
             throw new FormulaFormatException($"Formula is invalid with '{tokens.Count - 1}' as the last character");
         }
+    }
 
-        // --- End of Last Token Test ---
-        // ------------------------------
-
-        // --- Test for Parenthesis/Operator Following Rule ---
+    /// <summary>
+    /// Tests for the Parenthesis/Operator Following Rule: <br/>
+    /// Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.
+    /// </summary>
+    /// <exception cref="FormulaFormatException">Exception is thrown if a number, a variable, or an opening parenthesis is not seen after an opening parenthesis or an operator.</exception>
+    private static void ParenthesisOperatingFollowingRule()
+    {
         for (int i = 0; i < tokens.Count - 1; i++)
         {
             // Statement checks for an opening parenthesis or a single operand.
@@ -204,11 +264,15 @@ public class Formula
                 }
             }
         }
+    }
 
-        // --- End of Parenthesis/Operator Following Test ---
-        // --------------------------------------------------
-
-        // --- Test for Extra Following Rule ---
+    /// <summary>
+    /// Tests for the Extra Following Rule: <br/>
+    /// Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.
+    /// </summary>
+    /// <exception cref="FormulaFormatException">Exception is thrown if a number, a variable, or a closing parenthesis is not followed by an operator or a closing parenthesis. </exception>
+    private static void ExtraFollowingRule()
+    {
         for (int i = 0; i < tokens.Count - 1; i++)
         {
             if (Regex.IsMatch(tokens[i], LastTokenRegex))
@@ -221,47 +285,35 @@ public class Formula
                 }
             }
         }
+    }
 
-        // --- End of Extra Following Rule Test ---
-        // ----------------------------------------
-
+    /// <summary>
+    /// This method ensures that numbers are in canonical form (e.g. 3.0 -> 3).
+    /// </summary>
+    private static void NumberParse()
+    {
         double tokenDouble;
+
         for (int i = 0; i < tokens.Count; i++)
         {
             if (double.TryParse(tokens[i], out tokenDouble))
             {
+                // If the token is a number, it is converted and parsed as a double, converted back to a string, and placed back in tokens.
                 tokens[i] = tokenDouble.ToString();
             }
         }
+    }
 
+    /// <summary>
+    /// This method uppercases all tokens and stores them in the tokens list.
+    /// </summary>
+    private static void LetterUpper()
+    {
         for (int i = 0; i < tokens.Count; i++)
         {
             if (Regex.IsMatch(tokens[i], @"[a-z]"))
             {
                 tokens[i] = tokens[i].ToUpper();
-            }
-        }
-
-        this.tokensCanonical = tokens;
-    }
-
-    private static void OneTokenRule(string formula)
-    {
-        // --- Tests for One Token Rule ---
-        if (formula == string.Empty)
-        {
-            throw new FormulaFormatException("Formula must not be empty");
-        }
-    }
-
-    private static void ValidTokenRule(string formula)
-    {
-        // --- Tests for Valid Token Rule ---
-        foreach (string token in tokens)
-        {
-            if (!Regex.IsMatch(token, ValidTokens))
-            {
-                throw new FormulaFormatException($"Formula may only contain (, ), +, -, *, /, valid variables, and valid numbers. {token} is not valid.");
             }
         }
     }
@@ -287,7 +339,7 @@ public class Formula
     {
         HashSet<string> variables = new HashSet<string>();
 
-        foreach (string token in this.tokensCanonical)
+        foreach (string token in tokens)
         {
             if (IsVar(token))
             {
@@ -330,8 +382,7 @@ public class Formula
     /// </returns>
     public override string ToString()
     {
-        this.formulaCanonicalString = string.Join(string.Empty, this.tokensCanonical);
-        return this.formulaCanonicalString;
+        return string.Join(string.Empty, tokens);
     }
 
     /// <summary>
