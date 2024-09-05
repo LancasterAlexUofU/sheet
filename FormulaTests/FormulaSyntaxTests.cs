@@ -332,6 +332,19 @@ public class FormulaSyntaxTests
     // --- Tests for Valid Token Rule ---
 
     /// <summary>
+    /// Tests that a number with an extraneous decimal (e.g. 1.) is considered a valid formula.
+    /// </summary>
+    [TestMethod]
+    public void FormulaConstructor_TestExtraneousDecimal_Valid()
+    {
+        _ = new Formula("1.");
+    }
+
+    // --- Tests for One Token Rule ---
+
+    // --- Tests for Valid Token Rule ---
+
+    /// <summary>
     /// Tests that 0 in scientific notation is a valid formula.
     /// </summary>
     [TestMethod]
@@ -513,13 +526,94 @@ public class FormulaSyntaxTests
 
     // --- Tests for Extra Following Rule ---
 
+    /// <summary>
+    /// This is a simple test which validates that the ToString method uppercases a variable correctly and returns it as a string.
+    /// </summary>
     [TestMethod]
-    public void FormulaConstructor_TestLowercaseVariable_Valid()
+    public void ToString_TestVariable_Valid()
     {
-        HashSet<string> expectedVariables = new HashSet<string>{ "X1", "Y1" };
-        Formula formula = new Formula("x1 + x2");
-
-        HashSet<string> actualVariables = (HashSet<string>)formula.GetVariables();
-        Assert.IsTrue(expectedVariables.SetEquals(actualVariables), "Variable Hashsets are not equal.");
+        Formula formula = new Formula("x1");
+        Assert.AreEqual(formula.ToString(), "X1");
     }
+
+    /// <summary>
+    /// Test that ensures the ToString method correctly returns a formula with an operand and two variables.
+    /// </summary>
+    [TestMethod]
+    public void ToString_TestFormulaOperation_Valid()
+    {
+        Formula formula = new Formula("x1 + x2");
+        Assert.AreEqual(formula.ToString(), "X1+X2");
+    }
+
+    /// <summary>
+    /// Test which ensures the ToString method can properly handle parentheses with varying spaces between them.
+    /// </summary>
+    [TestMethod]
+    public void ToString_TestParentheses_Valid()
+    {
+        Formula formula = new Formula(" (  (x1+ 2  ) )");
+        Assert.AreEqual(formula.ToString(), "((X1+2))");
+    }
+
+    /// <summary>
+    /// Test that ensures the ToString method works properly on numbers in scientific notation by removing any unnecessary zeros after the decimal and capitalizing 'e'.
+    /// </summary>
+    [TestMethod]
+    public void ToString_TestScientificNotation_Valid()
+    {
+        Formula formula = new Formula("0.0e-0");
+        Assert.AreEqual(formula.ToString(), "0E-0");
+    }
+
+
+    /// <summary>
+    /// This test checks that the ToString can properly recognize and eliminate any extraneous zeros in a number.
+    /// </summary>
+    [TestMethod]
+    public void ToString_TestExtraneousZeros_Valid()
+    {
+        Formula formula = new Formula("05 + 05.00 + 0.050 + 05.00e-0001");
+        Assert.AreEqual(formula.ToString(), "5+5+0.05+5E-1");
+    }
+
+    /// <summary>
+    /// This test ensures that a number which contains a decimal point and no number to the right of the decimal point is properly handled.
+    /// </summary>
+    [TestMethod]
+    public void ToString_TestExtraneousDecimalPoint_Valid()
+    {
+        Formula formula = new Formula("01. + 1.");
+        Assert.AreEqual(formula.ToString(), "1+1");
+    }
+
+    /// <summary>
+    /// This tests sends a formula to the ToString method that uses all operations, variables with differing attributes, <br/>
+    /// integers, numbers with decimals, varying numbers in scientific notation, and parentheses throughout to ensure that <br/>
+    /// all interactions in a formula are accounted for and tested.
+    /// </summary>
+    [TestMethod]
+    public void ToString_TestComplexFormula_Valid()
+    {
+        Formula formula = new Formula("((aA1 + E2)/0)*(0.0E-0-3e1)+ 0.1 - 50 - (50E-1)/(3/Aa1)");
+        Assert.AreEqual(formula.ToString(), "((AA1+E2)/0)*(0E-0-3E1)+0.1-50-(50E-1)/(3/AA1)");
+    }
+
+    /// <summary>
+    /// This test ensures that two equivalent canonical string representations of a formula, which have been modified <br/>
+    /// with extra spaces, different capitalizations, extraneous decimal points, and extraneous zeros are still canonically the same.
+    /// </summary>
+    [TestMethod]
+    public void ToString_TestComplexFormulaEquivalent_Valid()
+    {
+        Formula EquivalentFormula1 = new Formula("  ((  Aa1+E2) /0.0)*(0.E-0 -3e1)+ 00.10 - 050. - (50E-1)/(3/Aa1)");
+        Formula EquivalentFormula2 = new Formula("((aA1+E02)/0)*(0.0E-00-3e1)+0.1-50-(050.E-1)/(3./Aa1)");
+
+        string EquivalentFormula1ToString = EquivalentFormula1.ToString();
+        string EquivalentFormula2ToString = EquivalentFormula2.ToString();
+
+        Assert.AreEqual(EquivalentFormula1ToString, "((AA1+E2)/0)*(0E-0-3E1)+0.1-50-(50E-1)/(3/AA1)");
+        Assert.AreEqual(EquivalentFormula2ToString, "((AA1+E2)/0)*(0E-0-3E1)+0.1-50-(50E-1)/(3/AA1)");
+    }
+
 }

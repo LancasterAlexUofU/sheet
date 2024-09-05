@@ -60,6 +60,8 @@ using System.Collections;
 /// </summary>
 public class Formula
 {
+    private string formulaString;
+
     /// <summary>
     ///     This regex matches the operands: [+, -, *, /].
     /// </summary>
@@ -234,6 +236,8 @@ public class Formula
 
         // --- End of Extra Following Rule Test ---
         // ----------------------------------------
+
+        formulaString = formula;
     }
 
     /// <summary>
@@ -300,8 +304,22 @@ public class Formula
     /// </returns>
     public override string ToString()
     {
-        // FIXME: add your code here.
-        return string.Empty;
+        string formulaCanonicalString = this.formulaString;
+        formulaCanonicalString = formulaCanonicalString.ToUpper();
+
+        formulaCanonicalString.Replace(" ", string.Empty);
+
+        // Leading Zeros
+        string leadingZerosRegexPattern = @"(?<=\D|^)0+(?=\d)";
+        // STILL EFFECTS TRAILING ZEROS, LOOK INTO
+        Regex.Replace(formulaCanonicalString, leadingZerosRegexPattern, string.Empty);
+
+        //Trailing zeros
+
+        //extraneous decimal point
+
+
+        return formulaCanonicalString;
     }
 
     /// <summary>
