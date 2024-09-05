@@ -103,6 +103,8 @@ public class Formula
 
     private List<string> tokensCanonical = [];
 
+    private static List<string> tokens = [];
+
     /// <summary>
     ///   Initializes a new instance of the <see cref="Formula"/> class.
     ///   <para>
@@ -132,24 +134,10 @@ public class Formula
     /// <param name="formula"> The string representation of the formula to be created.</param>
     public Formula(string formula)
     {
-        // --- Tests for One Token Rule ---
-        if (formula == string.Empty)
-        {
-            throw new FormulaFormatException("Formula must not be empty");
-        }
 
-        // --- End of One Token Rule Test ---
-        // ----------------------------------
-
-        // --- Tests for Valid Token Rule ---
-        List<string> tokens = GetTokens(formula);
-        foreach (string token in tokens)
-        {
-            if (!Regex.IsMatch(token, ValidTokens))
-            {
-                throw new FormulaFormatException($"Formula may only contain (, ), +, -, *, /, valid variables, and valid numbers. {token} is not valid.");
-            }
-        }
+        OneTokenRule(formula);
+        tokens = GetTokens(formula);
+        ValidTokenRule(formula);
 
         // --- End of Valid Token Rule ---
         // -------------------------------
@@ -255,6 +243,27 @@ public class Formula
         }
 
         this.tokensCanonical = tokens;
+    }
+
+    private static void OneTokenRule(string formula)
+    {
+        // --- Tests for One Token Rule ---
+        if (formula == string.Empty)
+        {
+            throw new FormulaFormatException("Formula must not be empty");
+        }
+    }
+
+    private static void ValidTokenRule(string formula)
+    {
+        // --- Tests for Valid Token Rule ---
+        foreach (string token in tokens)
+        {
+            if (!Regex.IsMatch(token, ValidTokens))
+            {
+                throw new FormulaFormatException($"Formula may only contain (, ), +, -, *, /, valid variables, and valid numbers. {token} is not valid.");
+            }
+        }
     }
 
     /// <summary>
