@@ -563,7 +563,7 @@ public class FormulaSyntaxTests
     public void ToString_TestScientificNotation_Valid()
     {
         Formula formula = new Formula("0.0e-0");
-        Assert.AreEqual(formula.ToString(), "0E-0");
+        Assert.AreEqual(formula.ToString(), "0");
     }
 
 
@@ -574,7 +574,7 @@ public class FormulaSyntaxTests
     public void ToString_TestExtraneousZeros_Valid()
     {
         Formula formula = new Formula("05 + 05.00 + 0.050 + 05.00e-0001");
-        Assert.AreEqual(formula.ToString(), "5+5+0.05+5E-1");
+        Assert.AreEqual(formula.ToString(), "5+5+0.05+0.5");
     }
 
     /// <summary>
@@ -596,7 +596,7 @@ public class FormulaSyntaxTests
     public void ToString_TestComplexFormula_Valid()
     {
         Formula formula = new Formula("((aA1 + E2)/0)*(0.0E-0-3e1)+ 0.1 - 50 - (50E-1)/(3/Aa1)");
-        Assert.AreEqual(formula.ToString(), "((AA1+E2)/0)*(0E-0-3E1)+0.1-50-(50E-1)/(3/AA1)");
+        Assert.AreEqual(formula.ToString(), "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)");
     }
 
     /// <summary>
@@ -607,13 +607,13 @@ public class FormulaSyntaxTests
     public void ToString_TestComplexFormulaEquivalent_Valid()
     {
         Formula EquivalentFormula1 = new Formula("  ((  Aa1+E2) /0.0)*(0.E-0 -3e1)+ 00.10 - 050. - (50E-1)/(3/Aa1)");
-        Formula EquivalentFormula2 = new Formula("((aA1+E02)/0)*(0.0E-00-3e1)+0.1-50-(050.E-1)/(3./Aa1)");
+        Formula EquivalentFormula2 = new Formula("((aA1+E2)/0)*(0.0E-00-3e1)+0.1-50-(050.E-1)/(3./Aa1)");
 
         string EquivalentFormula1ToString = EquivalentFormula1.ToString();
         string EquivalentFormula2ToString = EquivalentFormula2.ToString();
 
-        Assert.AreEqual(EquivalentFormula1ToString, "((AA1+E2)/0)*(0E-0-3E1)+0.1-50-(50E-1)/(3/AA1)");
-        Assert.AreEqual(EquivalentFormula2ToString, "((AA1+E2)/0)*(0E-0-3E1)+0.1-50-(50E-1)/(3/AA1)");
+        Assert.AreEqual(EquivalentFormula1ToString, "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)");
+        Assert.AreEqual(EquivalentFormula2ToString, "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)");
     }
 
 }

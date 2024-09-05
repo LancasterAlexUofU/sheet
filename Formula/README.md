@@ -15,7 +15,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 2 | 12 | 12.5 |
+| Assignment 2 | 12 | 13.5 |
 
 
  ## Hour Breakdown
@@ -25,7 +25,8 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Setting up coding environment & <br /> reading documentation | 3 |
 | Implementing formula syntax logic | 6 |
 | Writing Formula Tests | 1 |
-| Implementing ToString Function | 2 |
+| Implementing ToString Function | 2.5 |
+| Writing ToString Tests | .5 |
 | Implementing GetVariables Function | .5 |
 
 # Comments for Evaluators

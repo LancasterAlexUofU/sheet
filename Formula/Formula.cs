@@ -237,7 +237,16 @@ public class Formula
         // --- End of Extra Following Rule Test ---
         // ----------------------------------------
 
-        formulaString = formula;
+        double tokenDouble;
+        for (int i = 0; i < tokens.Count; i++)
+        {
+            if (double.TryParse(tokens[i], out tokenDouble))
+            {
+                tokens[i] = tokenDouble.ToString();
+            }
+        }
+
+        this.formulaString = string.Join(string.Empty, tokens);
     }
 
     /// <summary>
@@ -306,19 +315,6 @@ public class Formula
     {
         string formulaCanonicalString = this.formulaString;
         formulaCanonicalString = formulaCanonicalString.ToUpper();
-
-        formulaCanonicalString.Replace(" ", string.Empty);
-
-        // Leading Zeros
-        string leadingZerosRegexPattern = @"(?<=\D|^)0+(?=\d)";
-        // STILL EFFECTS TRAILING ZEROS, LOOK INTO
-        Regex.Replace(formulaCanonicalString, leadingZerosRegexPattern, string.Empty);
-
-        //Trailing zeros
-
-        //extraneous decimal point
-
-
         return formulaCanonicalString;
     }
 
