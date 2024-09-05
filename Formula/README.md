@@ -15,7 +15,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 2 | 12 | 13.5 |
+| Assignment 2 | 12 | 15.5 |
 
 
  ## Hour Breakdown
@@ -27,12 +27,15 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Writing Formula Tests | 1 |
 | Implementing ToString Function | 2.5 |
 | Writing ToString Tests | .5 |
-| Implementing GetVariables Function | .5 |
+| Implementing GetVariables Function | 1 |
+| Writing GetVariable Tests | .5 |
+| Improving readability & <br/> quality of code | .5 |
 
 # Comments for Evaluators
 Work stands on its own.
 
 # Consulted Peers
+Eli
 
 # References
 1) Microsoft RegEx Documentation - https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
@@ -42,4 +45,4 @@ Work stands on its own.
 5) Stack Class - https://learn.microsoft.com/en-us/dotnet/api/system.collections.stack?view=net-8.0
 6) this (C# Reference) - https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/this
 7) String.Replace Method - https://learn.microsoft.com/en-us/dotnet/api/system.string.replace?view=net-8.0
-8) AutoRegex - https://www.autoregex.xyz
+8) Double.TryParse Method - https://learn.microsoft.com/en-us/dotnet/api/system.double.tryparse?view=net-8.0

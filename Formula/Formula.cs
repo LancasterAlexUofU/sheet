@@ -23,8 +23,8 @@
 //
 // File Contents
 //
-//    [... and of course you should describe the contents of the
-//    file in broad terms here ...]
+//    [... and of course you should describe the contents of the                        ADD TO ME!!!!!!!!!!!!!!!!!
+//    file in broad terms here ...] 
 // </summary>
 namespace CS3500.Formula;
 
@@ -60,8 +60,6 @@ using System.Collections;
 /// </summary>
 public class Formula
 {
-    private string formulaString;
-
     /// <summary>
     ///     This regex matches the operands: [+, -, *, /].
     /// </summary>
@@ -101,7 +99,9 @@ public class Formula
     /// </summary>
     private const string LastTokenRegex = $@"{NumberRegexPattern}|{VariableRegexPattern}|\)";
 
-    // Combination of First and Last Token Rules
+    private string formulaCanonicalString;
+
+    private List<string> tokensCanonical = [];
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Formula"/> class.
@@ -246,7 +246,15 @@ public class Formula
             }
         }
 
-        this.formulaString = string.Join(string.Empty, tokens);
+        for (int i = 0; i < tokens.Count; i++)
+        {
+            if (Regex.IsMatch(tokens[i], @"[a-z]"))
+            {
+                tokens[i] = tokens[i].ToUpper();
+            }
+        }
+
+        this.tokensCanonical = tokens;
     }
 
     /// <summary>
@@ -268,17 +276,17 @@ public class Formula
     /// <returns> the set of variables (string names) representing the variables referenced by the formula. </returns>
     public ISet<string> GetVariables()
     {
-        HashSet<string> variables = [];
-        foreach (string variable in variables)
+        HashSet<string> variables = new HashSet<string>();
+
+        foreach (string token in this.tokensCanonical)
         {
-            if (Regex.IsMatch(variable, VariableRegexPattern))
+            if (IsVar(token))
             {
-                _ = variable.ToUpper();
-                variables.Add(variable);
+                variables.Add(token);
             }
         }
 
-        return new HashSet<string>();
+        return variables;
     }
 
     /// <summary>
@@ -313,9 +321,8 @@ public class Formula
     /// </returns>
     public override string ToString()
     {
-        string formulaCanonicalString = this.formulaString;
-        formulaCanonicalString = formulaCanonicalString.ToUpper();
-        return formulaCanonicalString;
+        this.formulaCanonicalString = string.Join(string.Empty, this.tokensCanonical);
+        return this.formulaCanonicalString;
     }
 
     /// <summary>

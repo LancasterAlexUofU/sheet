@@ -39,64 +39,24 @@ using CS3500.Formula; // Change this using statement to use different formula im
 [TestClass]
 public class FormulaSyntaxTests
 {
-    // --- Tests for One Token Rule ---
+    private string complexFormula =                    "((aA1 + E2)/0)*(0.0E-0-3e1)+ 0.1 - 50 - (50E-1)/(3/Aa1)+123456789101112131415+0.0000000000001";
+    private string complexFormulaCanonical =           "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)+1.2345678910111213E+20+1E-13";
+
+    private string complexFormulaEquivalentModified1 = "  ((  Aa1+E2) /0.0)*(0.E-0 -3e1)+ 00.10 - 050. - (50E-1)/(3/Aa1) +0000123456789101112131415+0.00000000000010000";
+    private string complexFormulaEquivalentModified2 = "((aA1+E2)/0)*(0.0E-00-3e1)+0.1-50-(050.E-1)/(3./Aa1) + 00123456789101112131415.00+00.000000000000100";
 
     /// <summary>
-    ///   <para>
-    ///     This test makes sure the right kind of exception is thrown
-    ///     when trying to create a formula with no tokens.
-    ///   </para>
-    ///   <remarks>
-    ///     <list type="bullet">
-    ///       <item>
-    ///         We use the _ (discard) notation because the formula object
-    ///         is not used after that point in the method.  Note: you can also
-    ///         use _ when a method must match an interface but does not use
-    ///         some of the required arguments to that method.
-    ///       </item>
-    ///       <item>
-    ///         string.Empty is often considered best practice (rather than using "") because it
-    ///         is explicit in intent (e.g., perhaps the coder forgot to but something in "").
-    ///       </item>
-    ///       <item>
-    ///         The name of a test method should follow the MS standard:
-    ///         https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices
-    ///       </item>
-    ///       <item>
-    ///         All methods should be documented, but perhaps not to the same extent
-    ///         as this one.  The remarks here are for your educational
-    ///         purposes (i.e., a developer would assume another developer would know these
-    ///         items) and would be superfluous in your code.
-    ///       </item>
-    ///       <item>
-    ///         Notice the use of the attribute tag [ExpectedException] which tells the test
-    ///         that the code should throw an exception, and if it doesn't an error has occurred;
-    ///         i.e., the correct implementation of the constructor should result
-    ///         in this exception being thrown based on the given poorly formed formula.
-    ///       </item>
-    ///     </list>
-    ///   </remarks>
-    ///   <example>
-    ///     <code>
-    ///        // here is how we call the formula constructor with a string representing the formula
-    ///        _ = new Formula( "5+5" );
-    ///     </code>
-    ///   </example>
+    /// Tests that an empty string is not accepted as a valid formula.
     /// </summary>
     [TestMethod]
     [ExpectedException( typeof( FormulaFormatException ) )]
     public void FormulaConstructor_TestNoTokens_Invalid( )
     {
-        _ = new Formula(string.Empty);  // note: it is arguable that you should replace "" with string.Empty for readability and clarity of intent (e.g., not a cut and paste error or a "I forgot to put something there" error).
+        _ = new Formula(string.Empty);
     }
 
-    // --- Tests for Valid Token Rule ---
-
-    // --- Tests for Closing Parenthesis Rule
-
-    // --- Tests for Balanced Parentheses Rule
-
-    // --- Tests for First Token Rule
+    // --- Tests for One Token Rule ---
+    // --------------------------------
 
     /// <summary>
     ///   <para>
@@ -119,6 +79,7 @@ public class FormulaSyntaxTests
     // --- Tests for Parentheses/Operator Following Rule ---
 
     // --- Tests for Extra Following Rule ---
+    // -----------------------------------------------------
 
     /// <summary>
     ///   <para>
@@ -146,6 +107,7 @@ public class FormulaSyntaxTests
     // --- Tests for Parentheses/Operator Following Rule ---
 
     // --- Tests for Extra Following Rule ---
+    // ------------------------------------------------------
 
     /// <summary>
     ///   <para>
@@ -160,6 +122,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Valid Tokens Rule ---
+    // -----------------------------------
 
     /// <summary>
     ///   <para>
@@ -180,6 +143,7 @@ public class FormulaSyntaxTests
     // --- Tests for Last Token Rule ---
 
     // --- Tests for Parenthesis Following Rule ---
+    // --------------------------------------------
 
     /// <summary>
     ///   <para>
@@ -199,6 +163,7 @@ public class FormulaSyntaxTests
     // --- Tests for Balanced Parentheses Rule ---
 
     // --- Tests for Parenthesis Following Rule ---
+    // --------------------------------------------
 
     /// <summary>
     ///   <para>
@@ -214,6 +179,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for First Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     ///   <para>
@@ -229,6 +195,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Last Token Rule ---
+    // ---------------------------------
 
     /// <summary>
     ///   <para>
@@ -247,6 +214,7 @@ public class FormulaSyntaxTests
     // --- Tests for Last Token Rule ---
 
     // --- Tests for Operator Following Rule ---
+    // -----------------------------------------
 
     /// <summary>
     ///   <para>
@@ -262,6 +230,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Extra Following Rule ---
+    // --------------------------------------
 
     /// <summary>
     ///   <para>
@@ -277,6 +246,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Extra Following Rule ---
+    // --------------------------------------
 
 
     /// <summary>
@@ -290,7 +260,8 @@ public class FormulaSyntaxTests
         _ = new Formula("(x1)7e-7");
     }
 
-    // --- Tests for Extra Following Rule
+    // --- Tests for Extra Following Rule ---
+    // --------------------------------------
 
     /// <summary>
     /// Tests that the number zero is a valid formula. [ExpectedException] is not used so the test should not throw an error.
@@ -304,6 +275,7 @@ public class FormulaSyntaxTests
     // --- Tests for One Token Rule ---
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that a non-zero number is a valid formula. [ExpectedException] is not used so the test should not throw an error.
@@ -317,6 +289,7 @@ public class FormulaSyntaxTests
     // --- Tests for One Token Rule ---
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that a decimal is a valid formula.
@@ -330,6 +303,7 @@ public class FormulaSyntaxTests
     // --- Tests for One Token Rule ---
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that a number with an extraneous decimal (e.g. 1.) is considered a valid formula.
@@ -343,6 +317,7 @@ public class FormulaSyntaxTests
     // --- Tests for One Token Rule ---
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that 0 in scientific notation is a valid formula.
@@ -356,6 +331,7 @@ public class FormulaSyntaxTests
     // --- Tests for One Token Rule ---
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that integers used in writing numbers in scientific notation is a valid formula (e.g. 7e7).
@@ -369,6 +345,7 @@ public class FormulaSyntaxTests
     // --- Tests for One Token Rule ---
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that numbers with decimals that are included in writing numbers in scientific notation are considered valid formulas (e.g. 0.7e7).
@@ -382,6 +359,7 @@ public class FormulaSyntaxTests
     // --- Tests for One Token Rule ---
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that a number in scientific notation with a negative sign in the exponent is considered a valid formula.
@@ -395,6 +373,7 @@ public class FormulaSyntaxTests
     // --- Tests for One Token Rule ---
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that numbers in scientific notation do not contain decimals in their exponent.
@@ -407,6 +386,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// This test passes a single letter without a number and should throw a FormulaFormatException.
@@ -419,6 +399,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that the formula constructor throws a FormulaFormatException error if a number is seen before a letter (e.g. 1a).
@@ -431,6 +412,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that a letter does not follow a number in a variable (e.g. a1a).
@@ -443,6 +425,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that letters followed by a number in the decimal form is not considered a valid formula (e.g. a1.0).
@@ -455,6 +438,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that a variable with uppercase lettered mixed with lower case letters is still considered a valid formula.
@@ -466,6 +450,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Tests that valid variables that contain 'E' (the same letter used to denote numbers in scientific notation) <br/>
@@ -478,6 +463,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// Runs a suit of the previous invalid tests, except the letters are replaced with 'E'. <br/>
@@ -503,6 +489,7 @@ public class FormulaSyntaxTests
     }
 
     // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
     /// This test passes a complex formula to the formula constructor that uses all operations, variables with differing attributes, <br/>
@@ -513,7 +500,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void FormulaConstructor_TestComplexEquation_Valid()
     {
-        _ = new Formula("((aA1 + E2)/0)*(0.0E-0-3e1)+ 0.1 - 50 - (50E-1)/(3/Aa1)");
+        _ = new Formula($"{complexFormula}");
     }
 
     // --- Tests for Balanced Parentheses Rule ---
@@ -525,6 +512,7 @@ public class FormulaSyntaxTests
     // --- Tests for Parenthesis/Operator Following Rule ---
 
     // --- Tests for Extra Following Rule ---
+    // ------------------------------------------------------
 
     /// <summary>
     /// This is a simple test which validates that the ToString method uppercases a variable correctly and returns it as a string.
@@ -595,8 +583,8 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestComplexFormula_Valid()
     {
-        Formula formula = new Formula("((aA1 + E2)/0)*(0.0E-0-3e1)+ 0.1 - 50 - (50E-1)/(3/Aa1)");
-        Assert.AreEqual(formula.ToString(), "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)");
+        Formula formula = new Formula($"{complexFormula}");
+        Assert.AreEqual(formula.ToString(), $"{complexFormulaCanonical}");
     }
 
     /// <summary>
@@ -606,14 +594,62 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestComplexFormulaEquivalent_Valid()
     {
-        Formula EquivalentFormula1 = new Formula("  ((  Aa1+E2) /0.0)*(0.E-0 -3e1)+ 00.10 - 050. - (50E-1)/(3/Aa1)");
-        Formula EquivalentFormula2 = new Formula("((aA1+E2)/0)*(0.0E-00-3e1)+0.1-50-(050.E-1)/(3./Aa1)");
+        Formula EquivalentFormula1 = new Formula($"{complexFormulaEquivalentModified1}");
+        Formula EquivalentFormula2 = new Formula($"{complexFormulaEquivalentModified2}");
 
         string EquivalentFormula1ToString = EquivalentFormula1.ToString();
         string EquivalentFormula2ToString = EquivalentFormula2.ToString();
 
-        Assert.AreEqual(EquivalentFormula1ToString, "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)");
-        Assert.AreEqual(EquivalentFormula2ToString, "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)");
+        Assert.AreEqual(EquivalentFormula1ToString, $"{complexFormulaCanonical}");
+        Assert.AreEqual(EquivalentFormula2ToString, $"{complexFormulaCanonical}");
     }
 
+    /// <summary>
+    /// Simple test that ensures the GetVariables method properly returns a single variable.
+    /// </summary>
+    [TestMethod]
+    public void GetVariables_TestVariable_Valid()
+    {
+        Formula formula = new Formula("x1");
+        HashSet<string> variables = (HashSet<string>)formula.GetVariables();
+        string variablesString = string.Join(",", variables);
+        Assert.AreEqual(variablesString, "X1");
+    }
+
+    /// <summary>
+    /// Test that ensures a formula with only numbers does not return any variables. <br/>
+    /// Tests numbers that start out in scientific notation as well a number that will be converted into scientific notation via double.TryParse() (Which contains 'E').
+    /// </summary>
+    [TestMethod]
+    public void GetVariables_TestNoVariables_Valid()
+    {
+        Formula formula = new Formula("10E1 + 20 + 1.1 + 100000000000000000000000");
+        HashSet<string> variables = (HashSet<string>)formula.GetVariables();
+        string variablesString = string.Join(",", variables);
+        Assert.AreEqual(variablesString, string.Empty);
+    }
+
+    /// <summary>
+    /// Test that ensures no duplicates are returned by GetVariables.
+    /// </summary>
+    [TestMethod]
+    public void GetVariables_TestNoDuplicates_Valid()
+    {
+        Formula formula = new Formula("x2 + x1 + x1 + x2");
+        HashSet<string> variables = (HashSet<string>)formula.GetVariables();
+        string variablesString = string.Join(",", variables);
+        Assert.AreEqual(variablesString, "X2,X1");
+    }
+
+    /// <summary>
+    /// Test that ensures GetVariables can handle complex formulas with many different interactions between variables, numbers, operands, and parentheses.
+    /// </summary>
+    [TestMethod]
+    public void GetVariables_TestComplexFormula_Valid()
+    {
+        Formula formula = new Formula($"{complexFormula}");
+        HashSet<string> variables = (HashSet<string>)formula.GetVariables();
+        string variablesString = string.Join(",", variables);
+        Assert.AreEqual(variablesString, "AA1,E2");
+    }
 }
