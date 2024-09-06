@@ -30,7 +30,7 @@ Future extensions are:
 | Assignment 2 | 12 | 17 |
 
 # Comments for Evaluators
-Work stands on its own.
+Read FormulaTests README for comment about code coverage.
 
 # Consulted Peers
 - Landon H.

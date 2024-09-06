@@ -22,7 +22,14 @@ This test additionally checks for valid variables as well as numbers in proper s
 | Assignment 1 | 12 | 8|
 
 # Comments for Evaluators
-Work stands on its own.
+Comment about code coverage:
+
+With test methods that have "[ExpectedException(typeof(FormulaFormatException))]", the last curly brace is marked as unexplored.
+This is okay and we went over it in class.
+
+For Test Method FormulaConstructor_TestVariablesContainingE_Invalid, the same thing happens on two lines, 
+as Assert.Fail isn't called (as it is catched by FormulaFormatException). It is marked as red, but is okay as
+it means the test itself isn't failing.
 
 # Consulted Peers
 - Landon H.
