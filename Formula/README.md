@@ -4,7 +4,7 @@ Partner:    None
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  LancasterAlexUofU
 Repo:       https://github.com/uofu-cs3500-20-fall2024/spreadsheet-LancasterAlexUofU
-Date:       30-Aug-2024
+Date:       5-Sept-2024
 Project:    Formula
 Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in Academic Coursework.
 ```
@@ -50,7 +50,7 @@ representation of the formula.
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 2 | 12 | 16.5 |
+| Assignment 2 | 12 | 17 |
 
 
  ## Hour Breakdown
