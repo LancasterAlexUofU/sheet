@@ -17,33 +17,27 @@
 ///
 /// File Contents
 ///
-///  FormulaTests runs 28 various tests on Formula.dll to ensure that the formula constructor is properly working.
-///  This is done by checking the 10 Formula Syntax and Validation Rules for a formula in infix notation.
+///  FormulaTests runs 42 various tests on Formula.dll to ensure that the formula constructor is properly working.
+///  This is done by checking the 8 Formula Syntax and Validation Rules for a formula in infix notation.
 ///  This test additionally checks for valid variables as well as numbers in proper scientific notation.
 /// </summary>
 
 namespace CS3500.Formula;
 
-using CS3500.Formula; // Change this using statement to use different formula implementations.
+using CS3500.Formula;
 
-/// <summary>
-///   <para>
-///     The following class shows the basics of how to use the MSTest framework,
-///     including:
-///   </para>
-///   <list type="number">
-///     <item> How to catch exceptions. </item>
-///     <item> How a test of valid code should look. </item>
-///   </list>
-/// </summary>
 [TestClass]
 public class FormulaSyntaxTests
 {
-    private string complexFormula =                    "((aA1 + E2)/0)*(0.0E-0-3e1)+ 0.1 - 50 - (50E-1)/(3/Aa1)+123456789101112131415+0.0000000000001";
-    private string complexFormulaCanonical =           "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)+1.2345678910111213E+20+1E-13";
+    // Complex formulas are meant to rigorously test Formula Class against many edge cases.
+    // That is why the formulas are long and strange looking.
+    /// <see cref="FormulaConstructor_TestComplexFormula_Valid"/>
+ 
+    private const string complexFormula =                    "((aA1 + E2)/0)*(0.0E-0-3e1)+ 0.1 - 50 - (50E-1)/(3/Aa1)+123456789101112131415+0.0000000000001";
+    private const string complexFormulaCanonical =           "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)+1.2345678910111213E+20+1E-13";
 
-    private string complexFormulaEquivalentModified1 = "  ((  Aa1+E2) /0.0)*(0.E-0 -3e1)+ 00.10 - 050. - (50E-1)/(3/Aa1) +0000123456789101112131415+0.00000000000010000";
-    private string complexFormulaEquivalentModified2 = "((aA1+E2)/0)*(0.0E-00-3e1)+0.1-50-(050.E-1)/(3./Aa1) + 00123456789101112131415.00+00.000000000000100";
+    private const string complexFormulaEquivalentModified1 = "  ((  Aa1+E2) /0.0)*(0.E-0 -3e1)+ 00.10 - 050. - (50E-1)/(3/Aa1) +0000123456789101112131415+0.00000000000010000";
+    private const string complexFormulaEquivalentModified2 = "((aA1+E2)/0)*(0.0E-00-3e1)+0.1-50-(050.E-1)/(3./Aa1) + 00123456789101112131415.00+00.000000000000100";
 
     /// <summary>
     /// Tests that an empty string is not accepted as a valid formula.
@@ -87,7 +81,7 @@ public class FormulaSyntaxTests
     ///     The constructor should not throw an error.
     ///   </para>
     ///   <remarks>
-    ///     This test ensures that a simple equation surrounded by a set of parentheses
+    ///     This test ensures that a simple formula surrounded by a set of parentheses
     ///     is still considered a valid formula. [ExpectedException] is not used as the test should
     ///     not throw an error.
     ///   </remarks>
@@ -131,9 +125,25 @@ public class FormulaSyntaxTests
     /// </summary>
     [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestBalancedParentheses_Invalid()
+    public void FormulaConstructor_TestUnbalancedParenthesesRight_Invalid()
     {
         _ = new Formula("(x1))");
+    }
+
+    // --- Tests for Balanced Parentheses Rule ---
+
+    // --- Tests for First Token Rule ---
+
+    // --- Tests for Last Token Rule ---
+
+    // --- Tests for Parenthesis Following Rule ---
+    // --------------------------------------------
+
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void FormulaConstructor_TestUnbalancedParenthesesLeft_Invalid()
+    {
+        _ = new Formula("((x1)");
     }
 
     // --- Tests for Balanced Parentheses Rule ---
@@ -495,10 +505,10 @@ public class FormulaSyntaxTests
     /// This test passes a complex formula to the formula constructor that uses all operations, variables with differing attributes, <br/>
     /// integers, numbers with decimals, varying numbers in scientific notation, and parentheses throughout. <br/> <br/>
     /// The purpose of this test is to ensure that if a complex formula with a blanket of almost all interactions <br/>
-    /// found in formulas passes, then simpler equations should also pass.
+    /// found in formulas passes, then simpler formula should also pass.
     /// </summary>
     [TestMethod]
-    public void FormulaConstructor_TestComplexEquation_Valid()
+    public void FormulaConstructor_TestComplexFormula_Valid()
     {
         _ = new Formula($"{complexFormula}");
     }
@@ -520,7 +530,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestVariable_Valid()
     {
-        Formula formula = new Formula("x1");
+        Formula formula = new("x1");
         Assert.AreEqual(formula.ToString(), "X1");
     }
 
@@ -530,7 +540,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestFormulaOperation_Valid()
     {
-        Formula formula = new Formula("x1 + x2");
+        Formula formula = new("x1 + x2");
         Assert.AreEqual(formula.ToString(), "X1+X2");
     }
 
@@ -540,7 +550,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestParentheses_Valid()
     {
-        Formula formula = new Formula(" (  (x1+ 2  ) )");
+        Formula formula = new(" (  (x1+ 2  ) )");
         Assert.AreEqual(formula.ToString(), "((X1+2))");
     }
 
@@ -550,7 +560,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestScientificNotation_Valid()
     {
-        Formula formula = new Formula("0.0e-0");
+        Formula formula = new("0.0e-0");
         Assert.AreEqual(formula.ToString(), "0");
     }
 
@@ -561,7 +571,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestExtraneousZeros_Valid()
     {
-        Formula formula = new Formula("05 + 05.00 + 0.050 + 05.00e-0001");
+        Formula formula = new("05 + 05.00 + 0.050 + 05.00e-0001");
         Assert.AreEqual(formula.ToString(), "5+5+0.05+0.5");
     }
 
@@ -571,7 +581,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestExtraneousDecimalPoint_Valid()
     {
-        Formula formula = new Formula("01. + 1.");
+        Formula formula = new("01. + 1.");
         Assert.AreEqual(formula.ToString(), "1+1");
     }
 
@@ -583,7 +593,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestComplexFormula_Valid()
     {
-        Formula formula = new Formula($"{complexFormula}");
+        Formula formula = new($"{complexFormula}");
         Assert.AreEqual(formula.ToString(), $"{complexFormulaCanonical}");
     }
 
@@ -594,8 +604,8 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void ToString_TestComplexFormulaEquivalent_Valid()
     {
-        Formula EquivalentFormula1 = new Formula($"{complexFormulaEquivalentModified1}");
-        Formula EquivalentFormula2 = new Formula($"{complexFormulaEquivalentModified2}");
+        Formula EquivalentFormula1 = new($"{complexFormulaEquivalentModified1}");
+        Formula EquivalentFormula2 = new($"{complexFormulaEquivalentModified2}");
 
         string EquivalentFormula1ToString = EquivalentFormula1.ToString();
         string EquivalentFormula2ToString = EquivalentFormula2.ToString();
@@ -610,7 +620,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void GetVariables_TestVariable_Valid()
     {
-        Formula formula = new Formula("x1");
+        Formula formula = new("x1");
         HashSet<string> variables = (HashSet<string>)formula.GetVariables();
         string variablesString = string.Join(",", variables);
         Assert.AreEqual(variablesString, "X1");
@@ -623,7 +633,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void GetVariables_TestNoVariables_Valid()
     {
-        Formula formula = new Formula("10E1 + 20 + 1.1 + 100000000000000000000000");
+        Formula formula = new("10E1 + 20 + 1.1 + 100000000000000000000000");
         HashSet<string> variables = (HashSet<string>)formula.GetVariables();
         string variablesString = string.Join(",", variables);
         Assert.AreEqual(variablesString, string.Empty);
@@ -635,7 +645,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void GetVariables_TestNoDuplicates_Valid()
     {
-        Formula formula = new Formula("x2 + x1 + x1 + x2");
+        Formula formula = new("x2 + x1 + x1 + x2");
         HashSet<string> variables = (HashSet<string>)formula.GetVariables();
         string variablesString = string.Join(",", variables);
         Assert.AreEqual(variablesString, "X2,X1");
@@ -647,7 +657,7 @@ public class FormulaSyntaxTests
     [TestMethod]
     public void GetVariables_TestComplexFormula_Valid()
     {
-        Formula formula = new Formula($"{complexFormula}");
+        Formula formula = new($"{complexFormula}");
         HashSet<string> variables = (HashSet<string>)formula.GetVariables();
         string variablesString = string.Join(",", variables);
         Assert.AreEqual(variablesString, "AA1,E2");

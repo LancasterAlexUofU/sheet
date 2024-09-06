@@ -3,7 +3,7 @@
 // </copyright>
 // <summary>
 //   <para>
-//     This code is provides to start your assignment.  It was written
+//     This code is provided for you to start your assignment.  It was written
 //     by Profs Joe, Danny, and Jim.  You should keep this attribution
 //     at the top of your code where you have your header comment, along
 //     with the other required information.
@@ -23,8 +23,16 @@
 //
 // File Contents
 //
-//    [... and of course you should describe the contents of the                        ADD TO ME!!!!!!!!!!!!!!!!!
-//    file in broad terms here ...] 
+//    The Formula class handles formulas in infix formula notation, given as string,
+//    and ensures that the formula is has the proper syntax of a formula.
+//    If a formula does not have proper syntax, a FormulaFormatException is thrown.
+//
+//    The Formula class also normalizes all variables, numbers, and removes spaces,
+//    to make a canonical string representation of the formula.
+//
+//    The Formula class further includes a GetVariables function, which returns a set
+//    (no duplicates) of all variables in a formula, and ToString, which returns a
+//    canonical string representation of the formula.
 // </summary>
 namespace CS3500.Formula;
 
@@ -38,25 +46,6 @@ using System.Collections;
 ///     floating-point syntax; variables that consist of one ore more letters followed by
 ///     one or more numbers; parentheses; and the four operator symbols +, -, *, and /.
 ///   </para>
-///   <para>
-///     Spaces are significant only insofar that they delimit tokens.  For example, "xy" is
-///     a single variable, "x y" consists of two variables "x" and y; "x23" is a single variable;
-///     and "x 23" consists of a variable "x" and a number "23".  Otherwise, spaces are to be removed.
-///   </para>
-///   <para>
-///     For Assignment Two, you are to implement the following functionality:
-///   </para>
-///   <list type="bullet">
-///     <item>
-///        Formula Constructor which checks the syntax of a formula.
-///     </item>
-///     <item>
-///        Get Variables
-///     </item>
-///     <item>
-///        ToString
-///     </item>
-///   </list>
 /// </summary>
 public class Formula
 {
@@ -101,15 +90,14 @@ public class Formula
 
     private static List<string> tokens = [];
 
-    private static string formula;
+    private static string formula = string.Empty;
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Formula"/> class.
     ///   <para>
     ///     Creates a Formula from a string that consists of an infix expression written as
     ///     described in the class comment.  If the expression is syntactically incorrect,
-    ///     throws a FormulaFormatException with an explanatory Message.  See the assignment
-    ///     specifications for the syntax rules you are to implement.
+    ///     throws a FormulaFormatException with an explanatory Message.
     ///   </para>
     ///   <para>
     ///     Non Exhaustive Example Errors:
@@ -145,6 +133,66 @@ public class Formula
 
         NumberParse();
         LetterUpper();
+    }
+
+    /// <summary>
+    ///   <para>
+    ///     Returns a set of all the variables in the formula.
+    ///   </para>
+    ///   <remarks>
+    ///     Important: no variable may appear more than once in the returned set, even
+    ///     if it is used more than once in the Formula.
+    ///   </remarks>
+    ///   <para>
+    ///     For example, if N is a method that converts all the letters in a string to upper case:
+    ///   </para>
+    ///   <list type="bullet">
+    ///     <item>new("x1+y1*z1").GetVariables() should enumerate "X1", "Y1", and "Z1".</item>
+    ///     <item>new("x1+X1"   ).GetVariables() should enumerate "X1".</item>
+    ///   </list>
+    /// </summary>
+    /// <returns> the set of variables (string names) representing the variables referenced by the formula. </returns>
+    public ISet<string> GetVariables()
+    {
+        HashSet<string> variables = [];
+
+        foreach (string token in tokens)
+        {
+            if (IsVar(token))
+            {
+                variables.Add(token);
+            }
+        }
+
+        return variables;
+    }
+
+    /// <summary>
+    ///   <para>
+    ///     Returns a string representation of a canonical form of the formula.
+    ///   </para>
+    ///   <para>
+    ///     The string will contain no spaces.
+    ///   </para>
+    ///   <para>
+    ///     All of the variables in the string will be normalized. This
+    ///     means capital letters.
+    ///   </para>
+    ///   <para>
+    ///       For example:
+    ///   </para>
+    ///   <code>
+    ///       new("x1 + y1").ToString() should return "X1+Y1"
+    ///       new("X1 + 5.0000").ToString() should return "X1+5".
+    ///   </code>
+    /// </summary>
+    /// <returns>
+    ///   A canonical version (string) of the formula. All "equal" formulas
+    ///   should have the same value here.
+    /// </returns>
+    public override string ToString()
+    {
+        return string.Join(string.Empty, tokens);
     }
 
     /// <summary>
@@ -292,11 +340,9 @@ public class Formula
     /// </summary>
     private static void NumberParse()
     {
-        double tokenDouble;
-
         for (int i = 0; i < tokens.Count; i++)
         {
-            if (double.TryParse(tokens[i], out tokenDouble))
+            if (double.TryParse(tokens[i], out double tokenDouble))
             {
                 // If the token is a number, it is converted and parsed as a double, converted back to a string, and placed back in tokens.
                 tokens[i] = tokenDouble.ToString();
@@ -316,73 +362,6 @@ public class Formula
                 tokens[i] = tokens[i].ToUpper();
             }
         }
-    }
-
-    /// <summary>
-    ///   <para>
-    ///     Returns a set of all the variables in the formula.
-    ///   </para>
-    ///   <remarks>
-    ///     Important: no variable may appear more than once in the returned set, even
-    ///     if it is used more than once in the Formula.
-    ///   </remarks>
-    ///   <para>
-    ///     For example, if N is a method that converts all the letters in a string to upper case:
-    ///   </para>
-    ///   <list type="bullet">
-    ///     <item>new("x1+y1*z1").GetVariables() should enumerate "X1", "Y1", and "Z1".</item>
-    ///     <item>new("x1+X1"   ).GetVariables() should enumerate "X1".</item>
-    ///   </list>
-    /// </summary>
-    /// <returns> the set of variables (string names) representing the variables referenced by the formula. </returns>
-    public ISet<string> GetVariables()
-    {
-        HashSet<string> variables = new HashSet<string>();
-
-        foreach (string token in tokens)
-        {
-            if (IsVar(token))
-            {
-                variables.Add(token);
-            }
-        }
-
-        return variables;
-    }
-
-    /// <summary>
-    ///   <para>
-    ///     Returns a string representation of a canonical form of the formula.
-    ///   </para>
-    ///   <para>
-    ///     The string will contain no spaces.
-    ///   </para>
-    ///   <para>
-    ///     If the string is passed to the Formula constructor, the new Formula f
-    ///     will be such that this.ToString() == f.ToString().
-    ///   </para>
-    ///   <para>
-    ///     All of the variables in the string will be normalized.  This
-    ///     means capital letters.
-    ///   </para>
-    ///   <para>
-    ///       For example:
-    ///   </para>
-    ///   <code>
-    ///       new("x1 + y1").ToString() should return "X1+Y1"
-    ///       new("X1 + 5.0000").ToString() should return "X1+5".
-    ///   </code>
-    ///   <para>
-    ///     This code should execute in O(1) time.
-    ///   <para>
-    /// </summary>
-    /// <returns>
-    ///   A canonical version (string) of the formula. All "equal" formulas
-    ///   should have the same value here.
-    /// </returns>
-    public override string ToString()
-    {
-        return string.Join(string.Empty, tokens);
     }
 
     /// <summary>

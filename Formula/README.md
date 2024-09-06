@@ -11,11 +11,46 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 # Overview of the Formula Project
 
+The Formula class handles formulas in infix formula notation, given as string,
+and ensures that the formula is has the proper syntax of a formula.
+
+### Examples of valid formulas are the following:
+
+- 1 + 1
+- x1 / 2
+- (a1)*(b1)
+- 10e2 - 37
+
+### Examples of INVALID  formula are the following:
+
+- 1 + 1 = 2
+- 1A1 + 2
+- x + y
+- 5**2
+- 5^2
+- -1 + 2
+- ((x1)
+
+If a formula does not have proper syntax, a FormulaFormatException is thrown.
+
+The Formula class also normalizes all variables, numbers, and removes spaces,
+to make a canonical string representation of the formula.
+
+### Original formula
+x1 + x2 + 10e1 + 1.0
+
+### Canonical representation
+X1+X2+100+1
+
+The Formula class further includes a GetVariables function, which returns a set
+of all variables in a formula, and ToString, which returns a canonical string 
+representation of the formula.
+
 # Time Expenditures
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 2 | 12 | 15.5 |
+| Assignment 2 | 12 | 16.5 |
 
 
  ## Hour Breakdown
@@ -26,16 +61,16 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Implementing formula syntax logic | 6 |
 | Writing Formula Tests | 1 |
 | Implementing ToString Function | 2.5 |
-| Writing ToString Tests | .5 |
+| Writing ToString Tests | 0.5 |
 | Implementing GetVariables Function | 1 |
-| Writing GetVariable Tests | .5 |
-| Improving readability & <br/> quality of code | .5 |
+| Writing GetVariable Tests | 0.5 |
+| Improving readability & <br/> quality of code | 2.5 |
 
 # Comments for Evaluators
 Work stands on its own.
 
 # Consulted Peers
-Eli
+Eli (unknown last name)
 
 # References
 1) Microsoft RegEx Documentation - https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
