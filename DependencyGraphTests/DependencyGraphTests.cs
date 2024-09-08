@@ -87,4 +87,62 @@ public class DependencyGraphExampleStressTests
             Assert.IsTrue(dependees[i].SetEquals(new HashSet<string>(dg.GetDependees(letters[i]))));
         }
     }
+
+    /// <summary>
+    /// This tests creates an empty graph to make sure the graph size is equal to zero.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestSizeZero()
+    {
+        DependencyGraph dg = new();
+        Assert.IsTrue(dg.Size == 0, $"Dependency Graph size is {dg.Size} when it should be 0.");
+    }
+
+    /// <summary>
+    /// This test checks the .Size method is properly working. This is the simpler test case and doesn't contain any duplicates, removals, or replacements.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestSimpleSize()
+    {
+        DependencyGraph dg = new();
+        dg.AddDependency("a", "b");
+        dg.AddDependency("b", "c");
+        Assert.IsTrue(dg.Size == 2, $"Dependency Graph size is {dg.Size} when it should be 2.");
+    }
+
+    /// <summary>
+    /// This test checks the .Size method against a more complex graph with duplicates. This test method does not remove or replace any nodes.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestComplexSizeNoRemove()
+    {
+        DependencyGraph dg = new();
+        dg.AddDependency("a", "b");
+        dg.AddDependency("a", "b"); // Duplicate node, shouldn't be included in graph
+        dg.AddDependency("b", "c");
+        dg.AddDependency("b", "c"); // Duplicate node, shouldn't be included in graph
+        dg.AddDependency("b", "d");
+        dg.AddDependency("e", "c");
+        dg.AddDependency("c", "f");
+        dg.AddDependency("d", "f");
+        dg.AddDependency("d", "g");
+        dg.AddDependency("g", "c");
+        Assert.IsTrue(dg.Size == 8, $"Dependency Graph size is {dg.Size} when it should be 8.");
+    }
+
+    [TestMethod]
+    public void DependencyGraph_TestComplexSizeRemoveAndReplace()
+    {
+        DependencyGraph dg = new();
+        // Implement :)
+
+    }
+    // Test HasDependents
+    // Test HasDependees
+    // Test GetDependents
+    // Test GetDependees
+    // Test AddDependency
+    // Test RemoveDependency
+    // Test ReplaceDependents
+    // Test ReplaceDependees
 }
