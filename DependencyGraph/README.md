@@ -15,7 +15,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 3 | 14 | 3 |
+| Assignment 3 | 14 | 5.5 |
 
 
  ## Hour Breakdown
@@ -23,7 +23,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Task | Number of Hours |
 | :--------:| :--------:
 | Setting up coding environment & <br /> reading documentation | 1 |
-| Writing Dependency Graph Tests | 2 |
+| Writing Dependency Graph Tests | 4.5 |
 
 # Comments for Evaluators
 Work stands on its own.
@@ -31,3 +31,5 @@ Work stands on its own.
 # Consulted Peers
 
 # References
+
+1) CollectionAssert Class: https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.testtools.unittesting.collectionassert?view=visualstudiosdk-2022 
