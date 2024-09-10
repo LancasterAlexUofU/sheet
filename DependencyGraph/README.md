@@ -15,7 +15,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 3 | 14 | 0 |
+| Assignment 3 | 14 | 3 |
 
 
  ## Hour Breakdown
@@ -23,6 +23,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Task | Number of Hours |
 | :--------:| :--------:
 | Setting up coding environment & <br /> reading documentation | 1 |
+| Writing Dependency Graph Tests | 2 |
 
 # Comments for Evaluators
 Work stands on its own.

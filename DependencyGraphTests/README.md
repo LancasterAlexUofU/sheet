@@ -9,20 +9,14 @@ Project:    DependencyGraphTests
 Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in Academic Coursework.
 ```
 
-# Overview of the DependencyGraph Project
+# Overview of the DependencyGraphTests Project
 
 # Time Expenditures
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 3 | 14 | 0 |
+| Assignment 3 | 14 | 3 |
 
-
- ## Hour Breakdown
-
-| Task | Number of Hours |
-| :--------:| :--------:
-| | |
 
 # Comments for Evaluators
 Work stands on its own.

@@ -130,16 +130,113 @@ public class DependencyGraphExampleStressTests
         Assert.IsTrue(dg.Size == 8, $"Dependency Graph size is {dg.Size} when it should be 8.");
     }
 
+    /// <summary>
+    /// This test creates a graph while using RemoveDependency, ReplaceDependents, and ReplaceDependees to check that the graph size is accurate.
+    /// </summary>
     [TestMethod]
     public void DependencyGraph_TestComplexSizeRemoveAndReplace()
     {
         DependencyGraph dg = new();
-        // Implement :)
-
+        dg.AddDependency("a", "b");
+        dg.RemoveDependency("a", "b");
+        dg.AddDependency("a", "b");
+        dg.AddDependency("b", "c");
+        dg.AddDependency("b", "d");
+        dg.ReplaceDependents("b", ["e", "f"]);
+        dg.ReplaceDependees("b", ["g", "h"]);
+        // Final graph is: (g,b), (h,b), (b,e), (b,f)
+        Assert.IsTrue(dg.Size == 4, $"Dependency Graph size is {dg.Size} when it should be 4.");
     }
-    // Test HasDependents
-    // Test HasDependees
-    // Test GetDependents
+    /// <summary>
+    /// This test ensures that an empty dependency graph returns false for HasDependents.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestHasDependentsZeroGraph_Invalid()
+    {
+        DependencyGraph dg = new();
+        Assert.IsFalse(dg.HasDependents(string.Empty));
+    }
+
+    /// <summary>
+    /// This test creates a simple graph and checks that HasDependents returns true.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestHasDependents_Valid()
+    {
+        DependencyGraph dg = new();
+        dg.AddDependency("a", "b");
+        Assert.IsTrue(dg.HasDependents("a"));
+    }
+
+    /// <summary>
+    /// This tests creates a simple graph and checks that a dependee does not return true for the HasDependents method.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestHasDependents_Invalid()
+    {
+        DependencyGraph dg = new();
+        dg.AddDependency("a", "b");
+        Assert.IsFalse(dg.HasDependents("b"));
+    }
+
+    /// <summary>
+    /// This test ensures that an empty dependency graph returns false for HasDependees.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestHasDependeesZeroGraph_Invalid()
+    {
+        DependencyGraph dg = new();
+        Assert.IsFalse(dg.HasDependees(string.Empty));
+    }
+
+    /// <summary>
+    /// This test creates a simple graph and checks that HasDependees returns true.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestHasDependees_Valid()
+    {
+        DependencyGraph dg = new();
+        dg.AddDependency("a", "b");
+        Assert.IsTrue(dg.HasDependents("b"));
+    }
+
+    /// <summary>
+    /// This tests creates a simple graph and checks that a dependent node does not return true for the HasDependeee method.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestHasDependees_Invalid()
+    {
+        DependencyGraph dg = new();
+        dg.AddDependency("a", "b");
+        Assert.IsFalse(dg.HasDependents("a"));
+    }
+
+    /// <summary>
+    /// This test ensures that all the dependent nodes are returned for the GetDependents method and that implied relationships are not included. <br/>
+    /// e.g. (a,b), (a,c), (b,d); if a is the target node, even through there is a link from a to d through b, their relationship is implied and should not be returned.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestGetDependents()
+    {
+        DependencyGraph dg = new();
+        dg.AddDependency("a", "b");
+        dg.AddDependency("a", "c");
+        dg.AddDependency("b", "d");
+        Assert.AreEqual(dg.GetDependents("a"), ["b", "c"], $"dg.GetDependents returned {dg.GetDependents("a")} when it should have returned [\"b\", \"c\"].");
+    }
+
+    /// <summary>
+    /// This test ensures that if the GetDependents method is given a node with no dependent nodes, it returns an empty list.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestGetDependentsZero()
+    {
+        DependencyGraph dg = new();
+        dg.AddDependency("a", "b");
+        dg.AddDependency("a", "c");
+        dg.AddDependency("b", "d");
+        Assert.AreEqual(dg.GetDependents("d"), [], $"dg.GetDependents returned {dg.GetDependents("d")} when it should have returned [].");
+    }
     // Test GetDependees
     // Test AddDependency
     // Test RemoveDependency
