@@ -212,6 +212,16 @@ public class DependencyGraphExampleStressTests
     }
 
     /// <summary>
+    /// This test checks that an empty string in an empty graph returns an empty list for GetDependents.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestGetDependentsEmpty()
+    {
+        DependencyGraph dg = new();
+        Assert.AreEqual(dg.GetDependents(string.Empty), [], $"dg.GetDependents returned {dg.GetDependents(string.Empty)} when it should have returned [].");
+    }
+
+    /// <summary>
     /// This test ensures that all the dependent nodes are returned for the GetDependents method and that implied relationships are not included. <br/>
     /// e.g. (a,b), (a,c), (b,d); if a is the target node, even through there is a link from a to d through b, their relationship is implied and should not be returned.
     /// </summary>
@@ -237,6 +247,29 @@ public class DependencyGraphExampleStressTests
         dg.AddDependency("b", "d");
         Assert.AreEqual(dg.GetDependents("d"), [], $"dg.GetDependents returned {dg.GetDependents("d")} when it should have returned [].");
     }
+
+    /// <summary>
+    /// This test checks that an empty string in an empty graph returns an empty list for GetDependees.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestGetDependeesEmpty()
+    {
+        DependencyGraph dg = new();
+        Assert.AreEqual(dg.GetDependees(string.Empty), [], $"dg.GetDependees returned {dg.GetDependees(string.Empty)} when it should have returned [].");
+    }
+
+    /// <summary>
+    /// This test checks that a node with two dependees properly returns those two nodes using the GetDependees method.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestGetDependees()
+    {
+        DependencyGraph dg = new();
+        dg.AddDependency("a", "b");
+        dg.AddDependency("c", "b");
+        Assert.AreEqual(dg.GetDependees("b"), [], $"dg.GetDependees returned {dg.GetDependees("b")} when it should have returned [\"a\", \"c\"]."); 
+    }
+
     // Test GetDependees
     // Test AddDependency
     // Test RemoveDependency
