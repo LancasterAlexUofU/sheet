@@ -262,7 +262,7 @@ public class DependencyGraphExampleStressTests
     {
         DependencyGraph dg = new();
         dg.AddDependency("a", "b");
-        Assert.IsTrue(dg.HasDependents("b"));
+        Assert.IsTrue(dg.HasDependees("b"));
     }
 
     /// <summary>
@@ -273,7 +273,7 @@ public class DependencyGraphExampleStressTests
     {
         DependencyGraph dg = new();
         dg.AddDependency("a", "b");
-        Assert.IsFalse(dg.HasDependents("a"));
+        Assert.IsFalse(dg.HasDependees("a"));
     }
 
 
@@ -321,7 +321,7 @@ public class DependencyGraphExampleStressTests
         dg.AddDependency("a", "b");
         dg.AddDependency("a", "c");
         dg.AddDependency("b", "d");        
-        CollectionAssert.AreEquivalent((System.Collections.ICollection)dg.GetDependents("a"), new List<string> { "b", "c" },
+        CollectionAssert.AreEquivalent(dg.GetDependents("a").ToList(), new List<string> { "b", "c" },
             $"dg.GetDependents returned {dg.GetDependents("a")} when it should have returned [\"b\", \"c\"].");
     }
 
@@ -345,8 +345,8 @@ public class DependencyGraphExampleStressTests
     public void DependencyGraph_TestGetDependentsComplex()
     {
         DependencyGraph dg = createComplexGraph();
-        CollectionAssert.AreEquivalent((System.Collections.ICollection)dg.GetDependents("b"), new List<string> { "c", "d", "e" });
-        CollectionAssert.AreEquivalent((System.Collections.ICollection)dg.GetDependents("e"), new List<string> { "d", "f" });
+        CollectionAssert.AreEquivalent(dg.GetDependents("b").ToList(), new List<string> { "c", "d", "e" });
+        CollectionAssert.AreEquivalent(dg.GetDependents("e").ToList(), new List<string> { "d", "f" });
     }
 
     /// <summary>
@@ -357,7 +357,7 @@ public class DependencyGraphExampleStressTests
     {
         DependencyGraph dg = createComplexGraph();
         dg.ReplaceDependents("b", ["j", "k", "l", "c"]);
-        CollectionAssert.AreEquivalent((System.Collections.ICollection)dg.GetDependents("b"), new List<string> { "j", "k", "l", "c" });
+        CollectionAssert.AreEquivalent(dg.GetDependents("b").ToList(), new List<string> { "j", "k", "l", "c" });
     }
 
     /// <summary>
@@ -400,8 +400,8 @@ public class DependencyGraphExampleStressTests
     public void DependencyGraph_TestGetDependeesComplex()
     {
         DependencyGraph dg = createComplexGraph();
-        CollectionAssert.AreEquivalent((System.Collections.ICollection)dg.GetDependees("d"), new List<string> { "b", "e" });
-        CollectionAssert.AreEquivalent((System.Collections.ICollection)dg.GetDependees("c"), new List<string> { "a", "b", "d" });
+        CollectionAssert.AreEquivalent(dg.GetDependees("d").ToList(), new List<string> { "b", "e" });
+        CollectionAssert.AreEquivalent(dg.GetDependees("c").ToList(), new List<string> { "a", "b", "d" });
     }
 
     /// <summary>
@@ -412,7 +412,7 @@ public class DependencyGraphExampleStressTests
     {
         DependencyGraph dg = createComplexGraph();
         dg.ReplaceDependees("c", ["j", "k", "l", "b"]);
-        CollectionAssert.AreEquivalent((System.Collections.ICollection)dg.GetDependees("c"), new List<string> { "j", "k", "l", "b" });
+        CollectionAssert.AreEquivalent(dg.GetDependees("c").ToList(), new List<string> { "j", "k", "l", "b" });
     }
 
     /// <summary>

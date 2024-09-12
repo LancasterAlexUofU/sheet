@@ -69,15 +69,16 @@ public class DependencyGraph
     /// </summary>
     public int Size
     {
-        get { return 0; }
+        // This counts all the elements in each list and then sums each count.
+        get { return graph.Values.Sum(set => set.Count); }
     }
 
-    /// <summary>
-    ///   Reports whether the given node has dependents (i.e., other nodes depend on it).
-    /// </summary>
-    /// <param name="nodeName"> The name of the node.</param>
-    /// <returns> true if the node has dependents. </returns>
-    public bool HasDependents(string nodeName)
+/// <summary>
+///   Reports whether the given node has dependents (i.e., other nodes depend on it).
+/// </summary>
+/// <param name="nodeName"> The name of the node.</param>
+/// <returns> true if the node has dependents. </returns>
+public bool HasDependents(string nodeName)
     {
         // If the graph contains a key, then that means it has at least one dependent node
         return graph.ContainsKey(nodeName);
@@ -122,7 +123,8 @@ public class DependencyGraph
     /// <returns> The dependees of nodeName. </returns>
     public IEnumerable<string> GetDependees(string nodeName)
     {
-        return new List<string>(); // Choose your own data structure
+        // Checks when a value in a key-value pair is found, only keep the key (the dependee).
+        return graph.Where(set => set.Value.Contains(nodeName)).Select(set => set.Key);
     }
 
     /// <summary>
@@ -175,6 +177,12 @@ public class DependencyGraph
     /// <param name="newDependents"> The new dependents for nodeName. </param>
     public void ReplaceDependents(string nodeName, IEnumerable<string> newDependents)
     {
+        if (graph.ContainsKey(nodeName))
+        {
+            graph.Remove(nodeName);
+        }
+        var newDependentsHashSet = new HashSet<string>(newDependents);
+        graph.Add(nodeName, newDependentsHashSet);
     }
 
     /// <summary>
@@ -187,5 +195,20 @@ public class DependencyGraph
     /// <param name="newDependees"> The new dependees for nodeName. Could be empty.</param>
     public void ReplaceDependees(string nodeName, IEnumerable<string> newDependees)
     {
+        // Checks when a value in a key-value pair is found, store the key in a list for later use to remove key nodeName pair.
+        IEnumerable<string> keys = graph.Where(set => set.Value.Contains(nodeName)).Select(set => set.Key);
+
+        // For each key, remove the ordered pair
+        foreach (string key in keys)
+        {
+            RemoveDependency(key, nodeName);
+        }
+
+        // Then for each dependee in newDependees, add (dependee, nodeName)
+        foreach (string dependee in newDependees)
+        {
+            AddDependency(dependee, nodeName);
+        }
+
     }
 }
