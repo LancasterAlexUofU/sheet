@@ -169,8 +169,8 @@ public class DependencyGraphExampleStressTests
         dg2.AddDependency("h", "b");
         dg2.AddDependency("b", "e");
         dg2.AddDependency("b", "f");
-        Assert.AreEqual(dg1.GetDependees("b"), dg2.GetDependees("b"));
-        Assert.AreEqual(dg1.GetDependents("b"), dg2.GetDependents("b"));
+        CollectionAssert.AreEquivalent(dg1.GetDependees("b").ToList(), dg2.GetDependees("b").ToList());
+        CollectionAssert.AreEquivalent(dg1.GetDependents("b").ToList(), dg2.GetDependents("b").ToList());
     }
 
 
@@ -181,11 +181,11 @@ public class DependencyGraphExampleStressTests
     public void DependencyGraph_TestComplexGraphSize2()
     {
         DependencyGraph dg = createComplexGraph();
-        Assert.IsTrue(dg.Size == 11);
+        Assert.IsTrue(dg.Size == 11, $"Actual dg.Size is {dg.Size}");
         dg.RemoveDependency("g", "h");
-        Assert.IsTrue(dg.Size == 9);
-        dg.RemoveDependency("d", "b");
-        Assert.IsTrue(dg.Size == 8); // Just ("a", "c"), ("e", "f") should be left.
+        Assert.IsTrue(dg.Size == 10, $"Actual dg.Size is {dg.Size}");
+        dg.RemoveDependency("b", "d");
+        Assert.IsTrue(dg.Size == 9, $"Actual dg.Size is {dg.Size}");
     }
 
     /// <summary>
@@ -379,7 +379,8 @@ public class DependencyGraphExampleStressTests
         DependencyGraph dg = new();
         dg.AddDependency("a", "b");
         dg.AddDependency("c", "b");
-        Assert.AreEqual(dg.GetDependees("b"), [], $"dg.GetDependees returned {dg.GetDependees("b")} when it should have returned [\"a\", \"c\"]."); 
+        //Assert.AreEqual(dg.GetDependees("b"), ["a", "c"]);
+        CollectionAssert.AreEquivalent(dg.GetDependees("b").ToList(), new List<string> { "a", "c" }, $"dg.GetDependees returned {dg.GetDependees("b")} when it should have returned [\"a\", \"c\"].");
     }
 
     /// <summary>
@@ -412,7 +413,8 @@ public class DependencyGraphExampleStressTests
     {
         DependencyGraph dg = createComplexGraph();
         dg.ReplaceDependees("c", ["j", "k", "l", "b"]);
-        CollectionAssert.AreEquivalent(dg.GetDependees("c").ToList(), new List<string> { "j", "k", "l", "b" });
+        List<string> FIXME = dg.GetDependees("c").ToList();
+        CollectionAssert.AreEquivalent(dg.GetDependees("c").ToList(), new List<string> { "j", "k", "l", "b" }, $"GetDependees ToList actually {dg.GetDependees("c").ToList()}");
     }
 
     /// <summary>

@@ -5,6 +5,9 @@
 // (Clarified meaning of dependent and dependee.)
 // (Clarified names in solution/project structure.)
 
+// TODO: Add stylecop file
+// TODO: Merge Tests, or add separate file for formula
+
 using System.Collections;
 
 namespace CS3500.DependencyGraph;
@@ -53,7 +56,10 @@ namespace CS3500.DependencyGraph;
 /// </summary>
 public class DependencyGraph
 {
-    private Dictionary<string, HashSet<string>> graph;
+    private Dictionary<string, HashSet<string>> dependees;
+    private Dictionary<string, HashSet<string>> dependents;
+
+    private int size;
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="DependencyGraph"/> class.
@@ -61,7 +67,7 @@ public class DependencyGraph
     /// </summary>
     public DependencyGraph()
     {
-        graph = [];
+        dependees = []; dependents = [];
     }
 
     /// <summary>
@@ -70,7 +76,8 @@ public class DependencyGraph
     public int Size
     {
         // This counts all the elements in each list and then sums each count.
-        get { return graph.Values.Sum(set => set.Count); }
+        //get { return graph.Values.Sum(set => set.Count); }
+        get { return size; }
     }
 
 /// <summary>
@@ -80,8 +87,8 @@ public class DependencyGraph
 /// <returns> true if the node has dependents. </returns>
 public bool HasDependents(string nodeName)
     {
-        // If the graph contains a key, then that means it has at least one dependent node
-        return graph.ContainsKey(nodeName);
+        // If the node is a key in dependees, then that means it has at least one dependent node
+        return dependees.ContainsKey(nodeName);
     }
 
     /// <summary>
@@ -91,10 +98,8 @@ public bool HasDependents(string nodeName)
     /// <param name="nodeName">The name of the node.</param>
     public bool HasDependees(string nodeName)
     {
-        // .Values gives a collection of sets, then .Any iterates over all the sets,
-        // and the lambda expression checks if the set contains the node.
-        // This is done as if the node if found in a value (is dependent), then it has to have a dependee node.
-        return graph.Values.Any(set => set.Contains(nodeName));
+        // If the node is a key in dependents, then that means it has at least one dependee node
+        return dependents.ContainsKey(nodeName);
     }
 
     /// <summary>
@@ -106,11 +111,13 @@ public bool HasDependents(string nodeName)
     /// <returns> The dependents of nodeName. </returns>
     public IEnumerable<string> GetDependents(string nodeName)
     {
-        if (graph.TryGetValue(nodeName, out HashSet<string>? values))
+        // Checks that dependees contains nodeName and if so, stores values in set values
+        if (dependees.TryGetValue(nodeName, out HashSet<string>? values))
         {
             return values;
         }
 
+        // Returns empty if nodeName is not found
         return [];
     }
 
@@ -123,8 +130,14 @@ public bool HasDependents(string nodeName)
     /// <returns> The dependees of nodeName. </returns>
     public IEnumerable<string> GetDependees(string nodeName)
     {
-        // Checks when a value in a key-value pair is found, only keep the key (the dependee).
-        return graph.Where(set => set.Value.Contains(nodeName)).Select(set => set.Key);
+        // Checks that dependents contains nodeName and if so, stores values in set values
+        if (dependents.TryGetValue(nodeName, out HashSet<string>? values))
+        {
+            return values;
+        }
+
+        // Returns empty if nodeName is not found
+        return [];
     }
 
     /// <summary>
@@ -139,13 +152,34 @@ public bool HasDependents(string nodeName)
     /// <param name="dependent"> The name of the node that cannot be evaluated until after the other node has been. </param>
     public void AddDependency(string dependee, string dependent)
     {
+        bool sizeIncreased = false;
+
         // Creates a new key slot for any new dependee value
-        if(!graph.ContainsKey(dependee))
+        if (!dependees.ContainsKey(dependee))
         {
-            graph[dependee] = [];
+            dependees[dependee] = [];
         }
 
-        graph[dependee].Add(dependent);
+        if (dependees[dependee].Add(dependent))
+        {
+            sizeIncreased = true;
+        }
+
+        // Creates a new key slot for any new dependent value
+        if (!dependents.ContainsKey(dependent))
+        {
+            dependents[dependent] = [];
+        }
+
+        if (dependents[dependent].Add(dependee))
+        {
+            sizeIncreased = true;
+        }
+
+        if (sizeIncreased)
+        {
+            size++;
+        }
     }
 
     /// <summary>
@@ -157,15 +191,22 @@ public bool HasDependents(string nodeName)
     /// <param name="dependent"> The name of the node that cannot be evaluated until the other node has been. </param>
     public void RemoveDependency(string dependee, string dependent)
     {
-        if (graph.ContainsKey(dependee))
+        // True if element is found and removed in both dictionaries, otherwise false (key isn't found).
+        if (dependees[dependee].Remove(dependent) && dependents[dependent].Remove(dependee))
         {
-            graph[dependee].Remove(dependent);
+            size--;
         }
 
         // If there are no dependent nodes for a given dependee, then it should no longer be considered a dependee and should be removed.
-        if (graph[dependee].Count == 0)
+        if (dependees[dependee].Count == 0)
         {
-            graph.Remove(dependee);
+            dependees.Remove(dependee);
+        }
+
+        // If there are no dependee nodes for a given dependent node, then it should no longer be considered dependent and should be removed.
+        if (dependents[dependent].Count == 0)
+        {
+            dependents.Remove(dependent);
         }
     }
 
@@ -177,12 +218,20 @@ public bool HasDependents(string nodeName)
     /// <param name="newDependents"> The new dependents for nodeName. </param>
     public void ReplaceDependents(string nodeName, IEnumerable<string> newDependents)
     {
-        if (graph.ContainsKey(nodeName))
+        // If the nodeName is a valid dependee, remove each of its dependent values.
+        if (dependees.ContainsKey(nodeName))
         {
-            graph.Remove(nodeName);
+            foreach(string dependent in dependees[nodeName])
+            {
+                RemoveDependency(nodeName, dependent);
+            }
         }
-        var newDependentsHashSet = new HashSet<string>(newDependents);
-        graph.Add(nodeName, newDependentsHashSet);
+
+        // Add all new dependents to dependee.
+        foreach(string newDependent in newDependents)
+        {
+            AddDependency(nodeName, newDependent);
+        }
     }
 
     /// <summary>
@@ -195,20 +244,19 @@ public bool HasDependents(string nodeName)
     /// <param name="newDependees"> The new dependees for nodeName. Could be empty.</param>
     public void ReplaceDependees(string nodeName, IEnumerable<string> newDependees)
     {
-        // Checks when a value in a key-value pair is found, store the key in a list for later use to remove key nodeName pair.
-        IEnumerable<string> keys = graph.Where(set => set.Value.Contains(nodeName)).Select(set => set.Key);
-
-        // For each key, remove the ordered pair
-        foreach (string key in keys)
+        // If the nodeName is a valid dependee, remove each of its dependent values.
+        if (dependents.ContainsKey(nodeName))
         {
-            RemoveDependency(key, nodeName);
+            foreach (string dependee in dependents[nodeName])
+            {
+                RemoveDependency(dependee, nodeName);
+            }
         }
 
-        // Then for each dependee in newDependees, add (dependee, nodeName)
-        foreach (string dependee in newDependees)
+        // Add all new dependents to dependee.
+        foreach (string newDependee in newDependees)
         {
-            AddDependency(dependee, nodeName);
+            AddDependency(newDependee, nodeName);
         }
-
     }
 }

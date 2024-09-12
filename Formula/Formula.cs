@@ -196,6 +196,70 @@ public class Formula
     }
 
     /// <summary>
+    ///   Reports whether "token" is a variable.  It must be one or more letters
+    ///   followed by one or more numbers.
+    /// </summary>
+    /// <param name="token"> A token that may be a variable. </param>
+    /// <returns> true if the string matches the requirements, e.g., A1 or a1. </returns>
+    private static bool IsVar(string token)
+    {
+        // notice the use of ^ and $ to denote that the entire string being matched is just the variable
+        string standaloneVarPattern = $"^{VariableRegexPattern}$";
+        return Regex.IsMatch(token, standaloneVarPattern);
+    }
+
+    /// <summary>
+    ///   <para>
+    ///     Given an expression, enumerates the tokens that compose it.
+    ///   </para>
+    ///   <para>
+    ///     Tokens returned are:
+    ///   </para>
+    ///   <list type="bullet">
+    ///     <item>left paren</item>
+    ///     <item>right paren</item>
+    ///     <item>one of the four operator symbols</item>
+    ///     <item>a string consisting of one or more letters followed by one or more numbers</item>
+    ///     <item>a double literal</item>
+    ///     <item>and anything that doesn't match one of the above patterns</item>
+    ///   </list>
+    ///   <para>
+    ///     There are no empty tokens; white space is ignored (except to separate other tokens).
+    ///   </para>
+    /// </summary>
+    /// <param name="formula"> A string representing an infix formula such as 1*B1/3.0. </param>
+    /// <returns> The ordered list of tokens in the formula. </returns>
+    private static List<string> GetTokens(string formula)
+    {
+        List<string> results = [];
+
+        string lpPattern = @"\(";
+        string rpPattern = @"\)";
+        string spacePattern = @"\s+";
+
+        // Overall pattern
+        string pattern = string.Format(
+                                        "({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
+                                        lpPattern,
+                                        rpPattern,
+                                        OperandRegex,
+                                        VariableRegexPattern,
+                                        NumberRegexPattern,
+                                        spacePattern);
+
+        // Enumerate matching tokens that don't consist solely of white space.
+        foreach (string s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
+        {
+            if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
+            {
+                results.Add(s);
+            }
+        }
+
+        return results;
+    }
+
+    /// <summary>
     /// Tests for the One Token Rule: <br/>
     /// There must be at least one token.
     /// </summary>
@@ -362,70 +426,6 @@ public class Formula
                 tokens[i] = tokens[i].ToUpper();
             }
         }
-    }
-
-    /// <summary>
-    ///   Reports whether "token" is a variable.  It must be one or more letters
-    ///   followed by one or more numbers.
-    /// </summary>
-    /// <param name="token"> A token that may be a variable. </param>
-    /// <returns> true if the string matches the requirements, e.g., A1 or a1. </returns>
-    private static bool IsVar(string token)
-    {
-        // notice the use of ^ and $ to denote that the entire string being matched is just the variable
-        string standaloneVarPattern = $"^{VariableRegexPattern}$";
-        return Regex.IsMatch(token, standaloneVarPattern);
-    }
-
-    /// <summary>
-    ///   <para>
-    ///     Given an expression, enumerates the tokens that compose it.
-    ///   </para>
-    ///   <para>
-    ///     Tokens returned are:
-    ///   </para>
-    ///   <list type="bullet">
-    ///     <item>left paren</item>
-    ///     <item>right paren</item>
-    ///     <item>one of the four operator symbols</item>
-    ///     <item>a string consisting of one or more letters followed by one or more numbers</item>
-    ///     <item>a double literal</item>
-    ///     <item>and anything that doesn't match one of the above patterns</item>
-    ///   </list>
-    ///   <para>
-    ///     There are no empty tokens; white space is ignored (except to separate other tokens).
-    ///   </para>
-    /// </summary>
-    /// <param name="formula"> A string representing an infix formula such as 1*B1/3.0. </param>
-    /// <returns> The ordered list of tokens in the formula. </returns>
-    private static List<string> GetTokens(string formula)
-    {
-        List<string> results = [];
-
-        string lpPattern = @"\(";
-        string rpPattern = @"\)";
-        string spacePattern = @"\s+";
-
-        // Overall pattern
-        string pattern = string.Format(
-                                        "({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
-                                        lpPattern,
-                                        rpPattern,
-                                        OperandRegex,
-                                        VariableRegexPattern,
-                                        NumberRegexPattern,
-                                        spacePattern);
-
-        // Enumerate matching tokens that don't consist solely of white space.
-        foreach (string s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
-        {
-            if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
-            {
-                results.Add(s);
-            }
-        }
-
-        return results;
     }
 }
 
