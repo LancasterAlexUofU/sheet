@@ -15,12 +15,14 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 3 | 14 | 5.5 |
+| Assignment 3 | 14 | 7 |
 
 
 # Comments for Evaluators
 Work stands on its own.
 
 # Consulted Peers
+- Eli
+- Yen
 
 # References

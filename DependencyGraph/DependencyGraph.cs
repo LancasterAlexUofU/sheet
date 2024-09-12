@@ -5,6 +5,8 @@
 // (Clarified meaning of dependent and dependee.)
 // (Clarified names in solution/project structure.)
 
+using System.Collections;
+
 namespace CS3500.DependencyGraph;
 
 /// <summary>
@@ -51,12 +53,15 @@ namespace CS3500.DependencyGraph;
 /// </summary>
 public class DependencyGraph
 {
+    private Dictionary<string, HashSet<string>> graph;
+
     /// <summary>
     ///   Initializes a new instance of the <see cref="DependencyGraph"/> class.
     ///   The initial DependencyGraph is empty.
     /// </summary>
     public DependencyGraph()
     {
+        graph = [];
     }
 
     /// <summary>
@@ -74,7 +79,8 @@ public class DependencyGraph
     /// <returns> true if the node has dependents. </returns>
     public bool HasDependents(string nodeName)
     {
-        return false;
+        // If the graph contains a key, then that means it has at least one dependent node
+        return graph.ContainsKey(nodeName);
     }
 
     /// <summary>
@@ -84,7 +90,10 @@ public class DependencyGraph
     /// <param name="nodeName">The name of the node.</param>
     public bool HasDependees(string nodeName)
     {
-        return false;
+        // .Values gives a collection of sets, then .Any iterates over all the sets,
+        // and the lambda expression checks if the set contains the node.
+        // This is done as if the node if found in a value (is dependent), then it has to have a dependee node.
+        return graph.Values.Any(set => set.Contains(nodeName));
     }
 
     /// <summary>
@@ -96,7 +105,12 @@ public class DependencyGraph
     /// <returns> The dependents of nodeName. </returns>
     public IEnumerable<string> GetDependents(string nodeName)
     {
-        return new List<string>(); // Choose your own data structure
+        if (graph.TryGetValue(nodeName, out HashSet<string>? values))
+        {
+            return values;
+        }
+
+        return [];
     }
 
     /// <summary>
@@ -123,6 +137,13 @@ public class DependencyGraph
     /// <param name="dependent"> The name of the node that cannot be evaluated until after the other node has been. </param>
     public void AddDependency(string dependee, string dependent)
     {
+        // Creates a new key slot for any new dependee value
+        if(!graph.ContainsKey(dependee))
+        {
+            graph[dependee] = [];
+        }
+
+        graph[dependee].Add(dependent);
     }
 
     /// <summary>
@@ -134,6 +155,16 @@ public class DependencyGraph
     /// <param name="dependent"> The name of the node that cannot be evaluated until the other node has been. </param>
     public void RemoveDependency(string dependee, string dependent)
     {
+        if (graph.ContainsKey(dependee))
+        {
+            graph[dependee].Remove(dependent);
+        }
+
+        // If there are no dependent nodes for a given dependee, then it should no longer be considered a dependee and should be removed.
+        if (graph[dependee].Count == 0)
+        {
+            graph.Remove(dependee);
+        }
     }
 
     /// <summary>
