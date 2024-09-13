@@ -1,16 +1,37 @@
-﻿// Skeleton implementation written by Joe Zachary for CS 3500, September 2013.
+﻿// <copyright file="DependencyGraph.cs" company="UofU-CS3500">
+// Copyright (c) 2024 UofU-CS3500. All rights reserved.
+// </copyright>
+// <summary>
+//
+// Author:    Alex Lancaster
+// Partner:   None
+// Date:      13-Sept-2024
+// Course:    CS 3500, University of Utah, School of Computing
+// Copyright: CS 3500 and Alex Lancaster - This work may not
+//            be copied for use in Academic Coursework.
+//
+// I, Alex Lancaster, certify that I wrote this code from scratch and
+// did not copy it in part or whole from another source.  All
+// references used in the completion of the assignments are cited
+// in my README file.
+//
+// File Contents
+//
+//      The DependencyGraph class takes in two elements (in this case cells), and determine
+//      which cells must be evaluated before other cells. This is done by storing
+//      the dependee and dependent cells in separate dictionaries so that dependent cells
+//      point to dependee cells and vice versa. This creates a unique dependency graph.
+//      Cells can be added, removed, and replaced.
+// </summary>
+
+// Skeleton implementation written by Joe Zachary for CS 3500, September 2013.
 // Version 1.1 (Fixed error in comment for RemoveDependency.)
 // Version 1.2 - Daniel Kopta
 // Version 1.3 - H. James de St. Germain Fall 2024
 // (Clarified meaning of dependent and dependee.)
 // (Clarified names in solution/project structure.)
-
-// TODO: Add stylecop file
-// TODO: Merge Tests, or add separate file for formula
-
-using System.Collections;
-
 namespace CS3500.DependencyGraph;
+using System.Collections;
 
 /// <summary>
 ///   <para>
@@ -67,16 +88,17 @@ public class DependencyGraph
     /// </summary>
     public DependencyGraph()
     {
-        dependees = []; dependents = [];
+        dependees = [];
+        dependents = [];
     }
 
     /// <summary>
-    /// The number of ordered pairs in the DependencyGraph.
+    /// Gets the number of ordered pairs in the DependencyGraph.
     /// </summary>
     public int Size
     {
         // This counts all the elements in each list and then sums each count.
-        //get { return graph.Values.Sum(set => set.Count); }
+        // get { return graph.Values.Sum(set => set.Count); }
         get { return size; }
     }
 
@@ -85,7 +107,7 @@ public class DependencyGraph
 /// </summary>
 /// <param name="nodeName"> The name of the node.</param>
 /// <returns> true if the node has dependents. </returns>
-public bool HasDependents(string nodeName)
+    public bool HasDependents(string nodeName)
     {
         // If the node is a key in dependees, then that means it has at least one dependent node
         return dependees.ContainsKey(nodeName);
@@ -141,7 +163,7 @@ public bool HasDependents(string nodeName)
     }
 
     /// <summary>
-    /// <para> 
+    /// <para>
     ///   Adds the ordered pair (dependee, dependent), if it doesn't already exist (otherwise nothing happens).
     /// </para>
     /// <para>
@@ -191,22 +213,26 @@ public bool HasDependents(string nodeName)
     /// <param name="dependent"> The name of the node that cannot be evaluated until the other node has been. </param>
     public void RemoveDependency(string dependee, string dependent)
     {
-        // True if element is found and removed in both dictionaries, otherwise false (key isn't found).
-        if (dependees[dependee].Remove(dependent) && dependents[dependent].Remove(dependee))
+        // Check if values exist, otherwise, errors will be thrown
+        if (dependees.ContainsKey(dependee) && dependents.ContainsKey(dependent))
         {
-            size--;
-        }
+            // True if element is found and removed in both dictionaries, otherwise false (key isn't found).
+            if (dependees[dependee].Remove(dependent) && dependents[dependent].Remove(dependee))
+            {
+                size--;
+            }
 
-        // If there are no dependent nodes for a given dependee, then it should no longer be considered a dependee and should be removed.
-        if (dependees[dependee].Count == 0)
-        {
-            dependees.Remove(dependee);
-        }
+            // If there are no dependent nodes for a given dependee, then it should no longer be considered a dependee and should be removed.
+            if (dependees[dependee].Count == 0)
+            {
+                dependees.Remove(dependee);
+            }
 
-        // If there are no dependee nodes for a given dependent node, then it should no longer be considered dependent and should be removed.
-        if (dependents[dependent].Count == 0)
-        {
-            dependents.Remove(dependent);
+            // If there are no dependee nodes for a given dependent node, then it should no longer be considered dependent and should be removed.
+            if (dependents[dependent].Count == 0)
+            {
+                dependents.Remove(dependent);
+            }
         }
     }
 

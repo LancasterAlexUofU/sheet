@@ -4,29 +4,55 @@ Partner:    None
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  LancasterAlexUofU
 Repo:       https://github.com/uofu-cs3500-20-fall2024/spreadsheet-LancasterAlexUofU
-Date:       7-Sept-2024
+Date:       13-Sept-2024
 Project:    DependencyGraph
 Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in Academic Coursework.
 ```
 
 # Overview of the DependencyGraph Project
 
+The Dependency Graph project determines which cells must be evaluated before other cells in the spreadsheet solution. 
+For example, cell A1 could contain formula A2 \* A3 and cell A2 contains B1 + B2. Therefore, B1 and B2 need to be evaluated before A2 \* A3.
+
+The project has the following pubic methods:
+
+**DependencyGraph** - Creates an empty dependency graph.
+
+**Size** - Returns an integer containing the number of ordered pairs in the dependency graph.
+
+**HasDependents(string nodeName)** - Returns a bool that reports whether the given node has dependents.
+
+**HasDependees(string nodeName)** - Returns a bool that reports whether the given node has dependees.
+
+**GetDependents(string nodeName)** - Returns an IEnumerable\<string> that contains the dependents of the given node.
+
+**GetDependees(string nodeName)** - Returns an IEnumerable\<string> that contains the dependees of the given node.
+
+**AddDependency(string dependee, string dependent)** - Adds the ordered pair (dependee, dependent) to the dependency graph, if it doesn't already exist (otherwise nothing happens).
+
+**RemoveDependency(string dependee, string dependent)** - Removes the ordered pair (dependee, dependent) from the dependency graph, if it exists (otherwise nothing happens).
+
+**ReplaceDependents(string nodeName, IEnumerable\<string> newDependents)** - Removes all existing ordered pairs of the form (nodeName, *) and then for each t in newDependents adds the ordered pair (nodeName, t).
+
+**ReplaceDependees(string nodeName, IEnumerable\<string> newDependees)** - Removes all existing ordered pairs of the form (*, nodeName) and then for each t in newDependees, adds the ordered pair (t, nodeName).
+
+
 # Time Expenditures
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 3 | 14 | 11.5 |
+| Assignment 3 | 14 | 14.5 |
 
 
  ## Hour Breakdown
 
 | Task | Number of Hours |
 | :--------:| :--------:
-| Setting up coding environment & <br /> reading documentation | 1 |
-| Writing Dependency Graph Tests | 4.5 |
-| Research | 1 |
+| Setting up coding environment, <br /> reading documentation, & research | 2 |
+| Writing Dependency Graph Tests | 5.5 |
 | Dependency Graph Implementation | 3.5 |
 | Debugging | 1.5 |
+| Formatting and Quality Assurance | 2 |
 
 # Comments for Evaluators
 Work stands on its own.

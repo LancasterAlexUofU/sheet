@@ -1,20 +1,42 @@
+// <copyright file="DependencyGraphTests.cs" company="UofU-CS3500">
+// Copyright (c) 2024 UofU-CS3500. All rights reserved.
+// </copyright>
+// <summary>
+//
+// Author:    Alex Lancaster
+// Partner:   None
+// Date:      13-Sept-2024
+// Course:    CS 3500, University of Utah, School of Computing
+// Copyright: CS 3500 and Alex Lancaster - This work may not
+//            be copied for use in Academic Coursework.
+//
+// I, Alex Lancaster, certify that I wrote this code from scratch and
+// did not copy it in part or whole from another source.  All
+// references used in the completion of the assignments are cited
+// in my README file.
+//
+// File Contents
+//
+//      The DependencyGraphTests contains 28 tests including 2 stress tests. This test class contains
+//      simple tests such as adding and removing, as well as edge cases and complex graphs. The tests
+//      cover the DependencyGraph code 100%.
+// </summary>
 namespace CS3500.DevelopmentTests;
 
 using CS3500.DependencyGraph;
 
 /// <summary>
 ///   This is a test class for DependencyGraphTest and is intended
-///   to contain all DependencyGraphTest Unit Tests
+///   to contain all DependencyGraphTest Unit Tests.
 /// </summary>
 [TestClass]
 public class DependencyGraphExampleStressTests
 {
     /// <summary>
-    ///   FIXME: Explain carefully what this code tests.
-    ///          Also, update in-line comments as appropriate.
+    ///   This test adds and removes many nodes in a dependency graph to ensure dependency graph is properly working and is efficient.
     /// </summary>
     [TestMethod]
-    [Timeout(2000)]  // 2 second run time limit <-- remove this comment
+    [Timeout(2000)]
     public void StressTest()
     {
         DependencyGraph dg = new();
@@ -89,6 +111,113 @@ public class DependencyGraphExampleStressTests
     }
 
     /// <summary>
+    /// This stress test checks that the Replace dependents and Replace dependees are working properly as well as quickly.
+    /// This is done by replacing the dependents for even indices and replacing dependees of odd indices.
+    /// </summary>
+    [TestMethod]
+    [Timeout(2000)]
+    public void StressTest2()
+    {
+        DependencyGraph dg = new();
+
+        // A bunch of strings to use
+        const int SIZE = 200;
+        string[] letters = new string[SIZE];
+
+        for (int i = 0; i < SIZE; i++)
+        {
+            letters[i] = string.Empty + ((char)('a' + i));
+        }
+
+        // The correct answers
+        HashSet<string>[] dependents = new HashSet<string>[SIZE];
+        HashSet<string>[] dependees = new HashSet<string>[SIZE];
+
+        for (int i = 0; i < SIZE; i++)
+        {
+            dependents[i] = [];
+            dependees[i] = [];
+        }
+
+        // Add initial dependencies
+        for (int i = 0; i < SIZE; i++)
+        {
+            for (int j = i + 1; j < SIZE; j++)
+            {
+                dg.AddDependency(letters[i], letters[j]);
+                dependents[i].Add(letters[j]);
+                dependees[j].Add(letters[i]);
+            }
+        }
+
+        // Replace dependents for even indices
+        for (int i = 0; i < SIZE; i += 2)
+        {
+            // Create new dependents
+            var newDependents = new HashSet<string>();
+            for (int j = i + 1; j < SIZE; j += 2)
+            {
+                newDependents.Add(letters[j]);
+            }
+
+            // Replace old dependents with new dependents
+            dg.ReplaceDependents(letters[i], newDependents);
+            dependents[i] = newDependents;
+
+            // Check to see if a member is in newDependents, then dependees at the index should have it, otherwise, remove it
+            for (int j = i + 1; j < SIZE; j++)
+            {
+                if (newDependents.Contains(letters[j]))
+                {
+                    dependees[j].Add(letters[i]);
+                }
+                else
+                {
+                    dependees[j].Remove(letters[i]);
+                }
+            }
+        }
+
+        // Replace dependees for odd indices
+        for (int i = 1; i < SIZE; i += 2)
+        {
+            var newDependees = new HashSet<string>();
+            for (int j = 0; j < i; j += 2)
+            {
+                newDependees.Add(letters[j]);
+            }
+
+            dg.ReplaceDependees(letters[i], newDependees);
+            dependees[i] = newDependees;
+
+            // Only from 0 to i because a letter can only be a dependee of letters that come after it in the array.
+            // Check to see if a member is in newDependees, then dependents at the index should have it, otherwise, remove it
+            for (int j = 0; j < i; j++)
+            {
+                if (newDependees.Contains(letters[j]))
+                {
+                    dependents[j].Add(letters[i]);
+                }
+                else
+                {
+                    dependents[j].Remove(letters[i]);
+                }
+            }
+        }
+
+        // Make sure everything is right
+        for (int i = 0; i < SIZE; i++)
+        {
+            Assert.IsTrue(dependents[i].SetEquals(new HashSet<string>(dg.GetDependents(letters[i]))));
+            Assert.IsTrue(dependees[i].SetEquals(new HashSet<string>(dg.GetDependees(letters[i]))));
+        }
+
+        // Check size
+        int expectedSize = dependents.Sum(d => d.Count);
+        Assert.AreEqual(expectedSize, dg.Size);
+    }
+
+    /// <summary>
     /// This tests creates an empty graph to make sure the graph size is equal to zero.
     /// </summary>
     [TestMethod]
@@ -144,6 +273,7 @@ public class DependencyGraphExampleStressTests
         dg.AddDependency("b", "d");
         dg.ReplaceDependents("b", ["e", "f"]);
         dg.ReplaceDependees("b", ["g", "h"]);
+
         // Final graph is: (g,b), (h,b), (b,e), (b,f)
         Assert.IsTrue(dg.Size == 4, $"Dependency Graph size is {dg.Size} when it should be 4.");
     }
@@ -162,8 +292,8 @@ public class DependencyGraphExampleStressTests
         dg1.AddDependency("b", "d");
         dg1.ReplaceDependents("b", ["e", "f"]);
         dg1.ReplaceDependees("b", ["g", "h"]);
-        // Final graph is: (g,b), (h,b), (b,e), (b,f)
 
+        // Final graph is: (g,b), (h,b), (b,e), (b,f)
         DependencyGraph dg2 = new();
         dg2.AddDependency("g", "b");
         dg2.AddDependency("h", "b");
@@ -173,14 +303,13 @@ public class DependencyGraphExampleStressTests
         CollectionAssert.AreEquivalent(dg1.GetDependents("b").ToList(), dg2.GetDependents("b").ToList());
     }
 
-
     /// <summary>
     /// This takes a complex graph and tests that its size is correct, even when multiple nodes are removed.
     /// </summary>
     [TestMethod]
     public void DependencyGraph_TestComplexGraphSize2()
     {
-        DependencyGraph dg = createComplexGraph();
+        DependencyGraph dg = CreateComplexGraph();
         Assert.IsTrue(dg.Size == 11, $"Actual dg.Size is {dg.Size}");
         dg.RemoveDependency("g", "h");
         Assert.IsTrue(dg.Size == 10, $"Actual dg.Size is {dg.Size}");
@@ -218,6 +347,7 @@ public class DependencyGraphExampleStressTests
         DependencyGraph dg = new();
         dg.AddDependency("a", "b");
         Assert.IsFalse(dg.HasDependents("b"));
+        Assert.IsFalse(dg.HasDependents("c"));
     }
 
     /// <summary>
@@ -226,7 +356,7 @@ public class DependencyGraphExampleStressTests
     [TestMethod]
     public void DependencyGraph_TestHasDependentsComplex_Valid()
     {
-        DependencyGraph dg = createComplexGraph();
+        DependencyGraph dg = CreateComplexGraph();
         Assert.IsTrue(dg.HasDependents("b"));
         Assert.IsTrue(dg.HasDependents("d"));
         Assert.IsTrue(dg.HasDependents("h"));
@@ -238,7 +368,7 @@ public class DependencyGraphExampleStressTests
     [TestMethod]
     public void DependencyGraph_TestHasDependentsComplex_Invalid()
     {
-        DependencyGraph dg = createComplexGraph();
+        DependencyGraph dg = CreateComplexGraph();
         Assert.IsFalse(dg.HasDependents("c"));
         Assert.IsFalse(dg.HasDependents("f"));
         Assert.IsFalse(dg.HasDependents("i"));
@@ -274,8 +404,8 @@ public class DependencyGraphExampleStressTests
         DependencyGraph dg = new();
         dg.AddDependency("a", "b");
         Assert.IsFalse(dg.HasDependees("a"));
+        Assert.IsFalse(dg.HasDependees("c"));
     }
-
 
     /// <summary>
     /// This test checks that multiple nodes with dependees in a complex graph all return true.
@@ -283,7 +413,7 @@ public class DependencyGraphExampleStressTests
     [TestMethod]
     public void DependencyGraph_TestHasDependeesComplex_Valid()
     {
-        DependencyGraph dg = createComplexGraph();
+        DependencyGraph dg = CreateComplexGraph();
         Assert.IsTrue(dg.HasDependees("b"));
         Assert.IsTrue(dg.HasDependees("c"));
         Assert.IsTrue(dg.HasDependees("i"));
@@ -295,7 +425,7 @@ public class DependencyGraphExampleStressTests
     [TestMethod]
     public void DependencyGraph_TestHasDependeesComplex_Invalid()
     {
-        DependencyGraph dg = createComplexGraph();
+        DependencyGraph dg = CreateComplexGraph();
         Assert.IsFalse(dg.HasDependees("a"));
         Assert.IsFalse(dg.HasDependees("g"));
     }
@@ -320,9 +450,8 @@ public class DependencyGraphExampleStressTests
         DependencyGraph dg = new();
         dg.AddDependency("a", "b");
         dg.AddDependency("a", "c");
-        dg.AddDependency("b", "d");        
-        CollectionAssert.AreEquivalent(dg.GetDependents("a").ToList(), new List<string> { "b", "c" },
-            $"dg.GetDependents returned {dg.GetDependents("a")} when it should have returned [\"b\", \"c\"].");
+        dg.AddDependency("b", "d");
+        CollectionAssert.AreEquivalent(dg.GetDependents("a").ToList(), new List<string> { "b", "c" }, $"dg.GetDependents returned {dg.GetDependents("a")} when it should have returned [\"b\", \"c\"].");
     }
 
     /// <summary>
@@ -344,7 +473,7 @@ public class DependencyGraphExampleStressTests
     [TestMethod]
     public void DependencyGraph_TestGetDependentsComplex()
     {
-        DependencyGraph dg = createComplexGraph();
+        DependencyGraph dg = CreateComplexGraph();
         CollectionAssert.AreEquivalent(dg.GetDependents("b").ToList(), new List<string> { "c", "d", "e" });
         CollectionAssert.AreEquivalent(dg.GetDependents("e").ToList(), new List<string> { "d", "f" });
     }
@@ -355,7 +484,7 @@ public class DependencyGraphExampleStressTests
     [TestMethod]
     public void DependencyGraph_TestGetDependentsComplexReplace()
     {
-        DependencyGraph dg = createComplexGraph();
+        DependencyGraph dg = CreateComplexGraph();
         dg.ReplaceDependents("b", ["j", "k", "l", "c"]);
         CollectionAssert.AreEquivalent(dg.GetDependents("b").ToList(), new List<string> { "j", "k", "l", "c" });
     }
@@ -379,7 +508,8 @@ public class DependencyGraphExampleStressTests
         DependencyGraph dg = new();
         dg.AddDependency("a", "b");
         dg.AddDependency("c", "b");
-        //Assert.AreEqual(dg.GetDependees("b"), ["a", "c"]);
+
+        // Assert.AreEqual(dg.GetDependees("b"), ["a", "c"]);
         CollectionAssert.AreEquivalent(dg.GetDependees("b").ToList(), new List<string> { "a", "c" }, $"dg.GetDependees returned {dg.GetDependees("b")} when it should have returned [\"a\", \"c\"].");
     }
 
@@ -400,7 +530,7 @@ public class DependencyGraphExampleStressTests
     [TestMethod]
     public void DependencyGraph_TestGetDependeesComplex()
     {
-        DependencyGraph dg = createComplexGraph();
+        DependencyGraph dg = CreateComplexGraph();
         CollectionAssert.AreEquivalent(dg.GetDependees("d").ToList(), new List<string> { "b", "e" });
         CollectionAssert.AreEquivalent(dg.GetDependees("c").ToList(), new List<string> { "a", "b", "d" });
     }
@@ -411,17 +541,64 @@ public class DependencyGraphExampleStressTests
     [TestMethod]
     public void DependencyGraph_TestGetDependeesComplexReplace()
     {
-        DependencyGraph dg = createComplexGraph();
+        DependencyGraph dg = CreateComplexGraph();
+        dg.ReplaceDependees("c", ["j", "k", "l", "b", "f"]);
+        CollectionAssert.AreEquivalent(dg.GetDependees("c").ToList(), new List<string> { "j", "k", "l", "b", "f" }, $"GetDependees ToList actually {dg.GetDependees("c").ToList()}");
+    }
+
+    /// <summary>
+    /// This test checks that whenever elements that are not in a graph (or are not a dependent node)
+    /// are called to be replaced, no error should be thrown.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestReplaceDependees_Invalid()
+    {
+        DependencyGraph dg = CreateComplexGraph();
+        dg.ReplaceDependees("a", ["j", "k", "l", "b", "f"]); // 'a' is not a dependent node, but should not throw an error
+        CollectionAssert.AreEquivalent(dg.GetDependees("a").ToList(), new List<string> { "j", "k", "l", "b", "f" }, $"GetDependees ToList actually {dg.GetDependees("a").ToList()}");
+
+        dg.GetDependees("z"); // 'z' does not exist
+        dg.ReplaceDependees("z", ["j", "k", "l", "b", "f"]);
+        CollectionAssert.AreEquivalent(dg.GetDependees("z").ToList(), new List<string> { "j", "k", "l", "b", "f" }, $"GetDependees ToList actually {dg.GetDependees("z").ToList()}");
+    }
+
+    /// <summary>
+    /// This test checks that whenever elements that are not in a graph (or are not a dependee node)
+    /// are called to be replaced, no error should be thrown.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestReplaceDependents_Invalid()
+    {
+        DependencyGraph dg = CreateComplexGraph();
+        dg.ReplaceDependents("c", ["j", "k", "l", "b", "f"]); // 'c' is not a dependent node, but should not throw an error
+        CollectionAssert.AreEquivalent(dg.GetDependents("c").ToList(), new List<string> { "j", "k", "l", "b", "f" }, $"GetDependees ToList actually {dg.GetDependents("c").ToList()}");
+
+        dg.GetDependents("z"); // 'z' does not exist
+        dg.ReplaceDependents("z", ["j", "k", "l", "b", "f"]);
+        CollectionAssert.AreEquivalent(dg.GetDependents("z").ToList(), new List<string> { "j", "k", "l", "b", "f" }, $"GetDependees ToList actually {dg.GetDependents("z").ToList()}");
+    }
+
+    /// <summary>
+    /// This method tests that the replace, remove, and add functions all work together.
+    /// </summary>
+    [TestMethod]
+    public void DependencyGraph_TestReplaceAndRemove()
+    {
+        DependencyGraph dg = CreateComplexGraph();
         dg.ReplaceDependees("c", ["j", "k", "l", "b"]);
-        List<string> FIXME = dg.GetDependees("c").ToList();
-        CollectionAssert.AreEquivalent(dg.GetDependees("c").ToList(), new List<string> { "j", "k", "l", "b" }, $"GetDependees ToList actually {dg.GetDependees("c").ToList()}");
+        dg.RemoveDependency("a", "c");
+        dg.RemoveDependency("b", "c");
+        dg.RemoveDependency("j", "c");
+        dg.AddDependency("a", "c");
+        dg.RemoveDependency("c", "p"); // Send invalid node, check that no error is thrown
+        CollectionAssert.AreEquivalent(dg.GetDependees("c").ToList(), new List<string> { "a", "k", "l" }, $"GetDependees ToList actually {dg.GetDependees("c").ToList()}");
     }
 
     /// <summary>
     /// This private function creates a complex graph. This graph has a disconnected part (g, h), (h, i).
     /// </summary>
     /// <returns>A complex dependency graph.</returns>
-    private DependencyGraph createComplexGraph()
+    private DependencyGraph CreateComplexGraph()
     {
         DependencyGraph dg = new();
         dg.AddDependency("a", "b");

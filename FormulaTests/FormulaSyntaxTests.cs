@@ -1,4 +1,4 @@
-// <copyright file="GradingTests.cs" company="UofU-CS3500">
+﻿// <copyright file="FormulaSyntaxTests.cs" company="UofU-CS3500">
 // Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
 
@@ -21,632 +21,649 @@
 ///   These tests are for your private use only to improve the quality of the
 ///   rest of your assignments
 /// </summary>
-/// <date> Updated Fall 2024 </date>
-
-namespace GradingTests;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+namespace CS3500.Formula;
 using CS3500.Formula;
 
-#pragma warning disable
-
+/// <summary>
+/// The FormulaSyntaxTest sends a formula, valid or invalid, to the formula constructor.
+/// If the formula is valid, then no error is expected to be thrown.
+/// If the formula is invalid, then a FormulaFormatException is expected to be thrown.
+/// </summary>
 [TestClass]
-public class GradingTests
+public class FormulaSyntaxTests
 {
-    // --- Tests One Token Rule ---
+    /// Complex formulas are meant to rigorously test Formula Class against many edge cases.
+    /// That is why the formulas are long and strange looking. <see cref="FormulaConstructor_TestComplexFormula_Valid"/>
+    private const string ComplexFormula = "((aA1 + E2)/0)*(0.0E-0-3e1)+ 0.1 - 50 - (50E-1)/(3/Aa1)+123456789101112131415+0.0000000000001";
+    private const string ComplexFormulaCanonical = "((AA1+E2)/0)*(0-30)+0.1-50-(5)/(3/AA1)+1.2345678910111213E+20+1E-13";
+
+    private const string ComplexFormulaEquivalentModified1 = "  ((  Aa1+E2) /0.0)*(0.E-0 -3e1)+ 00.10 - 050. - (50E-1)/(3/Aa1) +0000123456789101112131415+0.00000000000010000";
+    private const string ComplexFormulaEquivalentModified2 = "((aA1+E2)/0)*(0.0E-00-3e1)+0.1-50-(050.E-1)/(3./Aa1) + 00123456789101112131415.00+00.000000000000100";
 
     /// <summary>
-    ///   Test that an empty formula throws the formula format exception.
+    /// Tests that an empty string is not accepted as a valid formula.
     /// </summary>
     [TestMethod]
-    [TestCategory("1")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestOneToken_Fails()
+    public void FormulaConstructor_TestNoTokens_Invalid()
     {
         _ = new Formula(string.Empty);
     }
 
+    // --- Tests for One Token Rule ---
+    // --------------------------------
+
     /// <summary>
-    ///   Test that an empty formula, but with spaces, also fails.
+    ///   <para>
+    ///     Make sure a simple well formed formula is accepted by the constructor (the constructor
+    ///     should not throw an exception).
+    ///   </para>
+    ///   <remarks>
+    ///     This is an example of a test that is not expected to throw an exception, i.e., it succeeds.
+    ///     In other words, the formula "1+1" is a valid formula which should not cause any errors.
+    ///   </remarks>
     /// </summary>
     [TestMethod]
-    [TestCategory("2")]
+    public void FormulaConstructor_TestFirstTokenNumber_Valid()
+    {
+        _ = new Formula("1+1");
+    }
+
+    // --- Tests for  Last Token Rule ---
+
+    // --- Tests for Parentheses/Operator Following Rule ---
+
+    // --- Tests for Extra Following Rule ---
+    // -----------------------------------------------------
+
+    /// <summary>
+    ///   <para>
+    ///     A simple formula enclosed by open and closed parentheses.
+    ///     The constructor should not throw an error.
+    ///   </para>
+    ///   <remarks>
+    ///     This test ensures that a simple formula surrounded by a set of parentheses
+    ///     is still considered a valid formula. [ExpectedException] is not used as the test should
+    ///     not throw an error.
+    ///   </remarks>
+    /// </summary>
+    [TestMethod]
+    public void FormulaConstructor_TestFirstTokenParenthesis_Valid()
+    {
+        _ = new Formula("(1 + 1)");
+    }
+
+    // --- Tests for Closing Parentheses Rule ---
+
+    // --- Tests for Balanced Parentheses Rule ---
+
+    // --- Tests for  Last Token Rule ---
+
+    // --- Tests for Parentheses/Operator Following Rule ---
+
+    // --- Tests for Extra Following Rule ---
+    // ------------------------------------------------------
+
+    /// <summary>
+    ///   <para>
+    ///   This test ensures invalid symbols in a formula throws a FormulaFormatException.
+    ///   </para>
+    /// </summary>
+    [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestOneTokenSpaces_Fails()
+    public void FormulaConstructor_TestInvalidTokens_Invalid()
     {
-        _ = new Formula("  ");
+        _ = new Formula("@");
     }
 
-    // --- Test Valid Token Rules ---
+    // --- Tests for Valid Tokens Rule ---
+    // -----------------------------------
 
     /// <summary>
-    ///   Test that invalid tokens throw the appropriate exception.
+    ///   <para>
+    ///     This test makes sure that formulas with unbalanced parentheses throws a FormulaFormatException.
+    ///   </para>
     /// </summary>
     [TestMethod]
-    [TestCategory("3")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestInvalidTokensOnly_Fails()
+    public void FormulaConstructor_TestUnbalancedParenthesesRight_Invalid()
     {
-        _ = new Formula("$");
+        _ = new Formula("(x1))");
     }
 
+    // --- Tests for Balanced Parentheses Rule ---
+
+    // --- Tests for First Token Rule ---
+
+    // --- Tests for Last Token Rule ---
+
+    // --- Tests for Parenthesis Following Rule ---
+    // --------------------------------------------
+
     /// <summary>
-    ///   Test for another invalid token in the formula.
+    /// This test ensures that two left unbalanced parentheses throws a FormulaFormatException.
     /// </summary>
     [TestMethod]
-    [TestCategory("4")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestInvalidTokenInFormula_Fails()
+    public void FormulaConstructor_TestUnbalancedParenthesesLeft_Invalid()
     {
-        _ = new Formula("5 + 5 ,");
+        _ = new Formula("((x1)");
     }
 
-    /// <summary>
-    ///   Test that _all_ the valid tokens can be parsed,
-    ///   e.g., math operators, numbers, variables, parens.
-    /// </summary>
-    [TestMethod]
-    [TestCategory("5")]
-    public void FormulaConstructor_TestValidTokenTypes_Succeeds()
-    {
-        _ = new Formula("5 + (1-2) * 3.14 / 1e6 + 0.2E-9 - A1 + bb22");
-    }
+    // --- Tests for Balanced Parentheses Rule ---
 
-    // --- Test Closing Parenthesis Rule ---
+    // --- Tests for First Token Rule ---
+
+    // --- Tests for Last Token Rule ---
+
+    // --- Tests for Parenthesis Following Rule ---
+    // --------------------------------------------
 
     /// <summary>
-    ///   Test that a closing paren cannot occur without
-    ///   an opening paren first.
+    ///   <para>
+    ///     This test checks that no closing parentheses seen so far be greater than the number of opening parentheses seen so far.
+    ///   </para>
     /// </summary>
     [TestMethod]
-    [TestCategory("6")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestClosingWithoutOpening_Fails()
+
+    public void FormulaConstructor_TestClosingParentheses_Invalid()
     {
-        _ = new Formula("5 )");
+        _ = new Formula("(x1))(((x2))");
     }
 
+    // --- Tests for Closing Parentheses Rule ---
+
+    // --- Tests for Balanced Parentheses Rule ---
+
+    // --- Tests for Parenthesis Following Rule ---
+    // --------------------------------------------
+
     /// <summary>
-    ///   Test that the number of closing parens cannot be larger than
-    ///   the number of opening parens already seen.
+    ///   <para>
+    ///     This test assures that an operand isn't the first token in a formula. <br/>
+    ///     (Side note: an opening parenthesis at the end or a closed parenthesis should be caught by the Closing Parentheses or Balanced Parentheses Test.)
+    ///   </para>
     /// </summary>
     [TestMethod]
-    [TestCategory("7")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestClosingAfterBalanced_Fails()
+    public void FormulaConstructor_TestFirstToken_Invalid()
     {
-        _ = new Formula("(5 + 5))");
+        _ = new Formula("+ (x1)");
     }
 
+    // --- Tests for First Token Rule ---
+    // ----------------------------------
+
     /// <summary>
-    ///   Test that even when "balanced", the order of parens must be correct.
+    ///   <para>
+    ///     This test assures that an operand isn't the last token in a formula. <br/>
+    ///     (Side note: an opening parenthesis at the end or a closed parenthesis should be caught by the Closing Parentheses or Balanced Parentheses Test.)
+    ///   </para>
     /// </summary>
     [TestMethod]
-    [TestCategory("8")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestClosingBeforeOpening_Fails()
+    public void FormulaConstructor_TestLastToken_Invalid()
     {
-        _ = new Formula("5)(");
+        _ = new Formula("(x1) -");
     }
 
-    /// <summary>
-    ///   Make sure multiple/nested parens that are correct, are accepted.
-    /// </summary>
-    [TestMethod]
-    [TestCategory("9")]
-    public void FormulaConstructor_TestValidComplexParens_Succeeds()
-    {
-        _ = new Formula("(5 + ((3+2) - 5 / 2))");
-    }
-
-    // --- Test Balanced Parentheses Rule ---
+    // --- Tests for Last Token Rule ---
+    // ---------------------------------
 
     /// <summary>
-    ///   Make sure that an unbalanced parentheses set throws an exception.
+    ///   <para>
+    ///     This test checks that no operand is followed by another operand.
+    ///   </para>
     /// </summary>
     [TestMethod]
-    [TestCategory("10")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestUnclosedParens_Fails()
+    public void FormulaConstructor_TestOperatorFollowing_Invalid()
     {
-        _ = new Formula("(5 + 2");
+        _ = new Formula("x1 + + x2");
     }
 
-    /// <summary>
-    ///   Test that multiple sets of balanced parens work properly.
-    /// </summary>
-    [TestMethod]
-    [TestCategory("11")]
-    public void FormulaConstructor_TestManyParens_Succeeds()
-    {
-        _ = new Formula("(1 + 2) - (1 + 2) - (1 + 2)");
-    }
+    // --- Test for First Token Rule ---
+
+    // --- Tests for Last Token Rule ---
+
+    // --- Tests for Operator Following Rule ---
+    // -----------------------------------------
 
     /// <summary>
-    ///   Test that lots of balanced nested parentheses are accepted.
+    ///   <para>
+    ///     This test checks that there is an operand between two variables.
+    ///   </para>
     /// </summary>
     [TestMethod]
-    [TestCategory("12")]
-    public void FormulaConstructor_TestDeeplyNestedParens_Succeeds()
-    {
-        _ = new Formula("(((5)))");
-    }
-
-    // --- Test First Token Rule ---
-
-    /// <summary>
-    ///   The first token cannot be a closing paren.
-    /// </summary>
-    [TestMethod]
-    [TestCategory("13")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestInvalidFirstTokenClosingParen_Fails()
+
+    public void FormulaConstructor_TestExtraFollowingVariable_Invalid()
     {
-        _ = new Formula(")");
+        _ = new Formula("x1 x2");
     }
 
+    // --- Tests for Extra Following Rule ---
+    // --------------------------------------
+
     /// <summary>
-    ///   Test that the first token cannot be a math operator (+).
+    ///   <para>
+    ///     This test checks that there is an operand between two numbers.
+    ///   </para>
     /// </summary>
     [TestMethod]
-    [TestCategory("14")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestInvalidFirstTokenPlus_Fails()
+
+    public void FormulaConstructor_TestExtraFollowingNumber_Invalid()
     {
-        _ = new Formula("+");
+        _ = new Formula("1 1");
     }
 
+    // --- Tests for Extra Following Rule ---
+    // --------------------------------------
+
     /// <summary>
-    ///   Test that the first token cannot be a math operator (*).
+    ///     Tests that even though a number in scientific notation has an operand in the number, <br />
+    ///     it is still treated as a number and not an operand for the Extra Following Rule.
     /// </summary>
     [TestMethod]
-    [TestCategory("15")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestInvalidFirstTokenMultiply_Fails()
+    public void FormulaConstructor_TestExtraFollowingScientificNumber_Invalid()
     {
-        _ = new Formula("*");
+        _ = new Formula("(x1)7e-7");
     }
 
+    // --- Tests for Extra Following Rule ---
+    // --------------------------------------
+
     /// <summary>
-    ///   Test that an integer number can be a valid first token.
+    /// Tests that the number zero is a valid formula. [ExpectedException] is not used so the test should not throw an error.
     /// </summary>
     [TestMethod]
-    [TestCategory("16")]
-    public void FormulaConstructor_TestValidFirstTokenInteger_Succeeds()
+    public void FormulaConstructor_TestZero_Valid()
     {
-        _ = new Formula("1");
+        _ = new Formula("0");
     }
 
+    // --- Tests for One Token Rule ---
+
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
     /// <summary>
-    ///   Test that a floating point number can be a valid first token.
+    /// Tests that a non-zero number is a valid formula. [ExpectedException] is not used so the test should not throw an error.
     /// </summary>
     [TestMethod]
-    [TestCategory("17")]
-    public void FormulaConstructor_TestValidFirstTokenFloat_Succeeds()
+    public void FormulaConstructor_TestInteger_Valid()
     {
-        _ = new Formula("1.0");
+        _ = new Formula("7");
     }
 
-    // --- Test Last Token Rule ---
+    // --- Tests for One Token Rule ---
+
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
-    ///   Make sure the last token is valid, in this case, not an operator (plus).
+    /// Tests that a decimal is a valid formula.
     /// </summary>
     [TestMethod]
-    [TestCategory("18")]
+    public void FormulaConstructor_TestDecimal_Valid()
+    {
+        _ = new Formula("0.1");
+    }
+
+    // --- Tests for One Token Rule ---
+
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that a number with an extraneous decimal (e.g. 1.) is considered a valid formula.
+    /// </summary>
+    [TestMethod]
+    public void FormulaConstructor_TestExtraneousDecimal_Valid()
+    {
+        _ = new Formula("1.");
+    }
+
+    // --- Tests for One Token Rule ---
+
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that 0 in scientific notation is a valid formula.
+    /// </summary>
+    [TestMethod]
+    public void FormulaConstructor_TestScientificNotationZero_Valid()
+    {
+        _ = new Formula("0.0e-0");
+    }
+
+    // --- Tests for One Token Rule ---
+
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that integers used in writing numbers in scientific notation is a valid formula (e.g. 7e7).
+    /// </summary>
+    [TestMethod]
+    public void FormulaConstructor_TestScientificNotationInteger_Valid()
+    {
+        _ = new Formula("7e7");
+    }
+
+    // --- Tests for One Token Rule ---
+
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that numbers with decimals that are included in writing numbers in scientific notation are considered valid formulas (e.g. 0.7e7).
+    /// </summary>
+    [TestMethod]
+    public void FormulaConstructor_TestScientificNotationDecimal_Valid()
+    {
+        _ = new Formula("0.7e7");
+    }
+
+    // --- Tests for One Token Rule ---
+
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that a number in scientific notation with a negative sign in the exponent is considered a valid formula.
+    /// </summary>
+    [TestMethod]
+    public void FormulaConstructor_TestScientificNotationExponentNegative_Valid()
+    {
+        _ = new Formula("7e-7");
+    }
+
+    // --- Tests for One Token Rule ---
+
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that numbers in scientific notation do not contain decimals in their exponent.
+    /// </summary>
+    [TestMethod]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestInvalidLastTokenPlus_Fails()
+    public void FormulaConstructor_TestScientificNotationExponentDecimal_Invalid()
     {
-        _ = new Formula("5 +");
+        _ = new Formula("7e0.7");
     }
 
-    /// <summary>
-    ///   Make sure the last token is valid, in this case, not a closing paren.
-    /// </summary>
-    [TestMethod]
-    [TestCategory("19")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestInvalidLastTokenClosingParen_Fails()
-    {
-        _ = new Formula("5 (");
-    }
-
-    // --- Test Parentheses/Operator Following Rule ---
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
 
     /// <summary>
-    ///   Test that after an opening paren, there cannot be an invalid token, in this
-    ///   case a math operator (+).
+    /// This test passes a single letter without a number and should throw a FormulaFormatException.
     /// </summary>
     [TestMethod]
-    [TestCategory("20")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestOpAfterOpenParen_Fails()
-    {
-        _ = new Formula("( + 2)");
-    }
-
-    /// <summary>
-    ///   Test that a closing paren cannot come after an opening paren.
-    /// </summary>
-    [TestMethod]
-    [TestCategory("21")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestEmptyParens_Fails()
-    {
-        _ = new Formula("()");
-    }
-
-    // --- Test Extra Following Rule ---
-
-    /// <summary>
-    ///   Make sure that two consecutive numbers are invalid.
-    /// </summary>
-    [TestMethod]
-    [TestCategory("22")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestConsecutiveNumbers_Fails()
-    {
-        _ = new Formula("5 5");
-    }
-
-    /// <summary>
-    ///   Test that two consecutive operators is invalid.
-    /// </summary>
-    [TestMethod]
-    [TestCategory("23")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestConsecutiveOps_Fails()
-    {
-        _ = new Formula("5+-2");
-    }
-
-    /// <summary>
-    ///   Test that a closing paren cannot come after an operator (plus).
-    /// </summary>
-    [TestMethod]
-    [TestCategory("24")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void TestCloseParenAfterOp()
-    {
-        _ = new Formula("(5+)2");
-    }
-
-    /// <summary>
-    ///   Test bad variable name.
-    /// </summary>
-    [TestMethod]
-    [TestCategory("25")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void FormulaConstructor_TestInvalidVariableName_Throws()
+    public void FormulaConstructor_TestVariableWithoutNumber_Invalid()
     {
         _ = new Formula("a");
     }
 
-    // Get Vars Tests
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that the formula constructor throws a FormulaFormatException error if a number is seen before a letter (e.g. 1a).
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("26")]
-    public void GetVars_BasicVariable_ReturnsVariable()
-    {
-        Formula f = new("2+X1");
-        ISet<string> vars = f.GetVariables();
-
-        Assert.IsTrue(vars.SetEquals(["X1"]));
-    }
-
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("27")]
-    public void GetVariables_ManyVariables_ReturnsThemAll()
-    {
-        Formula f = new("X1+X2+X3+X4+A1+B1+C5");
-        ISet<string> vars = f.GetVariables();
-
-        Assert.IsTrue(vars.SetEquals(["X1", "X2", "X3", "X4", "A1", "B1", "C5"]));
-    }
-
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("28")]
-    public void TestGetVars_ManySameVariable_ReturnsUniqueVariable()
-    {
-        Formula f = new("X1+X1+X1+X1+X1+X1+X1+X1+X1+X1+X1");
-        ISet<string> vars = f.GetVariables();
-
-        Assert.IsTrue(vars.SetEquals(["X1"]));
-    }
-
-    // To String Tests
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("29")]
-    public void ToString_BasicFormula_ReturnsSameFormula()
-    {
-        Formula f1 = new("2+A1");
-
-        Assert.IsTrue(f1.ToString().Equals("2+A1"));
-    }
-
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("30")]
-    public void ToString_Numbers_UsesCanonicalForm()
-    {
-        Formula f1 = new("2.0000+A1");
-        Assert.IsTrue(f1.ToString().Equals("2+A1"));
-        f1 = new("2.0000-3");
-        Assert.IsTrue(f1.ToString().Equals("2-3"));
-        f1 = new("2.0000-3e2");
-        Assert.IsTrue(f1.ToString().Equals("2-300"));
-        f1 = new("1e20");
-        Assert.IsTrue(f1.ToString().Equals("1E+20"));
-    }
-
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("31")]
-    public void ToString_SpacesInFormula_SpacesRemoved()
-    {
-        Formula f1 = new("        2             +                    A1          ");
-        Assert.IsTrue(f1.ToString().Equals("2+A1"));
-    }
-
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("32")]
-    public void NormalizerAndToString_LowerCaseAndUpperCase_ResultInSameString()
-    {
-        Formula f1 = new("2+x1");
-        Formula f2 = new("2+X1");
-
-        Assert.IsTrue(f1.ToString().Equals("2+X1"));
-        Assert.IsTrue(f1.ToString().Equals(f2.ToString()));
-    }
-
-    // Normalizer tests
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("32")]
-    public void NormalizerAndGetVars_LowerCaseVariable_UpCasesVariable()
-    {
-        Formula f = new("2+x1");
-        ISet<string> vars = f.GetVariables();
-
-        Assert.IsTrue(vars.SetEquals(["X1"]));
-    }
-
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("33")]
-    public void GetVars_ManyCaseSwappingVariables_UpCasesAll()
-    {
-        Formula f = new("x1+X2+x3+X4+a1+B1+c5");
-        ISet<string> vars = f.GetVariables();
-
-        Assert.IsTrue(vars.SetEquals(["X1", "X2", "X3", "X4", "A1", "B1", "C5"]));
-    }
-
-    // Some more general syntax errors detected by the constructor
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("34")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void TestSingleOperator()
+    public void FormulaConstructor_TestVariableNumberBeforeVariable_Invalid()
     {
-        new Formula("+");
+        _ = new Formula("1a");
     }
 
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that a letter does not follow a number in a variable (e.g. a1a).
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("35")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void TestExtraOperator()
+    public void FormulaConstructor_TestVariableAfterNumber_Invalid()
     {
-        new Formula("2+5+");
+        _ = new Formula("a1a");
     }
 
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that letters followed by a number in the decimal form is not considered a valid formula (e.g. a1.0).
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("36")]
     [ExpectedException(typeof(FormulaFormatException))]
-    public void TestExtraCloseParen()
+    public void FormulaConstructor_TestVariableWithDecimal_Invalid()
     {
-        new Formula("2+5*7)");
+        _ = new Formula("a1.0");
     }
 
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that a variable with uppercase lettered mixed with lower case letters is still considered a valid formula.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("37")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void TestExtraOpenParen()
+    public void FormulaConstructor_TestVariableUppercaseMixed_Valid()
     {
-        new Formula("((3+5*7)");
+        _ = new Formula("aAaA1");
     }
 
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Tests that valid variables that contain 'E' (the same letter used to denote numbers in scientific notation) <br/>
+    /// is counted as a variable instead of a scientific notation formating error (e.g. e1).
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("38")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void TestXasMultiply()
+    public void FormulaConstructor_TestVariablesContainingE_Valid()
     {
-        new Formula("5x5");
+        _ = new Formula("e1");
     }
 
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// Runs a suit of the previous invalid tests, except the letters are replaced with 'E'. <br/>
+    /// This is to make sure any invalid variable containing 'E' do not count as valid numbers in scientific notation. <br/>
+    /// If this test doesn't return an exception for most cases but the other variable invalid tests return exceptions, it is highly likely there is an issue with a scientific notation processor.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("39")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void TestNoOperator2()
+    public void FormulaConstructor_TestVariablesContainingE_Invalid()
     {
-        new Formula("5+5x");
+        string[] testCases = ["e", "e1e", "1e", "1ee"];
+
+        foreach (string testCase in testCases)
+        {
+            try
+            {
+                _ = new Formula(testCase);
+                Assert.Fail($"No exception thrown for case: {testCase}");
+            }
+
+            // Expected exception
+            catch (FormulaFormatException)
+            {
+            }
+        }
     }
 
+    // --- Tests for Valid Token Rule ---
+    // ----------------------------------
+
+    /// <summary>
+    /// This test passes a complex formula to the formula constructor that uses all operations, variables with differing attributes, <br/>
+    /// integers, numbers with decimals, varying numbers in scientific notation, and parentheses throughout. <br/> <br/>
+    /// The purpose of this test is to ensure that if a complex formula with a blanket of almost all interactions <br/>
+    /// found in formulas passes, then simpler formula should also pass.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("40")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void TestNoOperator3()
+    public void FormulaConstructor_TestComplexFormula_Valid()
     {
-        new Formula("5+7+(5)8");
+        _ = new Formula($"{ComplexFormula}");
     }
 
+    // --- Tests for Balanced Parentheses Rule ---
+
+    // --- Tests for First Token Rule ---
+
+    // --- Tests for Last Token Rule ---
+
+    // --- Tests for Parenthesis/Operator Following Rule ---
+
+    // --- Tests for Extra Following Rule ---
+    // ------------------------------------------------------
+
+    /// <summary>
+    /// This is a simple test which validates that the ToString method uppercases a variable correctly and returns it as a string.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("41")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void TestNoOperator4()
+    public void ToString_TestVariable_Valid()
     {
-        new Formula("5 5");
+        Formula formula = new("x1");
+        Assert.AreEqual(formula.ToString(), "X1");
     }
 
+    /// <summary>
+    /// Test that ensures the ToString method correctly returns a formula with an operand and two variables.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("42")]
-    [ExpectedException(typeof(FormulaFormatException))]
-    public void TestDoubleOperator()
+    public void ToString_TestFormulaOperation_Valid()
     {
-        new Formula("5 + + 3");
+        Formula formula = new("x1 + x2");
+        Assert.AreEqual(formula.ToString(), "X1+X2");
     }
 
-    // Some more complicated formula evaluations
+    /// <summary>
+    /// Test which ensures the ToString method can properly handle parentheses with varying spaces between them.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("43")]
-    public void FormulaConstructor_TestComplex_IsValid()
+    public void ToString_TestParentheses_Valid()
     {
-        Formula f = new("y1*3-8/2+4*(8-9*2)/14*x7");
+        Formula formula = new(" (  (x1+ 2  ) )");
+        Assert.AreEqual(formula.ToString(), "((X1+2))");
     }
 
+    /// <summary>
+    /// Test that ensures the ToString method works properly on numbers in scientific notation by removing any unnecessary zeros after the decimal and capitalizing 'e'.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("44")]
-    public void FormulaConstructor_MatchingParens_EachLeftHasARight()
+    public void ToString_TestScientificNotation_Valid()
     {
-        Formula f = new("x1+(x2+(x3+(x4+(x5+x6))))");
+        Formula formula = new("0.0e-0");
+        Assert.AreEqual(formula.ToString(), "0");
     }
 
+    /// <summary>
+    /// This test checks that the ToString can properly recognize and eliminate any extraneous zeros in a number.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("45")]
-    public void FormulaConstructor_TestLotsOfLeftParens_IsValidAndMatching()
+    public void ToString_TestExtraneousZeros_Valid()
     {
-        Formula f = new("((((x1+x2)+x3)+x4)+x5)+x6");
+        Formula formula = new("05 + 05.00 + 0.050 + 05.00e-0001");
+        Assert.AreEqual(formula.ToString(), "5+5+0.05+0.5");
     }
 
+    /// <summary>
+    /// This test ensures that a number which contains a decimal point and no number to the right of the decimal point is properly handled.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("46")]
-    public void ToString_Whitespace_RemovedInCannonicalForm()
+    public void ToString_TestExtraneousDecimalPoint_Valid()
     {
-        Formula f1 = new("X1+X2");
-        Formula f2 = new(" X1  +  X2   ");
-        Assert.IsTrue(f1.ToString().Equals(f2.ToString()));
+        Formula formula = new("01. + 1.");
+        Assert.AreEqual(formula.ToString(), "1+1");
     }
 
+    /// <summary>
+    /// This tests sends a formula to the ToString method that uses all operations, variables with differing attributes, <br/>
+    /// integers, numbers with decimals, varying numbers in scientific notation, and parentheses throughout to ensure that <br/>
+    /// all interactions in a formula are accounted for and tested.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("47")]
-    public void ToString_DifferentNumberRepresentations_EquateToSameCanonicalForm()
+    public void ToString_TestComplexFormula_Valid()
     {
-        Formula f1 = new("2+X1*3.00");
-        Formula f2 = new("2.00+X1*3.0");
-        Assert.IsTrue(f1.ToString().Equals(f2.ToString()));
+        Formula formula = new($"{ComplexFormula}");
+        Assert.AreEqual(formula.ToString(), $"{ComplexFormulaCanonical}");
     }
 
+    /// <summary>
+    /// This test ensures that two equivalent canonical string representations of a formula, which have been modified <br/>
+    /// with extra spaces, different capitalizations, extraneous decimal points, and extraneous zeros are still canonically the same.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("48")]
-    public void ToString_DifferentNumberRepresentations_EquateToSameCanonicalForm2()
+    public void ToString_TestComplexFormulaEquivalent_Valid()
     {
-        Formula f1 = new("1e-2 + X5 + 17.00 * 19 ");
-        Formula f2 = new("   0.0100  +     X5+ 17 * 19.00000 ");
-        Assert.IsTrue(f1.ToString().Equals(f2.ToString()));
+        Formula equivalentFormula1 = new($"{ComplexFormulaEquivalentModified1}");
+        Formula equivalentFormula2 = new($"{ComplexFormulaEquivalentModified2}");
+
+        string equivalentFormula1ToString = equivalentFormula1.ToString();
+        string equivalentFormula2ToString = equivalentFormula2.ToString();
+
+        Assert.AreEqual(equivalentFormula1ToString, $"{ComplexFormulaCanonical}");
+        Assert.AreEqual(equivalentFormula2ToString, $"{ComplexFormulaCanonical}");
     }
 
+    /// <summary>
+    /// Simple test that ensures the GetVariables method properly returns a single variable.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("49")]
-    public void ToString_DifferentFormulas_HaveDifferentStrings()
+    public void GetVariables_TestVariable_Valid()
     {
-        Formula f1 = new("2");
-        Formula f2 = new("5");
-        Assert.IsTrue(f1.ToString() != f2.ToString());
+        Formula formula = new("x1");
+        HashSet<string> variables = (HashSet<string>)formula.GetVariables();
+        string variablesString = string.Join(",", variables);
+        Assert.AreEqual(variablesString, "X1");
     }
 
-    // Tests of GetVariables method
+    /// <summary>
+    /// Test that ensures a formula with only numbers does not return any variables. <br/>
+    /// Tests numbers that start out in scientific notation as well a number that will be converted into scientific notation via double.TryParse() (Which contains 'E').
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("50")]
-    public void GetVariables_NoVariables_ReturnsEmptySet()
+    public void GetVariables_TestNoVariables_Valid()
     {
-        Formula f = new("2*5");
-        Assert.IsFalse(f.GetVariables().Any());
+        Formula formula = new("10E1 + 20 + 1.1 + 100000000000000000000000");
+        HashSet<string> variables = (HashSet<string>)formula.GetVariables();
+        string variablesString = string.Join(",", variables);
+        Assert.AreEqual(variablesString, string.Empty);
     }
 
+    /// <summary>
+    /// Test that ensures no duplicates are returned by GetVariables.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("51")]
-    public void GetVariables_OneVariable_ReturnsTheOne()
+    public void GetVariables_TestNoDuplicates_Valid()
     {
-        Formula f = new("2*X2");
-        List<string> actual = new(f.GetVariables());
-        HashSet<string> expected = ["X2"];
-        Assert.AreEqual(actual.Count, 1);
-        Assert.IsTrue(expected.SetEquals(actual));
+        Formula formula = new("x2 + x1 + x1 + x2");
+        HashSet<string> variables = (HashSet<string>)formula.GetVariables();
+        string variablesString = string.Join(",", variables);
+        Assert.AreEqual(variablesString, "X2,X1");
     }
 
+    /// <summary>
+    /// Test that ensures GetVariables can handle complex formulas with many different interactions between variables, numbers, operands, and parentheses.
+    /// </summary>
     [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("52")]
-    public void GetVariables_TwoVariables_ReturnsBoth()
+    public void GetVariables_TestComplexFormula_Valid()
     {
-        Formula f = new("2*X2+Y3");
-        List<string> actual = new(f.GetVariables());
-        HashSet<string> expected = ["Y3", "X2"];
-        Assert.AreEqual(actual.Count, 2);
-        Assert.IsTrue(expected.SetEquals(actual));
+        Formula formula = new($"{ComplexFormula}");
+        HashSet<string> variables = (HashSet<string>)formula.GetVariables();
+        string variablesString = string.Join(",", variables);
+        Assert.AreEqual(variablesString, "AA1,E2");
     }
-
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("53")]
-    public void GetVariables_Duplicated_ReturnsOnlyOneValue()
-    {
-        Formula f = new("2*X2+X2");
-        List<string> actual = new(f.GetVariables());
-        HashSet<string> expected = ["X2"];
-        Assert.AreEqual(actual.Count, 1);
-        Assert.IsTrue(expected.SetEquals(actual));
-    }
-
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("54")]
-    public void GetVariables_LotsOfVariablesWithOperatorsAndRepeats_ReturnsCompleteList()
-    {
-        Formula f = new("X1+Y2*X3*Y2+Z7+X1/Z8");
-        List<string> actual = new(f.GetVariables());
-        HashSet<string> expected = ["X1", "Y2", "X3", "Z7", "Z8"];
-        Assert.AreEqual(actual.Count, 5);
-        Assert.IsTrue(expected.SetEquals(actual));
-    }
-
-    // Test some longish valid formulas.
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("55")]
-    public void FormulaConstructor_LongComplexFormula_IsAValidFormula()
-    {
-        _ = new Formula("(((((2+3*X1)/(7e-5+X2-X4))*X5+.0005e+92)-8.2)*3.14159) * ((x2+3.1)-.00000000008)");
-    }
-
-    [TestMethod]
-    [Timeout(2000)]
-    [TestCategory("56")]
-    public void FormulaConstructor_LongComplexFormula2_IsAValidFormula()
-    {
-        _ = new Formula("5 + (1-2) * 3.14 / 1e6 + 0.2E-9 - A1 + bb22");
-    }
-
 }
-

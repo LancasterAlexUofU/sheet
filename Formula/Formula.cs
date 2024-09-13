@@ -266,7 +266,8 @@ public class Formula
     /// <exception cref="FormulaFormatException">Exception throw if formula is empty.</exception>
     private void OneTokenRule()
     {
-        if (Regex.IsMatch(formula, @"^\s*$")) // Checks for zero or more spaces
+        // Checks for zero or more spaces
+        if (Regex.IsMatch(formula, @"^\s*$"))
         {
             throw new FormulaFormatException("Formula must not be empty");
         }
