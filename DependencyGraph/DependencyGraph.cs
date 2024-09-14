@@ -249,14 +249,14 @@ public class DependencyGraph
         {
             foreach(string dependent in this.dependees[nodeName])
             {
-                RemoveDependency(nodeName, dependent);
+                this.RemoveDependency(nodeName, dependent);
             }
         }
 
         // Add all new dependents to dependee.
         foreach(string newDependent in newDependents)
         {
-            AddDependency(nodeName, newDependent);
+            this.AddDependency(nodeName, newDependent);
         }
     }
 
@@ -275,14 +275,14 @@ public class DependencyGraph
         {
             foreach (string dependee in this.dependents[nodeName])
             {
-                RemoveDependency(dependee, nodeName);
+                this.RemoveDependency(dependee, nodeName);
             }
         }
 
         // Add all new dependents to dependee.
         foreach (string newDependee in newDependees)
         {
-            AddDependency(newDependee, nodeName);
+            this.AddDependency(newDependee, nodeName);
         }
     }
 }
