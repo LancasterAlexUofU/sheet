@@ -247,14 +247,14 @@ public class DependencyGraph
         // If the nodeName is a valid dependee, remove each of its dependent values.
         if (this.dependees.ContainsKey(nodeName))
         {
-            foreach(string dependent in this.dependees[nodeName])
+            foreach (string dependent in this.dependees[nodeName])
             {
                 this.RemoveDependency(nodeName, dependent);
             }
         }
 
         // Add all new dependents to dependee.
-        foreach(string newDependent in newDependents)
+        foreach (string newDependent in newDependents)
         {
             this.AddDependency(nodeName, newDependent);
         }
