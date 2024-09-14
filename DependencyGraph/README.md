@@ -41,7 +41,7 @@ The project has the following pubic methods:
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 3 | 14 | 14.5 |
+| Assignment 3 | 14 | 15 |
 
 
  ## Hour Breakdown
@@ -51,7 +51,7 @@ The project has the following pubic methods:
 | Setting up coding environment, <br /> reading documentation, & research | 2 |
 | Writing Dependency Graph Tests | 5.5 |
 | Dependency Graph Implementation | 3.5 |
-| Debugging | 1.5 |
+| Debugging | 2 |
 | Formatting and Quality Assurance | 2 |
 
 # Comments for Evaluators

@@ -29,7 +29,7 @@ Future extensions are:
 | :---------:| :-------------: | :---------: |
 | Assignment 1 | 12 | 8|
 | Assignment 2 | 12 | 17 |
-| Assignment 3 | 14 | 14.5 |
+| Assignment 3 | 14 | 15 |
 
 # Comments for Evaluators
 Read FormulaTests README for comment about code coverage.

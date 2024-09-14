@@ -18,7 +18,7 @@ The tests cover 100% of the DependencyGraph project and ensure that the program 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 3 | 14 | 14.5 |
+| Assignment 3 | 14 | 15 |
 
  ## Hour Breakdown
 | Task | Number of Hours |
