@@ -200,7 +200,7 @@ public class DependencyGraph
 
         if (sizeIncreased)
         {
-            size++;
+            this.size++;
         }
     }
 
@@ -219,7 +219,7 @@ public class DependencyGraph
             // True if element is found and removed in both dictionaries, otherwise false (key isn't found).
             if (this.dependees[dependee].Remove(dependent) && this.dependents[dependent].Remove(dependee))
             {
-                size--;
+                this.size--;
             }
 
             // If there are no dependent nodes for a given dependee, then it should no longer be considered a dependee and should be removed.
