@@ -77,10 +77,10 @@ using System.Collections;
 /// </summary>
 public class DependencyGraph
 {
-    private Dictionary<string, HashSet<string>> dependees;
-    private Dictionary<string, HashSet<string>> dependents;
+    private Dictionary<string, HashSet<string>> _dependees;
+    private Dictionary<string, HashSet<string>> _dependents;
 
-    private int size;
+    private int _size;
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="DependencyGraph"/> class.
@@ -88,8 +88,8 @@ public class DependencyGraph
     /// </summary>
     public DependencyGraph()
     {
-        dependees = [];
-        dependents = [];
+        _dependees = [];
+        _dependents = [];
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public class DependencyGraph
     {
         // This counts all the elements in each list and then sums each count.
         // get { return graph.Values.Sum(set => set.Count); }
-        get { return size; }
+        get { return _size; }
     }
 
 /// <summary>
@@ -110,7 +110,7 @@ public class DependencyGraph
     public bool HasDependents(string nodeName)
     {
         // If the node is a key in dependees, then that means it has at least one dependent node
-        return dependees.ContainsKey(nodeName);
+        return _dependees.ContainsKey(nodeName);
     }
 
     /// <summary>
@@ -121,7 +121,7 @@ public class DependencyGraph
     public bool HasDependees(string nodeName)
     {
         // If the node is a key in dependents, then that means it has at least one dependee node
-        return dependents.ContainsKey(nodeName);
+        return _dependents.ContainsKey(nodeName);
     }
 
     /// <summary>
@@ -134,7 +134,7 @@ public class DependencyGraph
     public IEnumerable<string> GetDependents(string nodeName)
     {
         // Checks that dependees contains nodeName and if so, stores values in set values
-        if (dependees.TryGetValue(nodeName, out HashSet<string>? values))
+        if (_dependees.TryGetValue(nodeName, out HashSet<string>? values))
         {
             return values;
         }
@@ -153,7 +153,7 @@ public class DependencyGraph
     public IEnumerable<string> GetDependees(string nodeName)
     {
         // Checks that dependents contains nodeName and if so, stores values in set values
-        if (dependents.TryGetValue(nodeName, out HashSet<string>? values))
+        if (_dependents.TryGetValue(nodeName, out HashSet<string>? values))
         {
             return values;
         }
@@ -177,30 +177,30 @@ public class DependencyGraph
         bool sizeIncreased = false;
 
         // Creates a new key slot for any new dependee value
-        if (!dependees.ContainsKey(dependee))
+        if (!_dependees.ContainsKey(dependee))
         {
-            dependees[dependee] = [];
+            _dependees[dependee] = [];
         }
 
-        if (dependees[dependee].Add(dependent))
+        if (_dependees[dependee].Add(dependent))
         {
             sizeIncreased = true;
         }
 
         // Creates a new key slot for any new dependent value
-        if (!dependents.ContainsKey(dependent))
+        if (!_dependents.ContainsKey(dependent))
         {
-            dependents[dependent] = [];
+            _dependents[dependent] = [];
         }
 
-        if (dependents[dependent].Add(dependee))
+        if (_dependents[dependent].Add(dependee))
         {
             sizeIncreased = true;
         }
 
         if (sizeIncreased)
         {
-            size++;
+            _size++;
         }
     }
 
@@ -214,24 +214,24 @@ public class DependencyGraph
     public void RemoveDependency(string dependee, string dependent)
     {
         // Check if values exist, otherwise, errors will be thrown
-        if (dependees.ContainsKey(dependee) && dependents.ContainsKey(dependent))
+        if (_dependees.ContainsKey(dependee) && _dependents.ContainsKey(dependent))
         {
             // True if element is found and removed in both dictionaries, otherwise false (key isn't found).
-            if (dependees[dependee].Remove(dependent) && dependents[dependent].Remove(dependee))
+            if (_dependees[dependee].Remove(dependent) && _dependents[dependent].Remove(dependee))
             {
-                size--;
+                _size--;
             }
 
             // If there are no dependent nodes for a given dependee, then it should no longer be considered a dependee and should be removed.
-            if (dependees[dependee].Count == 0)
+            if (_dependees[dependee].Count == 0)
             {
-                dependees.Remove(dependee);
+                _dependees.Remove(dependee);
             }
 
             // If there are no dependee nodes for a given dependent node, then it should no longer be considered dependent and should be removed.
-            if (dependents[dependent].Count == 0)
+            if (_dependents[dependent].Count == 0)
             {
-                dependents.Remove(dependent);
+                _dependents.Remove(dependent);
             }
         }
     }
@@ -245,9 +245,9 @@ public class DependencyGraph
     public void ReplaceDependents(string nodeName, IEnumerable<string> newDependents)
     {
         // If the nodeName is a valid dependee, remove each of its dependent values.
-        if (dependees.ContainsKey(nodeName))
+        if (_dependees.ContainsKey(nodeName))
         {
-            foreach(string dependent in dependees[nodeName])
+            foreach(string dependent in _dependees[nodeName])
             {
                 RemoveDependency(nodeName, dependent);
             }
@@ -271,9 +271,9 @@ public class DependencyGraph
     public void ReplaceDependees(string nodeName, IEnumerable<string> newDependees)
     {
         // If the nodeName is a valid dependee, remove each of its dependent values.
-        if (dependents.ContainsKey(nodeName))
+        if (_dependents.ContainsKey(nodeName))
         {
-            foreach (string dependee in dependents[nodeName])
+            foreach (string dependee in _dependents[nodeName])
             {
                 RemoveDependency(dependee, nodeName);
             }
