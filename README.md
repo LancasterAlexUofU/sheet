@@ -29,10 +29,12 @@ Future extensions are:
 | :---------:| :-------------: | :---------: |
 | Assignment 1 | 12 | 8|
 | Assignment 2 | 12 | 17 |
-| Assignment 3 | 14 | 15 |
+| Assignment 3 | 14 | 16 |
 
 # Comments for Evaluators
 Read FormulaTests README for comment about code coverage.
+
+Read DependencyGraph README about autograder and reason for excessive commit history.
 
 # Consulted Peers
 - Landon H.

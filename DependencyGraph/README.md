@@ -41,7 +41,7 @@ The project has the following pubic methods:
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 3 | 14 | 15 |
+| Assignment 3 | 14 | 16 |
 
 
  ## Hour Breakdown
@@ -51,11 +51,19 @@ The project has the following pubic methods:
 | Setting up coding environment, <br /> reading documentation, & research | 2 |
 | Writing Dependency Graph Tests | 5.5 |
 | Dependency Graph Implementation | 3.5 |
-| Debugging | 2 |
+| Debugging | 3 |
 | Formatting and Quality Assurance | 2 |
 
 # Comments for Evaluators
-Work stands on its own.
+The autograder kept throwing errors about different formatting issues, such as
+having a space after a bracket (... = [];). If the space was removed, it would 
+say it would need a space. Therefore, I added to ignore the errors. 
+
+I apologize about the number of commits but every time I would fix one thing for the auto grader,
+another error would pop up (and these warnings/errors never showed up is visual studio).
+
+Currently, everything has "this." so the autograder could compile the code. I plan on talking
+with a TA to figure out what is going on and eventually improve this part of the code.
 
 # Consulted Peers
 - Eli
