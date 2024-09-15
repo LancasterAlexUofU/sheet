@@ -51,10 +51,11 @@ representation of the formula.
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 2 | 12 | 17 |
+| Assignment 4 | 18 | 1 |
 
 
  ## Hour Breakdown
-
+ ### Assignment 2
 | Task | Number of Hours |
 | :--------:| :--------:
 | Setting up coding environment & <br /> reading documentation | 3 |
@@ -65,6 +66,11 @@ representation of the formula.
 | Implementing GetVariables Function | 1 |
 | Writing GetVariable Tests | 0.5 |
 | Improving readability & <br/> quality of code | 2.5 |
+
+### Assignment 4
+| Task | Number of Hours |
+| :--------:| :--------:
+| Setting up coding environment & <br /> reading documentation | 1 |
 
 # Comments for Evaluators
 Work stands on its own.
