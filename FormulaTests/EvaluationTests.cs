@@ -371,4 +371,52 @@ public class EvaluationTests
         Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
         Assert.IsInstanceOfType(f.Evaluate(lookup), typeof(FormulaError));
     }
+
+    /// <summary>
+    /// Tests that two strings, even with different string representations of the same formula, have the same hash code.
+    /// </summary>
+    [TestMethod]
+    public void GetHashCode_HashEqual_Valid()
+    {
+        Formula equivalentFormula1 = new($"{ComplexFormulaEquivalentModified1}");
+        Formula equivalentFormula2 = new($"{ComplexFormulaEquivalentModified2}");
+        Assert.IsTrue(equivalentFormula1 == equivalentFormula2);
+        Assert.IsTrue(equivalentFormula1.GetHashCode() == equivalentFormula2.GetHashCode());
+    }
+
+    /// <summary>
+    /// This tests that two distinctly different formulas return false for the equals method.
+    /// </summary>
+    [TestMethod]
+    public void GetHashCode_HashEqual_Invalid()
+    {
+        Formula equivalentFormula1 = new($"{ComplexFormulaEquivalentModified1}");
+        Formula equivalentFormula2 = new($"{ComplexFormulaEquivalentModified2}+1");
+        Assert.IsFalse(equivalentFormula1 == equivalentFormula2);
+        Assert.IsFalse(equivalentFormula1.GetHashCode() == equivalentFormula2.GetHashCode());
+    }
+
+    /// <summary>
+    /// Tests that two distinctly different formulas do not return the same hash code.
+    /// </summary>
+    [TestMethod]
+    public void GetHashCode_HashNotEqual_Valid()
+    {
+        Formula equivalentFormula1 = new($"{ComplexFormulaEquivalentModified1}");
+        Formula equivalentFormula2 = new($"{ComplexFormulaEquivalentModified2}+1");
+        Assert.IsTrue(equivalentFormula1 != equivalentFormula2);
+        Assert.IsTrue(equivalentFormula1.GetHashCode() != equivalentFormula2.GetHashCode());
+    }
+
+    /// <summary>
+    /// Tests that two identical formulas return false for the not equals method.
+    /// </summary>
+    [TestMethod]
+    public void GetHashCode_HashNotEqual_Invalid()
+    {
+        Formula equivalentFormula1 = new($"{ComplexFormulaEquivalentModified1}");
+        Formula equivalentFormula2 = new($"{ComplexFormulaEquivalentModified2}");
+        Assert.IsFalse(equivalentFormula1 != equivalentFormula2);
+        Assert.IsFalse(equivalentFormula1.GetHashCode() != equivalentFormula2.GetHashCode());
+    }
 }

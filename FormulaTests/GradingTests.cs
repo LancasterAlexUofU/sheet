@@ -1,5 +1,5 @@
-// <copyright file="GradingTests.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="GradingTests.cs" company="UofU-CS3500">
+// Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
 /// <summary>
 /// Authors:   Joe Zachary

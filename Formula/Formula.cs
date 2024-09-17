@@ -164,7 +164,12 @@ public class Formula
     /// <returns> true if the two formulas are the same.</returns>
     public static bool operator ==(Formula f1, Formula f2)
     {
-        // FIXME: Write this method
+        if (f1.Equals(f2))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -177,7 +182,12 @@ public class Formula
     /// <returns> true if the two formulas are not equal to each other.</returns>
     public static bool operator !=(Formula f1, Formula f2)
     {
-        // FIXME: Write this method
+        if (f1 == f2)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -199,8 +209,13 @@ public class Formula
     /// </returns>
     public override bool Equals(object? obj)
     {
-        // FIXME: write this method
-        return true;
+        // If the canonical version of the strings are equal, then the formulas are equal.
+        if (this.ToString().Equals(obj?.ToString()))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -232,7 +247,7 @@ public class Formula
     /// <returns> Either a double or a formula error, based on evaluating the formula.</returns>
     public object Evaluate(Lookup lookup)
     {
-        // FIXME: Implement the required algorithm here.
+        return 0;
     }
 
     /// <summary>
@@ -245,7 +260,7 @@ public class Formula
     /// <returns> The hashcode for the object. </returns>
     public override int GetHashCode()
     {
-        // FIXME: Implement the required algorithm here.
+        return this.GetHashCode();
     }
 
     /// <summary>
