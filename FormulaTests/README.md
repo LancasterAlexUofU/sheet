@@ -20,10 +20,16 @@ This test additionally checks for valid variables as well as numbers in proper s
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 1 | 12 | 8 |
-| Assignment 4 | 18 | 1 |
+| Assignment 4 | 18 | 4 |
+
+# Time Breakdown
+### Assignment 4
+| Task | Number of Hours |
+| :--------:| :--------:
+| Implemented Evaluation Test Methods, <br/>Closed Box | 3
 
 # Comments for Evaluators
-Comment about code coverage:
+### Comment about code coverage:
 
 With test methods that have "[ExpectedException(typeof(FormulaFormatException))]", the last curly brace is marked as unexplored.
 This is okay and we went over it in class.
@@ -32,10 +38,21 @@ For Test Method FormulaConstructor_TestVariablesContainingE_Invalid, the same th
 as Assert.Fail isn't called (as it is catched by FormulaFormatException). It is marked as red, but is okay as
 it means the test itself isn't failing.
 
+
+### Comment about parentheses canonical string representation:
+
+The ToString method in Formula.cs "normalized" a formula into its canonical representation.
+Number and variables are converted to be the same, and spaces are removed. However, I wanted
+to make note of something. The ToString method does not consider extraneous parentheses.
+What this means is that (1) != 1. Or (1+1) != 1+1. The specifications don't necissarly say anything
+about this, just that the formulas are "equal." Therefore, I am determining that (1) is not equal to 1,
+and are distinct formulas. So, in the equals and not equals testing methods, I will not be testing for extraneous parentheses.
+
 # Consulted Peers
 - Landon H.
 - Eli
 
 # References
-1. Markdown Cheat Sheet - https://www.markdownguide.org/cheat-sheet/
-2. Markdown Tables - https://www.codecademy.com/resources/docs/markdown/tables
+1) Markdown Cheat Sheet - https://www.markdownguide.org/cheat-sheet/
+2) Markdown Tables - https://www.codecademy.com/resources/docs/markdown/tables
+3) Asset Class - https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.testtools.unittesting.assert?view=visualstudiosdk-2022

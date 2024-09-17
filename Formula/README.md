@@ -51,7 +51,7 @@ representation of the formula.
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 2 | 12 | 17 |
-| Assignment 4 | 18 | 1 |
+| Assignment 4 | 18 | 4 |
 
 
  ## Hour Breakdown
