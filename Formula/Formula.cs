@@ -247,6 +247,52 @@ public class Formula
     /// <returns> Either a double or a formula error, based on evaluating the formula.</returns>
     public object Evaluate(Lookup lookup)
     {
+        Formula formula = this;
+        List<string> tokens = this.tokens;
+        Stack<double> values = [];
+        Stack<string> operators = []; // Includes '(', ')'
+
+        for (int i = 0; i < tokens.Count; i++)
+        {
+            string token = tokens[i];
+
+            switch (token)
+            {
+                // Checks if token is a number
+                case string when IsNum(token):
+                    if (IsMultOrDiv(operators.Peek()))
+                    {
+                        // Do stuff
+                    }
+
+                    break;
+
+                // Checks if token is a variable
+                case string when IsVar(token):
+                    double value = lookup(token);
+                    break;
+
+                // Checks if token is '+' or '-'
+                case string when IsPlusOrMinus(token):
+                    break;
+
+                // Checks if token is '*' or '/'
+                case string when IsMultOrDiv(token):
+                    break;
+
+                // Checks if token is '('
+                case string when IsOpenParen(token):
+                    break;
+
+                // Checks if token is ')'
+                case string when IsClosedParen(token):
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
         return 0;
     }
 
@@ -334,6 +380,57 @@ public class Formula
         // notice the use of ^ and $ to denote that the entire string being matched is just the variable
         string standaloneVarPattern = $"^{VariableRegexPattern}$";
         return Regex.IsMatch(token, standaloneVarPattern);
+    }
+
+    /// <summary>
+    /// Reports whether "token" is a number. This can be a number with or without decimals
+    /// and numbers in scientific notation.
+    /// </summary>
+    /// <param name="token">A token that may be a number.</param>
+    /// <returns>true if the string matches the requirement for a number.</returns>
+    private static bool IsNum(string token)
+    {
+        return Regex.IsMatch(token, NumberRegexPattern);
+    }
+
+    /// <summary>
+    /// Reports whether token is either a '+' or '-'.
+    /// </summary>
+    /// <param name="token">A token that may be a '+' or '-'.</param>
+    /// <returns>True if the string contains a single '+' or '-'.</returns>
+    private static bool IsPlusOrMinus(string token)
+    {
+        return Regex.IsMatch(token, @"^[\+\-]$");
+    }
+
+    /// <summary>
+    /// Reports whether token is either a '*' or '/'.
+    /// </summary>
+    /// <param name="token">A token that may be a '*' or '/'.</param>
+    /// <returns>True if the string contains a single '*' or '/'.</returns>
+    private static bool IsMultOrDiv(string token)
+    {
+        return Regex.IsMatch(token, @"^[*/]$");
+    }
+
+    /// <summary>
+    /// Reports whether token is '('.
+    /// </summary>
+    /// <param name="token">A token that may be '('.</param>
+    /// <returns>True if the string contains a single '('.</returns>
+    private static bool IsOpenParen(string token)
+    {
+        return Regex.IsMatch(token, @"^\($");
+    }
+
+    /// <summary>
+    /// Reports whether token is ')'.
+    /// </summary>
+    /// <param name="token">A token that may be ')'.</param>
+    /// <returns>True if the string contains a single ')'.</returns>
+    private static bool IsClosedParen(string token)
+    {
+        return Regex.IsMatch(token, @"^\)$");
     }
 
     /// <summary>
