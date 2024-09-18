@@ -51,7 +51,10 @@ representation of the formula.
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 2 | 12 | 17 |
-| Assignment 4 | 18 | 4 |
+| Assignment 4 | 18 | 9 |
+
+
+(Includes hours from FormulaTests Project)
 
 
  ## Hour Breakdown
@@ -71,6 +74,7 @@ representation of the formula.
 | Task | Number of Hours |
 | :--------:| :--------:
 | Setting up coding environment & <br /> reading documentation | 1 |
+| Implementing Evaluator Logic | 5 |
 
 # Comments for Evaluators
 Work stands on its own.

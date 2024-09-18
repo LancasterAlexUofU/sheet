@@ -20,7 +20,10 @@ This test additionally checks for valid variables as well as numbers in proper s
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 1 | 12 | 8 |
-| Assignment 4 | 18 | 4 |
+| Assignment 4 | 18 | 9 |
+
+
+(Includes hours from Formula Project)
 
 # Time Breakdown
 ### Assignment 4

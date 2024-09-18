@@ -41,6 +41,9 @@ namespace CS3500.Formula;
 
 using System.Text.RegularExpressions;
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 /// <summary>
 ///   <para>
@@ -91,7 +94,22 @@ public class Formula
     /// </summary>
     private const string LastTokenRegex = $@"{NumberRegexPattern}|{VariableRegexPattern}|\)";
 
+    /// <summary>
+    /// Defines the string representation of an operation and the corresponding operation on two numbers.
+    /// </summary>
+    private Dictionary<string, Func<double, double, double>> operations = new()
+    {
+        { "+", (a, b) => a + b },
+        { "-", (a, b) => a - b },
+        { "*", (a, b) => a * b },
+        { "/", (a, b) => a / b },
+    };
+
     private List<string> tokens = [];
+
+    private Stack<double> values = [];
+
+    private Stack<string> operators = []; // Includes '(', ')'
 
     private string formula = string.Empty;
 
@@ -249,8 +267,6 @@ public class Formula
     {
         Formula formula = this;
         List<string> tokens = this.tokens;
-        Stack<double> values = [];
-        Stack<string> operators = []; // Includes '(', ')'
 
         for (int i = 0; i < tokens.Count; i++)
         {
@@ -260,40 +276,56 @@ public class Formula
             {
                 // Checks if token is a number
                 case string when IsNum(token):
-                    if (IsMultOrDiv(operators.Peek()))
-                    {
-                        // Do stuff
-                    }
 
+                    double tokenDub = Convert.ToDouble(token);
+                    TokenNumberStackEvaluation(tokenDub);
                     break;
 
                 // Checks if token is a variable
                 case string when IsVar(token):
+
                     double value = lookup(token);
+                    TokenNumberStackEvaluation(value);
                     break;
 
                 // Checks if token is '+' or '-'
                 case string when IsPlusOrMinus(token):
+
+                    TokenPlusOrMinusEvaluation(token);
                     break;
 
                 // Checks if token is '*' or '/'
                 case string when IsMultOrDiv(token):
+
+                    operators.Push(token);
                     break;
 
                 // Checks if token is '('
                 case string when IsOpenParen(token):
+
+                    operators.Push(token);
                     break;
 
                 // Checks if token is ')'
                 case string when IsClosedParen(token):
-                    break;
-
-                default:
+                    TokenClosedParenEvaluation(token);
                     break;
             }
         }
 
-        return 0;
+        // If operators stack is not empty when the last token has been processed,
+        // it will be either a '+' or '-'. Do the following.
+        if (IsPlusOrMinus(operators.Peek()))
+        {
+            double topValue = values.Pop();
+            double secondTopValue = values.Pop();
+            string op = operators.Pop();
+
+            return operations[op](topValue, secondTopValue);
+        }
+
+        // Otherwise, there will only be a single value which is the result.
+        return values.Pop();
     }
 
     /// <summary>
@@ -306,7 +338,8 @@ public class Formula
     /// <returns> The hashcode for the object. </returns>
     public override int GetHashCode()
     {
-        return this.GetHashCode();
+        // string canonicalFormula = formula.ToString();
+        return this.ToString().GetHashCode();
     }
 
     /// <summary>
@@ -482,6 +515,108 @@ public class Formula
         }
 
         return results;
+    }
+
+    /// <summary>
+    /// This method computes the logic for pushing numbers onto the stack for evaluator. <br/>
+    /// The logic is the following: <br/>
+    /// If * or / is at the top of the operator stack, pop the value stack, pop the operator stack, <br/>
+    /// and apply the popped operator to the popped number and t. <br/>
+    /// Push the result onto the value stack. Otherwise, push t onto the value stack.
+    /// </summary>
+    /// <param name="token">A double that may have operations applied to it.</param>
+    /// <returns>The top value of stack values in all cases except division by zero, which returns a FormulaError Object.</returns>
+    private object TokenNumberStackEvaluation(double token)
+    {
+        if (IsMultOrDiv(operators.Peek()))
+        {
+            // Pops the top value, operand, applies the operation on token and topValue, and pushes the result to values
+            double topValue = values.Pop();
+            string op = operators.Pop();
+
+            // Return FormulaError if division by zero is caught.
+            if (token == 0 && op == "/")
+            {
+                return new FormulaError("Division by zero is not allowed.");
+            }
+
+            values.Push(operations[op](topValue, token));
+        }
+
+        // If there is no '*' or '/', push token onto value stack
+        else
+        {
+            values.Push(token);
+        }
+
+        // Added so all paths return
+        return values.Peek();
+    }
+
+    /// <summary>
+    /// This method computes the logic for pushing operands '+' and '-' onto the stack for evaluation. <br/>
+    /// The logic is the following: <br/>
+    /// If + or - is at the top of the operator stack, pop the value stack twice and the operator stack once, <br/>
+    /// then apply the popped operator to the popped numbers, then push the result onto the value stack. <br/>
+    /// Push t onto the operator stack.
+    /// </summary>
+    /// <param name="token">A string that is either '+' or '-'.</param>
+    private void TokenPlusOrMinusEvaluation(string token)
+    {
+        if (IsPlusOrMinus(operators.Peek()))
+        {
+            double topValue = values.Pop();
+            double secondTopValue = values.Pop();
+            string op = operators.Pop();
+
+            values.Push(operations[op](topValue, secondTopValue));
+        }
+
+        operators.Push(token);
+    }
+
+    /// <summary>
+    /// This method computes the logic for pushing ')' onto the stack for evaluation. <br/> <br/>
+    /// The logic is the following, in order: <br/>
+    /// (1) If '+' or '-' is at the top of the operator stack, pop the value stack twice and the operator stack once. <br/>
+    /// Apply the popped operator to the popped numbers. Push the result onto the value stack. <br/> <br/>
+    /// (2) The top of the operator stack should be a '('. Pop it. <br/> <br/>
+    /// (3) If '*' or '/' is at the top of the operator stack, pop the value stack twice and the operator stack once. <br/>
+    /// Apply the popped operator to the popped numbers. Push the result onto the value stack. <br/>
+    /// </summary>
+    /// <param name="token">A single closed parenthesis ')'.</param>
+    /// <returns>The top value of stack values in all cases except division by zero, which returns a FormulaError Object.</returns>
+    private object TokenClosedParenEvaluation(string token)
+    {
+        // Checks for '+' or '-'
+        if (IsPlusOrMinus(operators.Peek()))
+        {
+            double topValue = values.Pop();
+            double secondTopValue = values.Pop();
+            string op = operators.Pop();
+
+            values.Push(operations[op](topValue, secondTopValue));
+        }
+
+        operators.Pop(); // Should be a '('
+
+        // Checks for '*' or '/'
+        if (IsMultOrDiv(operators.Peek()))
+        {
+            double topValue = values.Pop();
+            double secondTopValue = values.Pop();
+            string op = operators.Pop();
+
+            // Checks for division by zero
+            if (topValue == 0 && op == "/")
+            {
+                return new FormulaError("Division by zero is not allowed.");
+            }
+
+            values.Push(operations[op](topValue, secondTopValue));
+        }
+
+        return values.Peek();
     }
 
     /// <summary>
