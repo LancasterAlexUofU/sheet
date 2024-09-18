@@ -51,7 +51,7 @@ representation of the formula.
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 2 | 12 | 17 |
-| Assignment 4 | 18 | 9 |
+| Assignment 4 | 18 | 10 |
 
 
 (Includes hours from FormulaTests Project)
@@ -75,6 +75,7 @@ representation of the formula.
 | :--------:| :--------:
 | Setting up coding environment & <br /> reading documentation | 1 |
 | Implementing Evaluator Logic | 5 |
+| Debugging | 1 |
 
 # Comments for Evaluators
 Work stands on its own.

@@ -46,6 +46,29 @@ public class EvaluationTests
     private const string ComplexFormulaEquivalentModifiedVariablesOnly2 = "((A1+B1)/C1)*(D1-E1)+F1-G1-(H1)/(I1/A1) + J1+K1";
 
     /// <summary>
+    /// This method passes a single number through and looks to get the same number back.
+    /// </summary>
+    [TestMethod]
+    public void Evaluator_NumSingle()
+    {
+        Formula f = new("1");
+        Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
+        Assert.AreEqual(f.Evaluate(lookup), 1.0);
+    }
+
+    /// <summary>
+    /// This method adds two numbers together and checks that their sum is correct.
+    /// This is a simpler version of Evaluator_NumAddition, which adds three numbers together.
+    /// </summary>
+    [TestMethod]
+    public void Evaluator_NumAdditionSimple()
+    {
+        Formula f = new("5 + 10");
+        Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
+        Assert.AreEqual(f.Evaluate(lookup), 15.0);
+    }
+
+    /// <summary>
     /// This method adds three numbers together and checks that their sum is correct.
     /// </summary>
     [TestMethod]
@@ -53,7 +76,7 @@ public class EvaluationTests
     {
         Formula f = new("5 + 10 + 15");
         Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
-        Assert.AreEqual(f.Evaluate(lookup), 30);
+        Assert.AreEqual(f.Evaluate(lookup), 30.0);
     }
 
     /// <summary>
@@ -64,7 +87,7 @@ public class EvaluationTests
     {
         Formula f = new("5 - 10 - 15");
         Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
-        Assert.AreEqual(f.Evaluate(lookup), -20);
+        Assert.AreEqual(f.Evaluate(lookup), -20.0);
     }
 
     /// <summary>
@@ -75,7 +98,7 @@ public class EvaluationTests
     {
         Formula f = new("20 - 10 - 5");
         Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
-        Assert.AreEqual(f.Evaluate(lookup), 5);
+        Assert.AreEqual(f.Evaluate(lookup), 5.0);
     }
 
     /// <summary>
@@ -86,7 +109,7 @@ public class EvaluationTests
     {
         Formula f = new("5 * 5 * 5");
         Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
-        Assert.AreEqual(f.Evaluate(lookup), 125);
+        Assert.AreEqual(f.Evaluate(lookup), 125.0);
     }
 
     /// <summary>
@@ -97,7 +120,7 @@ public class EvaluationTests
     {
         Formula f = new("625 / 5 / 5");
         Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
-        Assert.AreEqual(f.Evaluate(lookup), 25);
+        Assert.AreEqual(f.Evaluate(lookup), 25.0);
     }
 
     /// <summary>
@@ -109,7 +132,7 @@ public class EvaluationTests
     {
         Formula f = new("(5 * 5) / 5 + 5 - 10 + 5 - (10 - 5) * 5");
         Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
-        Assert.AreEqual(f.Evaluate(lookup), -20);
+        Assert.AreEqual(f.Evaluate(lookup), -20.0);
     }
 
     /// <summary>
@@ -120,7 +143,7 @@ public class EvaluationTests
     {
         Formula f = new("A1 + B1 + C1");
         Formula.Lookup lookup = (string s) => 5; // Sets A1, B1, C1 equal to 5.
-        Assert.AreEqual(f.Evaluate(lookup), 15);
+        Assert.AreEqual(f.Evaluate(lookup), 15.0);
     }
 
     /// <summary>
@@ -131,7 +154,7 @@ public class EvaluationTests
     {
         Formula f = new("A1 - B1 - C1");
         Formula.Lookup lookup = (string s) => 5; // Sets A1, B1, C1 equal to 5.
-        Assert.AreEqual(f.Evaluate(lookup), -5);
+        Assert.AreEqual(f.Evaluate(lookup), -5.0);
     }
 
     /// <summary>
@@ -142,7 +165,7 @@ public class EvaluationTests
     {
         Formula f = new("A1 * B1 * C1");
         Formula.Lookup lookup = (string s) => 5; // Sets A1, B1, C1 equal to 5.
-        Assert.AreEqual(f.Evaluate(lookup), 125);
+        Assert.AreEqual(f.Evaluate(lookup), 125.0);
     }
 
     /// <summary>
@@ -174,7 +197,7 @@ public class EvaluationTests
                 default: throw new ArgumentException($"Unknown variable: {s}");
             }
         };
-        Assert.AreEqual(f.Evaluate(lookup), -20);
+        Assert.AreEqual(f.Evaluate(lookup), -20.0);
     }
 
     /// <summary>
@@ -185,7 +208,7 @@ public class EvaluationTests
     {
         Formula f = new("A1 + 5 + B1");
         Formula.Lookup lookup = (string s) => 5; // Sets A1, B1 equal to 5.
-        Assert.AreEqual(f.Evaluate(lookup), 15);
+        Assert.AreEqual(f.Evaluate(lookup), 15.0);
     }
 
     /// <summary>
@@ -196,7 +219,7 @@ public class EvaluationTests
     {
         Formula f = new("A1 - 5 - B1");
         Formula.Lookup lookup = (string s) => 5; // Sets A1, B1 equal to 5.
-        Assert.AreEqual(f.Evaluate(lookup), -5);
+        Assert.AreEqual(f.Evaluate(lookup), -5.0);
     }
 
     /// <summary>
@@ -207,7 +230,7 @@ public class EvaluationTests
     {
         Formula f = new("A1 * 5 * B1");
         Formula.Lookup lookup = (string s) => 5; // Sets A1, B1 equal to 5.
-        Assert.AreEqual(f.Evaluate(lookup), 125);
+        Assert.AreEqual(f.Evaluate(lookup), 125.0);
     }
 
     /// <summary>
@@ -245,7 +268,7 @@ public class EvaluationTests
                 default: throw new ArgumentException($"Unknown variable: {s}");
             }
         };
-        Assert.AreEqual(f.Evaluate(lookup), -20);
+        Assert.AreEqual(f.Evaluate(lookup), -20.0);
     }
 
     /// <summary>
@@ -358,7 +381,7 @@ public class EvaluationTests
     {
         Formula f = new("(0-10) * (0-10)");
         Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
-        Assert.AreEqual(f.Evaluate(lookup), 100);
+        Assert.AreEqual(f.Evaluate(lookup), 100.0);
     }
 
     /// <summary>

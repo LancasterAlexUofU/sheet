@@ -278,7 +278,14 @@ public class Formula
                 case string when IsNum(token):
 
                     double tokenDub = Convert.ToDouble(token);
-                    TokenNumberStackEvaluation(tokenDub);
+
+                    // Detects whether an FormulaError object was returned. If so, return it in evaluation.
+                    object valueOrError = TokenNumberStackEvaluation(tokenDub);
+                    if (valueOrError.GetType() == typeof(FormulaError))
+                    {
+                        return valueOrError;
+                    }
+
                     break;
 
                 // Checks if token is a variable
@@ -308,20 +315,30 @@ public class Formula
 
                 // Checks if token is ')'
                 case string when IsClosedParen(token):
-                    TokenClosedParenEvaluation(token);
+
+                    // Detects whether an FormulaError object was returned. If so, return it in evaluation.
+                    valueOrError = TokenClosedParenEvaluation(token);
+                    if (valueOrError.GetType() == typeof(FormulaError))
+                    {
+                        return valueOrError;
+                    }
+
                     break;
             }
         }
 
         // If operators stack is not empty when the last token has been processed,
         // it will be either a '+' or '-'. Do the following.
-        if (IsPlusOrMinus(operators.Peek()))
+        if (operators.TryPeek(out string? resultPlusMin))
         {
-            double topValue = values.Pop();
-            double secondTopValue = values.Pop();
-            string op = operators.Pop();
+            if (IsPlusOrMinus(resultPlusMin))
+            {
+                double topValue = values.Pop();
+                double secondTopValue = values.Pop();
+                string op = operators.Pop();
 
-            return operations[op](topValue, secondTopValue);
+                return operations[op](secondTopValue, topValue);
+            }
         }
 
         // Otherwise, there will only be a single value which is the result.
@@ -423,7 +440,7 @@ public class Formula
     /// <returns>true if the string matches the requirement for a number.</returns>
     private static bool IsNum(string token)
     {
-        return Regex.IsMatch(token, NumberRegexPattern);
+        return Regex.IsMatch(token, $@"^{NumberRegexPattern}$");
     }
 
     /// <summary>
@@ -528,19 +545,28 @@ public class Formula
     /// <returns>The top value of stack values in all cases except division by zero, which returns a FormulaError Object.</returns>
     private object TokenNumberStackEvaluation(double token)
     {
-        if (IsMultOrDiv(operators.Peek()))
+        if (operators.TryPeek(out string? resultMultDiv))
         {
-            // Pops the top value, operand, applies the operation on token and topValue, and pushes the result to values
-            double topValue = values.Pop();
-            string op = operators.Pop();
-
-            // Return FormulaError if division by zero is caught.
-            if (token == 0 && op == "/")
+            if (IsMultOrDiv(resultMultDiv))
             {
-                return new FormulaError("Division by zero is not allowed.");
+                // Pops the top value, operand, applies the operation on token and topValue, and pushes the result to values
+                double topValue = values.Pop();
+                string op = operators.Pop();
+
+                // Return FormulaError if division by zero is caught.
+                if (token == 0 && op == "/")
+                {
+                    return new FormulaError("Division by zero is not allowed.");
+                }
+
+                values.Push(operations[op](topValue, token));
             }
 
-            values.Push(operations[op](topValue, token));
+            // Needed as if the first if statement is true, the other "outside" else statement wouldn't execute
+            else
+            {
+                values.Push(token);
+            }
         }
 
         // If there is no '*' or '/', push token onto value stack
@@ -563,13 +589,17 @@ public class Formula
     /// <param name="token">A string that is either '+' or '-'.</param>
     private void TokenPlusOrMinusEvaluation(string token)
     {
-        if (IsPlusOrMinus(operators.Peek()))
+        if(operators.TryPeek(out string? resultPlusMin))
         {
-            double topValue = values.Pop();
-            double secondTopValue = values.Pop();
-            string op = operators.Pop();
+            if (IsPlusOrMinus(resultPlusMin))
+            {
+                double topValue = values.Pop();
+                double secondTopValue = values.Pop();
+                string op = operators.Pop();
 
-            values.Push(operations[op](topValue, secondTopValue));
+                // Second value first so that subtraction is in the correct order.
+                values.Push(operations[op](secondTopValue, topValue));
+            }
         }
 
         operators.Push(token);
@@ -589,31 +619,38 @@ public class Formula
     private object TokenClosedParenEvaluation(string token)
     {
         // Checks for '+' or '-'
-        if (IsPlusOrMinus(operators.Peek()))
+        if (operators.TryPeek(out string? resultPlusMin))
         {
-            double topValue = values.Pop();
-            double secondTopValue = values.Pop();
-            string op = operators.Pop();
+            if (IsPlusOrMinus(resultPlusMin))
+            {
+                double topValue = values.Pop();
+                double secondTopValue = values.Pop();
+                string op = operators.Pop();
 
-            values.Push(operations[op](topValue, secondTopValue));
+                values.Push(operations[op](secondTopValue, topValue));
+            }
         }
 
         operators.Pop(); // Should be a '('
 
         // Checks for '*' or '/'
-        if (IsMultOrDiv(operators.Peek()))
+        if (operators.TryPeek(out string? resultMultDiv))
         {
-            double topValue = values.Pop();
-            double secondTopValue = values.Pop();
-            string op = operators.Pop();
-
-            // Checks for division by zero
-            if (topValue == 0 && op == "/")
+            if (IsMultOrDiv(resultMultDiv))
             {
-                return new FormulaError("Division by zero is not allowed.");
-            }
+                double topValue = values.Pop();
+                double secondTopValue = values.Pop();
+                string op = operators.Pop();
 
-            values.Push(operations[op](topValue, secondTopValue));
+                // Checks for division by zero
+                if (topValue == 0 && op == "/")
+                {
+                    return new FormulaError("Division by zero is not allowed.");
+                }
+
+                // Second is first so that order of division is correct
+                values.Push(operations[op](secondTopValue, topValue));
+            }
         }
 
         return values.Peek();
