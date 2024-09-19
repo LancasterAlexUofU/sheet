@@ -18,10 +18,12 @@ The Spreadsheet program is currently capable of:
 - Returning a list of all variables contained in a formula
 - Retuning a canonical string representation of a formula
 - Determining which cells must be evaluated before other cells
+- Evaluating a formula with numbers and variables
 
 Future extensions are:
 
-- Implementing a formula evaluator in the Formula class
+- Detecting loops for cell dependency values
+- Adding a GUI
 
 # Time Expenditures
 
@@ -30,11 +32,14 @@ Future extensions are:
 | Assignment 1 | 12 | 8|
 | Assignment 2 | 12 | 17 |
 | Assignment 3 | 14 | 16 |
+| Assignment 4 | 18 | 11 |
 
 # Comments for Evaluators
 Read FormulaTests README for comment about code coverage.
 
 Read DependencyGraph README about autograder and reason for excessive commit history.
+
+Read Formula README about very minor code coverage comment.
 
 # Consulted Peers
 - Landon H.
@@ -52,7 +57,8 @@ Read DependencyGraph README about autograder and reason for excessive commit his
 8) this (C# Reference) - https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/this
 9) String.Replace Method - https://learn.microsoft.com/en-us/dotnet/api/system.string.replace?view=net-8.0
 10) Double.TryParse Method - https://learn.microsoft.com/en-us/dotnet/api/system.double.tryparse?view=net-8.0
-11) CollectionAssert Class: https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.testtools.unittesting.collectionassert?view=visualstudiosdk-2022
-12) Dictionary Class: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-8.0
-13) Any: https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.any?view=net-8.0
-14) LINQ: https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/introduction-to-linq-queries
+11) CollectionAssert Class - https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.testtools.unittesting.collectionassert?view=visualstudiosdk-2022
+12) Dictionary Class - https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-8.0
+13) Any - https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.any?view=net-8.0
+14) LINQ - https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/introduction-to-linq-queries
+15) Asset Class - https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.testtools.unittesting.assert?view=visualstudiosdk-2022

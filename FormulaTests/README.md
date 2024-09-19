@@ -4,35 +4,49 @@ Partner:    None
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  LancasterAlexUofU
 Repo:       https://github.com/uofu-cs3500-20-fall2024/spreadsheet-LancasterAlexUofU
-Date:       30-Aug-2024
+Date:       18-Sept-2024
 Project:    FormulaTests
 Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in Academic Coursework.
 ```
 
 # Overview of the FormulaTests Project
-FormulaTests runs 27 various tests on Formula.dll to ensure that the formula constructor is properly working.
+### FormulaSyntaxTests
 
-This is done by checking the 10 Formula Syntax and Validation Rules for a formula in infix notation.
+FormulaSyntaxTests runs 42 various tests on Formula.dll to ensure that the formula constructor is properly working.
+
+This is done by checking the 8 Formula Syntax and Validation Rules for a formula in infix notation.
 
 This test additionally checks for valid variables as well as numbers in proper scientific notation.
+
+### GradingTests
+
+This test is provided by Joe Zachary, Daniel Kopta, and Jim de St. Germain. It contains additional tests
+on top of what already is tested by FormulaSyntaxTests.
+
+### EvaluationTests
+
+EvaluationTests runs 35 various tests to ensure that formulas are properly being evaluated and
+formula equality methods are returning correctly.
+
 # Time Expenditures
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 1 | 12 | 8 |
-| Assignment 4 | 18 | 10 |
+| Assignment 4 | 18 | 11 |
 
 
-(Includes hours from Formula Project)
+(Includes 7.5 hours from Formula Project)
 
 # Time Breakdown
 ### Assignment 4
 | Task | Number of Hours |
 | :--------:| :--------:
-| Implemented Evaluation Test Methods, <br/>Closed Box | 3
+| Implemented Evaluation Test Methods | 3.5
 
 # Comments for Evaluators
-### Comment about code coverage:
+
+### Comment about code coverage for FormulaSyntaxTests:
 
 With test methods that have "[ExpectedException(typeof(FormulaFormatException))]", the last curly brace is marked as unexplored.
 This is okay and we went over it in class.
@@ -41,15 +55,16 @@ For Test Method FormulaConstructor_TestVariablesContainingE_Invalid, the same th
 as Assert.Fail isn't called (as it is catched by FormulaFormatException). It is marked as red, but is okay as
 it means the test itself isn't failing.
 
+### Comment about code coverage for EvaluationTests
+For the Evaluator_VarComplexFormula and Evaluator_NumVarComplexFormula methods, I use a switch statement to assign
+different values to different variables. The lambda expression will throw error CS1643: Not all code paths return a 
+value in method of type 'Formula.Lookup' if I do not add a default path. However, since it is just a default path and
+the formula will always be the same, it is never triggered. This leads to the code not being covered. However, the
+program won't compile if I remove the default statement, so it must be left this way.
 
-### Comment about parentheses canonical string representation:
+Also, the last curly brace in the program is not counted as covered.
 
-The ToString method in Formula.cs "normalized" a formula into its canonical representation.
-Number and variables are converted to be the same, and spaces are removed. However, I wanted
-to make note of something. The ToString method does not consider extraneous parentheses.
-What this means is that (1) != 1. Or (1+1) != 1+1. The specifications don't necissarly say anything
-about this, just that the formulas are "equal." Therefore, I am determining that (1) is not equal to 1,
-and are distinct formulas. So, in the equals and not equals testing methods, I will not be testing for extraneous parentheses.
+
 
 # Consulted Peers
 - Landon H.

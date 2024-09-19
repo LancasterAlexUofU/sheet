@@ -1,24 +1,28 @@
 // <copyright file="EvaluationTests.cs" company="UofU-CS3500">
 // Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
-// <summary>
-//
-// Author:    Alex Lancaster
-// Partner:   None
-// Date:      14-Sept-2024
-// Course:    CS 3500, University of Utah, School of Computing
-// Copyright: CS 3500 and Alex Lancaster - This work may not
-//            be copied for use in Academic Coursework.
-//
-// I, Alex Lancaster, certify that I wrote this code from scratch and
-// did not copy it in part or whole from another source.  All
-// references used in the completion of the assignments are cited
-// in my README file.
-//
-// File Contents
-//      FIXME: Add file contents!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// </summary>
 
+/// <summary>
+/// Author:    Alex Lancaster
+/// Partner:   None
+/// Date:      18-Sept-2024
+/// Course:    CS 3500, University of Utah, School of Computing
+/// Copyright: CS 3500 and Alex Lancaster - This work may not
+///            be copied for use in Academic Coursework.
+///
+/// I, Alex Lancaster, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All
+/// references used in the completion of the assignments are cited
+/// in my README file.
+///
+/// File Contents
+///      The EvaluationTests contains 35 tests, ranging from testing the evaluator method
+///      as well as equals, not equals, and getHashCode. Various versions of the same test exist
+///      except inverted to test that the inverse returns the opposite result.
+///
+///      Complex formulas are used so that the likelihood of an off case being caught is increased
+///      if the code is ever tweaked.
+/// </summary>
 namespace CS3500.Formula;
 using CS3500.Formula;
 using System.Text.RegularExpressions;
@@ -255,12 +259,6 @@ public class EvaluationTests
         Formula f = new("(A1 * 5) / A1 + 5 - B1 + 5 - (10 - A1) * A1");
         Formula.Lookup lookup = (string s) =>
         {
-            // Check for a number first before a variable so default switch case isn't triggered
-            if (Regex.IsMatch(NumberRegexPattern, s))
-            {
-                return Convert.ToDouble(s);
-            }
-
             switch (s)
             {
                 case "A1": return 5;
@@ -269,6 +267,40 @@ public class EvaluationTests
             }
         };
         Assert.AreEqual(f.Evaluate(lookup), -20.0);
+    }
+
+    /// <summary>
+    /// This test checks that two negative numbers multiplied together equals the correct positive number.
+    /// </summary>
+    [TestMethod]
+    public void Evaluator_NegativeNumberMultiply()
+    {
+        Formula f = new("(0-10) * (0-10)");
+        Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
+        Assert.AreEqual(f.Evaluate(lookup), 100.0);
+    }
+
+    /// <summary>
+    /// This test checks that a FormulaError is thrown if a division by 0 occurs in the denominator.
+    /// </summary>
+    [TestMethod]
+    public void Evaluator_DivideByZero_Invalid()
+    {
+        Formula f = new("1/0");
+        Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
+        Assert.IsInstanceOfType(f.Evaluate(lookup), typeof(FormulaError));
+    }
+
+    /// <summary>
+    /// Tests that a divide by zero error following a closed parenthesis (in a particular way) is caught by the closed parenthesis stack logic. <br/>
+    /// (1/0) is still caught by the '*' or '/' stack logic, so extra operator is needed so closed parenthesis logic is executed instead for code coverage.
+    /// </summary>
+    [TestMethod]
+    public void Evaluator_DivideByZeroClosedParenthesisFollowing_Invalid()
+    {
+        Formula f = new("(1/(0-0))");
+        Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
+        Assert.IsInstanceOfType(f.Evaluate(lookup), typeof(FormulaError));
     }
 
     /// <summary>
@@ -374,28 +406,6 @@ public class EvaluationTests
     }
 
     /// <summary>
-    /// This test checks that two negative numbers multiplied together equals the correct positive number.
-    /// </summary>
-    [TestMethod]
-    public void Evaluator_NegativeNumberMultiply()
-    {
-        Formula f = new("(0-10) * (0-10)");
-        Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
-        Assert.AreEqual(f.Evaluate(lookup), 100.0);
-    }
-
-    /// <summary>
-    /// This test checks that a FormulaError is thrown if a division by 0 occurs in the denominator.
-    /// </summary>
-    [TestMethod]
-    public void Evaluator_DivideByZero_Invalid()
-    {
-        Formula f = new("1/0");
-        Formula.Lookup lookup = (string s) => Convert.ToDouble(s);
-        Assert.IsInstanceOfType(f.Evaluate(lookup), typeof(FormulaError));
-    }
-
-    /// <summary>
     /// Tests that two strings, even with different string representations of the same formula, have the same hash code.
     /// </summary>
     [TestMethod]
@@ -441,5 +451,25 @@ public class EvaluationTests
         Formula equivalentFormula2 = new($"{ComplexFormulaEquivalentModified2}");
         Assert.IsFalse(equivalentFormula1 != equivalentFormula2);
         Assert.IsFalse(equivalentFormula1.GetHashCode() != equivalentFormula2.GetHashCode());
+    }
+
+    /// <summary>
+    /// This test adds two variables, one of which is unknown. This method is expected to receive an ArgumentException.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown if an unknown variable is seen.</exception>
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentException))]
+    public void Lookup_UnknownVariable()
+    {
+        Formula formula = new("A1 + B1");
+        Formula.Lookup lookup = (string s) =>
+        {
+            switch (s)
+            {
+                case "A1": return 5;
+                default: throw new ArgumentException($"Unknown variable: {s}");
+            }
+        };
+        formula.Evaluate(lookup);
     }
 }

@@ -23,19 +23,22 @@
 //
 // File Contents
 //
-//    The Formula class handles formulas in infix formula notation, given as string,
-//    and ensures that the formula is has the proper syntax of a formula.
-//    If a formula does not have proper syntax, a FormulaFormatException is thrown.
+//      The Formula class handles formulas in infix formula notation, given as a string,
+//      and ensures that the formula has the proper syntax of a formula.
+//      If a formula does not have proper syntax, a FormulaFormatException is thrown.
 //
-//    The Formula class also normalizes all variables, numbers, and removes spaces,
-//    to make a canonical string representation of the formula.
+//      The Formula class also normalizes all variables, numbers, and removes spaces,
+//      to make a canonical string representation of the formula.
 //
-//    The Formula class further includes a GetVariables function, which returns a set
-//    (no duplicates) of all variables in a formula, and ToString, which returns a
-//    canonical string representation of the formula.
+//      The Formula class further includes a GetVariables function, which returns a set
+//      (no duplicates) of all variables in a formula, and ToString, which returns a
+//      canonical string representation of the formula.
 //
+//      The Formula class contains an Evaluator, which takes in syntactically
+//      correct formulas and returns a result double based on the operators and numbers.
+//      Variable values are found using lookup, and lookup returns a double value.
 //
-//      FIXME: ADD MORE ABOUT EVALUATOR!!!!!!!!!!!!!!!!!!!!!!!!
+//      There are overrides for ==, !=, .Equals, and GetHashCode so that Formulas can use this syntax.
 // </summary>
 namespace CS3500.Formula;
 
@@ -317,7 +320,7 @@ public class Formula
                 case string when IsClosedParen(token):
 
                     // Detects whether an FormulaError object was returned. If so, return it in evaluation.
-                    valueOrError = TokenClosedParenEvaluation(token);
+                    valueOrError = TokenClosedParenEvaluation();
                     if (valueOrError.GetType() == typeof(FormulaError))
                     {
                         return valueOrError;
@@ -616,7 +619,7 @@ public class Formula
     /// </summary>
     /// <param name="token">A single closed parenthesis ')'.</param>
     /// <returns>The top value of stack values in all cases except division by zero, which returns a FormulaError Object.</returns>
-    private object TokenClosedParenEvaluation(string token)
+    private object TokenClosedParenEvaluation()
     {
         // Checks for '+' or '-'
         if (operators.TryPeek(out string? resultPlusMin))

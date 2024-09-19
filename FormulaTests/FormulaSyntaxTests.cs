@@ -3,23 +3,23 @@
 // </copyright>
 
 /// <summary>
-/// Authors:   Joe Zachary
-///            Daniel Kopta
-///            Jim de St. Germain
-/// Date:      Updated Spring 2022
+/// Author:    Alex Lancaster
+/// Partner:   None
+/// Date:      21-Aug-2024
 /// Course:    CS 3500, University of Utah, School of Computing
-/// Copyright: CS 3500 - This work may not be copied for use
-///                      in Academic Coursework.  See below.
+/// Copyright: CS 3500 and Alex Lancaster - This work may not
+///            be copied for use in Academic Coursework.
+///
+/// I, Alex Lancaster, certify that I wrote this code from scratch and
+/// did not copy it in part or whole from another source.  All
+/// references used in the completion of the assignments are cited
+/// in my README file.
 ///
 /// File Contents
 ///
-///   This file contains proprietary grading tests for CS 3500.  These tests cases
-///   are for individual student use only and MAY NOT BE SHARED.  Do not back them up
-///   nor place them in any online repository.  Improper use of these test cases
-///   can result in removal from the course and an academic misconduct sanction.
-///
-///   These tests are for your private use only to improve the quality of the
-///   rest of your assignments
+///  FormulaTests runs 42 various tests on Formula.dll to ensure that the formula constructor is properly working.
+///  This is done by checking the 8 Formula Syntax and Validation Rules for a formula in infix notation.
+///  This test additionally checks for valid variables as well as numbers in proper scientific notation.
 /// </summary>
 namespace CS3500.Formula;
 using CS3500.Formula;
@@ -96,12 +96,6 @@ public class FormulaSyntaxTests
     // --- Tests for Closing Parentheses Rule ---
 
     // --- Tests for Balanced Parentheses Rule ---
-
-    // --- Tests for  Last Token Rule ---
-
-    // --- Tests for Parentheses/Operator Following Rule ---
-
-    // --- Tests for Extra Following Rule ---
     // ------------------------------------------------------
 
     /// <summary>
@@ -131,12 +125,6 @@ public class FormulaSyntaxTests
         _ = new Formula("(x1))");
     }
 
-    // --- Tests for Balanced Parentheses Rule ---
-
-    // --- Tests for First Token Rule ---
-
-    // --- Tests for Last Token Rule ---
-
     // --- Tests for Parenthesis Following Rule ---
     // --------------------------------------------
 
@@ -149,12 +137,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("((x1)");
     }
-
-    // --- Tests for Balanced Parentheses Rule ---
-
-    // --- Tests for First Token Rule ---
-
-    // --- Tests for Last Token Rule ---
 
     // --- Tests for Parenthesis Following Rule ---
     // --------------------------------------------
@@ -171,10 +153,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("(x1))(((x2))");
     }
-
-    // --- Tests for Closing Parentheses Rule ---
-
-    // --- Tests for Balanced Parentheses Rule ---
 
     // --- Tests for Parenthesis Following Rule ---
     // --------------------------------------------
@@ -223,10 +201,6 @@ public class FormulaSyntaxTests
         _ = new Formula("x1 + + x2");
     }
 
-    // --- Test for First Token Rule ---
-
-    // --- Tests for Last Token Rule ---
-
     // --- Tests for Operator Following Rule ---
     // -----------------------------------------
 
@@ -259,9 +233,6 @@ public class FormulaSyntaxTests
         _ = new Formula("1 1");
     }
 
-    // --- Tests for Extra Following Rule ---
-    // --------------------------------------
-
     /// <summary>
     ///     Tests that even though a number in scientific notation has an operand in the number, <br />
     ///     it is still treated as a number and not an operand for the Extra Following Rule.
@@ -273,9 +244,6 @@ public class FormulaSyntaxTests
         _ = new Formula("(x1)7e-7");
     }
 
-    // --- Tests for Extra Following Rule ---
-    // --------------------------------------
-
     /// <summary>
     /// Tests that the number zero is a valid formula. [ExpectedException] is not used so the test should not throw an error.
     /// </summary>
@@ -284,8 +252,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("0");
     }
-
-    // --- Tests for One Token Rule ---
 
     // --- Tests for Valid Token Rule ---
     // ----------------------------------
@@ -299,11 +265,6 @@ public class FormulaSyntaxTests
         _ = new Formula("7");
     }
 
-    // --- Tests for One Token Rule ---
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
-
     /// <summary>
     /// Tests that a decimal is a valid formula.
     /// </summary>
@@ -312,11 +273,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("0.1");
     }
-
-    // --- Tests for One Token Rule ---
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
 
     /// <summary>
     /// Tests that a number with an extraneous decimal (e.g. 1.) is considered a valid formula.
@@ -327,11 +283,6 @@ public class FormulaSyntaxTests
         _ = new Formula("1.");
     }
 
-    // --- Tests for One Token Rule ---
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
-
     /// <summary>
     /// Tests that 0 in scientific notation is a valid formula.
     /// </summary>
@@ -340,11 +291,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("0.0e-0");
     }
-
-    // --- Tests for One Token Rule ---
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
 
     /// <summary>
     /// Tests that integers used in writing numbers in scientific notation is a valid formula (e.g. 7e7).
@@ -355,11 +301,6 @@ public class FormulaSyntaxTests
         _ = new Formula("7e7");
     }
 
-    // --- Tests for One Token Rule ---
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
-
     /// <summary>
     /// Tests that numbers with decimals that are included in writing numbers in scientific notation are considered valid formulas (e.g. 0.7e7).
     /// </summary>
@@ -369,11 +310,6 @@ public class FormulaSyntaxTests
         _ = new Formula("0.7e7");
     }
 
-    // --- Tests for One Token Rule ---
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
-
     /// <summary>
     /// Tests that a number in scientific notation with a negative sign in the exponent is considered a valid formula.
     /// </summary>
@@ -382,11 +318,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("7e-7");
     }
-
-    // --- Tests for One Token Rule ---
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
 
     /// <summary>
     /// Tests that numbers in scientific notation do not contain decimals in their exponent.
@@ -398,9 +329,6 @@ public class FormulaSyntaxTests
         _ = new Formula("7e0.7");
     }
 
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
-
     /// <summary>
     /// This test passes a single letter without a number and should throw a FormulaFormatException.
     /// </summary>
@@ -410,9 +338,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("a");
     }
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
 
     /// <summary>
     /// Tests that the formula constructor throws a FormulaFormatException error if a number is seen before a letter (e.g. 1a).
@@ -424,9 +349,6 @@ public class FormulaSyntaxTests
         _ = new Formula("1a");
     }
 
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
-
     /// <summary>
     /// Tests that a letter does not follow a number in a variable (e.g. a1a).
     /// </summary>
@@ -436,9 +358,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("a1a");
     }
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
 
     /// <summary>
     /// Tests that letters followed by a number in the decimal form is not considered a valid formula (e.g. a1.0).
@@ -450,9 +369,6 @@ public class FormulaSyntaxTests
         _ = new Formula("a1.0");
     }
 
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
-
     /// <summary>
     /// Tests that a variable with uppercase lettered mixed with lower case letters is still considered a valid formula.
     /// </summary>
@@ -461,9 +377,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("aAaA1");
     }
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
 
     /// <summary>
     /// Tests that valid variables that contain 'E' (the same letter used to denote numbers in scientific notation) <br/>
@@ -474,9 +387,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula("e1");
     }
-
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
 
     /// <summary>
     /// Runs a suit of the previous invalid tests, except the letters are replaced with 'E'. <br/>
@@ -503,9 +413,6 @@ public class FormulaSyntaxTests
         }
     }
 
-    // --- Tests for Valid Token Rule ---
-    // ----------------------------------
-
     /// <summary>
     /// This test passes a complex formula to the formula constructor that uses all operations, variables with differing attributes, <br/>
     /// integers, numbers with decimals, varying numbers in scientific notation, and parentheses throughout. <br/> <br/>
@@ -517,12 +424,6 @@ public class FormulaSyntaxTests
     {
         _ = new Formula($"{ComplexFormula}");
     }
-
-    // --- Tests for Balanced Parentheses Rule ---
-
-    // --- Tests for First Token Rule ---
-
-    // --- Tests for Last Token Rule ---
 
     // --- Tests for Parenthesis/Operator Following Rule ---
 

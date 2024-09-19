@@ -14,6 +14,9 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 The DependencyGraphTests project contains 28 tests including 2 stress tests for the DependencyGraph project. 
 The tests cover 100% of the DependencyGraph project and ensure that the program is working as intended. 
 
+The DependencyGraphTests project also contains a grading test created by Joe Zachary, Daniel Kopta, 
+Jim de St. Germain, and Travis Martin.
+
 # Time Expenditures
 
 | Assignment | Predicted Hours | Actual Hours|

@@ -4,7 +4,7 @@ Partner:    None
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  LancasterAlexUofU
 Repo:       https://github.com/uofu-cs3500-20-fall2024/spreadsheet-LancasterAlexUofU
-Date:       5-Sept-2024
+Date:       18-Sept-2024
 Project:    Formula
 Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in Academic Coursework.
 ```
@@ -13,6 +13,10 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 The Formula class handles formulas in infix formula notation, given as string,
 and ensures that the formula is has the proper syntax of a formula.
+
+The Formula class also contains an evaluator for formulas and returns a double 
+result of the formula. The evaluator uses lookup to handle variable values,
+so even non-number values can be computed as long as variable values are defined.
 
 ### Examples of valid formulas are the following:
 
@@ -51,10 +55,10 @@ representation of the formula.
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 2 | 12 | 17 |
-| Assignment 4 | 18 | 10 |
+| Assignment 4 | 18 | 12 |
 
 
-(Includes hours from FormulaTests Project)
+(Includes 3.5 hours from FormulaTests Project for Assignment 4)
 
 
  ## Hour Breakdown
@@ -76,9 +80,14 @@ representation of the formula.
 | Setting up coding environment & <br /> reading documentation | 1 |
 | Implementing Evaluator Logic | 5 |
 | Debugging | 1 |
+| Quality Assurance | 1 |
 
 # Comments for Evaluators
-Work stands on its own.
+There are some very minor code coverage details I wanted to point out. 
+
+For the Equals method, a single line has orange, but is still executed (not exactly sure why that is).
+
+At the end of the evaluate method, a curly brace is counted as not covered.
 
 # Consulted Peers
 Eli (unknown last name)
