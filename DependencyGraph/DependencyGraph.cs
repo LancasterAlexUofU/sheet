@@ -88,8 +88,8 @@ public class DependencyGraph
     /// </summary>
     public DependencyGraph()
     {
-        this.dependees = [];
-        this.dependents = [];
+        dependees = [];
+        dependents = [];
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public class DependencyGraph
     {
         // This counts all the elements in each list and then sums each count.
         // get { return graph.Values.Sum(set => set.Count); }
-        get { return this.size; }
+        get { return size; }
     }
 
 /// <summary>
@@ -110,7 +110,7 @@ public class DependencyGraph
     public bool HasDependents(string nodeName)
     {
         // If the node is a key in dependees, then that means it has at least one dependent node
-        return this.dependees.ContainsKey(nodeName);
+        return dependees.ContainsKey(nodeName);
     }
 
     /// <summary>
@@ -121,7 +121,7 @@ public class DependencyGraph
     public bool HasDependees(string nodeName)
     {
         // If the node is a key in dependents, then that means it has at least one dependee node
-        return this.dependents.ContainsKey(nodeName);
+        return dependents.ContainsKey(nodeName);
     }
 
     /// <summary>
@@ -134,7 +134,7 @@ public class DependencyGraph
     public IEnumerable<string> GetDependents(string nodeName)
     {
         // Checks that dependees contains nodeName and if so, stores values in set values
-        if (this.dependees.TryGetValue(nodeName, out HashSet<string>? values))
+        if (dependees.TryGetValue(nodeName, out HashSet<string>? values))
         {
             return values;
         }
@@ -153,7 +153,7 @@ public class DependencyGraph
     public IEnumerable<string> GetDependees(string nodeName)
     {
         // Checks that dependents contains nodeName and if so, stores values in set values
-        if (this.dependents.TryGetValue(nodeName, out HashSet<string>? values))
+        if (dependents.TryGetValue(nodeName, out HashSet<string>? values))
         {
             return values;
         }
@@ -177,30 +177,30 @@ public class DependencyGraph
         bool sizeIncreased = false;
 
         // Creates a new key slot for any new dependee value
-        if (!this.dependees.ContainsKey(dependee))
+        if (!dependees.ContainsKey(dependee))
         {
-            this.dependees[dependee] = [];
+            dependees[dependee] = [];
         }
 
-        if (this.dependees[dependee].Add(dependent))
+        if (dependees[dependee].Add(dependent))
         {
             sizeIncreased = true;
         }
 
         // Creates a new key slot for any new dependent value
-        if (!this.dependents.ContainsKey(dependent))
+        if (!dependents.ContainsKey(dependent))
         {
-            this.dependents[dependent] = [];
+            dependents[dependent] = [];
         }
 
-        if (this.dependents[dependent].Add(dependee))
+        if (dependents[dependent].Add(dependee))
         {
             sizeIncreased = true;
         }
 
         if (sizeIncreased)
         {
-            this.size++;
+            size++;
         }
     }
 
@@ -214,24 +214,24 @@ public class DependencyGraph
     public void RemoveDependency(string dependee, string dependent)
     {
         // Check if values exist, otherwise, errors will be thrown
-        if (this.dependees.ContainsKey(dependee) && this.dependents.ContainsKey(dependent))
+        if (dependees.ContainsKey(dependee) && dependents.ContainsKey(dependent))
         {
             // True if element is found and removed in both dictionaries, otherwise false (key isn't found).
-            if (this.dependees[dependee].Remove(dependent) && this.dependents[dependent].Remove(dependee))
+            if (dependees[dependee].Remove(dependent) && dependents[dependent].Remove(dependee))
             {
-                this.size--;
+                size--;
             }
 
             // If there are no dependent nodes for a given dependee, then it should no longer be considered a dependee and should be removed.
-            if (this.dependees[dependee].Count == 0)
+            if (dependees[dependee].Count == 0)
             {
-                this.dependees.Remove(dependee);
+                dependees.Remove(dependee);
             }
 
             // If there are no dependee nodes for a given dependent node, then it should no longer be considered dependent and should be removed.
-            if (this.dependents[dependent].Count == 0)
+            if (dependents[dependent].Count == 0)
             {
-                this.dependents.Remove(dependent);
+                dependents.Remove(dependent);
             }
         }
     }
@@ -245,18 +245,18 @@ public class DependencyGraph
     public void ReplaceDependents(string nodeName, IEnumerable<string> newDependents)
     {
         // If the nodeName is a valid dependee, remove each of its dependent values.
-        if (this.dependees.ContainsKey(nodeName))
+        if (dependees.ContainsKey(nodeName))
         {
-            foreach (string dependent in this.dependees[nodeName])
+            foreach (string dependent in dependees[nodeName])
             {
-                this.RemoveDependency(nodeName, dependent);
+                RemoveDependency(nodeName, dependent);
             }
         }
 
         // Add all new dependents to dependee.
         foreach (string newDependent in newDependents)
         {
-            this.AddDependency(nodeName, newDependent);
+            AddDependency(nodeName, newDependent);
         }
     }
 
@@ -271,18 +271,18 @@ public class DependencyGraph
     public void ReplaceDependees(string nodeName, IEnumerable<string> newDependees)
     {
         // If the nodeName is a valid dependee, remove each of its dependent values.
-        if (this.dependents.ContainsKey(nodeName))
+        if (dependents.ContainsKey(nodeName))
         {
-            foreach (string dependee in this.dependents[nodeName])
+            foreach (string dependee in dependents[nodeName])
             {
-                this.RemoveDependency(dependee, nodeName);
+                RemoveDependency(dependee, nodeName);
             }
         }
 
         // Add all new dependents to dependee.
         foreach (string newDependee in newDependees)
         {
-            this.AddDependency(newDependee, nodeName);
+            AddDependency(newDependee, nodeName);
         }
     }
 }
