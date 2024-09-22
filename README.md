@@ -46,6 +46,9 @@ Read Formula README about very minor code coverage comment.
 - Eli
 - Yen
 
+# Examples of Good Software Practice (GSP)
+
+
 # References
 1) Markdown Cheat Sheet - https://www.markdownguide.org/cheat-sheet/
 2) Markdown Tables - https://www.codecademy.com/resources/docs/markdown/tables

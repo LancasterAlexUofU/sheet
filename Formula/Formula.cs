@@ -1,6 +1,7 @@
 ﻿// <copyright file="Formula.cs" company="UofU-CS3500">
 // Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
+
 // <summary>
 //   <para>
 //     This code is provided for you to start your assignment.  It was written

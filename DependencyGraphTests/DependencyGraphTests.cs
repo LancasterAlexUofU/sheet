@@ -1,8 +1,8 @@
 // <copyright file="DependencyGraphTests.cs" company="UofU-CS3500">
 // Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
+
 // <summary>
-//
 // Author:    Alex Lancaster
 // Partner:   None
 // Date:      13-Sept-2024
