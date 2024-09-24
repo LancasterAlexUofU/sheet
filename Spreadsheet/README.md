@@ -31,3 +31,5 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 # Consulted Peers
 
 # References
+1) C# Classes and Objects - https://www.w3schools.com/cs/cs_classes.php
+2) Dictionary Class - https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-8.0

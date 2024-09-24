@@ -22,6 +22,7 @@ namespace CS3500.SpreadsheetTests;
 
 using CS3500.Formula;
 using CS3500.Spreadsheet;
+using Newtonsoft.Json.Linq;
 using System.Linq.Expressions;
 
 /// <summary>
@@ -383,5 +384,25 @@ public class SpreadsheetTests
 
         values.Insert(0, "E1"); // values = ["E1", "D1"]
         CollectionAssert.AreEquivalent(values, sheet.SetCellContents("E1", formula3).ToList());
+    }
+
+    /// <summary>
+    /// This test add and removes a cell, then checks whether it was removed from the spreadsheet properly.
+    /// </summary>
+    [TestMethod]
+    public void SetCellContents_Remove()
+    {
+        Spreadsheet sheet = new();
+        Formula formula = new("1");
+        List<string> values = [];
+
+        sheet.SetCellContents("A1", formula);
+
+        // Setting A1 to string.Empty removes it
+        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", string.Empty).ToList());
+
+        // Ensure GetCellContents and GetNamesOfAllNonemptyCells are also working
+        Assert.AreEqual(string.Empty, sheet.GetCellContents("A1"));
+        CollectionAssert.AreEquivalent(values, sheet.GetNamesOfAllNonemptyCells().ToList());
     }
 }

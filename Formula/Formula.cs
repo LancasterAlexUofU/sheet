@@ -618,7 +618,6 @@ public class Formula
     /// (3) If '*' or '/' is at the top of the operator stack, pop the value stack twice and the operator stack once. <br/>
     /// Apply the popped operator to the popped numbers. Push the result onto the value stack. <br/>
     /// </summary>
-    /// <param name="token">A single closed parenthesis ')'.</param>
     /// <returns>The top value of stack values in all cases except division by zero, which returns a FormulaError Object.</returns>
     private object TokenClosedParenEvaluation()
     {

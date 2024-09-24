@@ -35,6 +35,9 @@ dotnet_diagnostic.SYSLIB1045.severity = silent
 # IDE0290: Use primary constructor
 dotnet_diagnostic.IDE0290.severity = silent
 
+# IDE0130: namespace does not match folder structure
+dotnet_diagnostic.IDE0130.severity = silent
+
 # CA1869: Cache and reuse 'JsonSerializerOptions' instances
 dotnet_diagnostic.CA1869.severity = silent
 
@@ -68,6 +71,9 @@ dotnet_diagnostic.SA1011.severity = silent
 
 # SA1309: Field names should not begin with underscore
 dotnet_diagnostic.SA1309.severity = silent
+
+# SA1021: Negative sign should not be preceded by a space
+dotnet_diagnostic.SA1021.severity = silent
 
 
 csharp_style_allow_embedded_statements_on_same_line_experimental = true:silent

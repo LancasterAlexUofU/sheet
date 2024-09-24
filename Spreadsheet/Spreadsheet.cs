@@ -26,6 +26,7 @@
 namespace CS3500.Spreadsheet;
 
 using CS3500.Formula;
+using System.Text.RegularExpressions;
 
 /// <summary>
 ///   <para>
@@ -43,6 +44,14 @@ public class CircularException : Exception
 /// </summary>
 public class InvalidNameException : Exception
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InvalidNameException"/> class.
+    /// </summary>
+    /// <param name="message">Message explaining why exception way thrown.</param>
+    internal InvalidNameException(string message)
+        : base(message)
+    {
+    }
 }
 
 /// <summary>
@@ -102,6 +111,19 @@ public class InvalidNameException : Exception
 public class Spreadsheet
 {
     /// <summary>
+    ///     All variables are letters followed by numbers.  This pattern
+    ///     represents valid variable name strings. <br />
+    ///     Matches one or more letters, upper or lowercase, followed by one or more numbers.
+    /// </summary>
+    private const string VariableRegexPattern = @"[a-zA-Z]+\d+";
+
+    // Creates a dictionary of cell names and pairs them with their contents / values
+    private Dictionary<string, Cells> sheet = [];
+    private HashSet<string> nonEmptyCells = [];
+    private List<string> dependentCells = [];
+    private int allIndiciesVisited = 0;
+
+    /// <summary>
     ///   Provides a copy of the names of all of the cells in the spreadsheet
     ///   that contain information (i.e., not empty cells).
     /// </summary>
@@ -110,7 +132,7 @@ public class Spreadsheet
     /// </returns>
     public ISet<string> GetNamesOfAllNonemptyCells()
     {
-        throw new NotImplementedException();
+        return nonEmptyCells;
     }
 
     /// <summary>
@@ -128,7 +150,14 @@ public class Spreadsheet
     /// </returns>
     public object GetCellContents(string name)
     {
-        throw new NotImplementedException();
+        if (IsVar(name))
+        {
+            return sheet[name].Content;
+        }
+        else
+        {
+            throw new InvalidNameException($"The cell name '{name}' is invalid.");
+        }
     }
 
     /// <summary>
@@ -160,7 +189,21 @@ public class Spreadsheet
     /// </returns>
     public IList<string> SetCellContents(string name, double number)
     {
-        throw new NotImplementedException();
+        if (IsVar(name))
+        {
+            Cells cell = new()
+            {
+                Content = number,
+            };
+
+            sheet.Add(name, cell);
+            nonEmptyCells.Add(name);
+            return Visit()
+        }
+        else
+        {
+            throw new InvalidNameException($"The cell name '{name}' is invalid.");
+        }
     }
 
     /// <summary>
@@ -205,6 +248,13 @@ public class Spreadsheet
         throw new NotImplementedException();
     }
 
+    private static bool IsVar(string cellName)
+    {
+        // notice the use of ^ and $ to denote that the entire string being matched is just the variable
+        string standaloneVarPattern = $"^{VariableRegexPattern}$";
+        return Regex.IsMatch(cellName, standaloneVarPattern);
+    }
+
     /// <summary>
     ///   Returns an enumeration, without duplicates, of the names of all cells whose
     ///   values depend directly on the value of the named cell.
@@ -226,6 +276,32 @@ public class Spreadsheet
     /// </returns>
     private IEnumerable<string> GetDirectDependents(string name)
     {
+        allIndiciesVisited++;
+
+        if (sheet[name].Content is Formula)
+        {
+            Formula contentFormula = new($"{sheet[name].Content}");
+
+            // Checking to make sure that there is at least one cell in formula
+            if (contentFormula.GetVariables().Count > 0)
+            {
+                // Add all dependent cells in formula
+                foreach (string cell in contentFormula.GetVariables())
+                {
+                    dependentCells.Add(cell);
+                }
+
+                if (dependentCells.Count == (allIndiciesVisited - 1))
+                {
+                    return dependentCells;
+                }
+                else
+                {
+                    GetCellContents(dependentCells[allIndiciesVisited - 1]);
+                }
+            }
+        }
+        // recursively add var to list
         throw new NotImplementedException();
     }
 
@@ -307,5 +383,32 @@ public class Spreadsheet
         }
 
         changed.AddFirst(name);
+    }
+}
+
+/// <summary>
+/// This class creates the structure of each cell, which holds its content and value.
+/// </summary>
+internal class Cells
+{
+    private object content = string.Empty;
+    private double localValue = 0.0;
+
+    /// <summary>
+    /// Gets or sets content.
+    /// </summary>
+    public object Content
+    {
+        get { return content; }
+        set { content = value; }
+    }
+
+    /// <summary>
+    /// Gets or sets value.
+    /// </summary>
+    public double Value
+    {
+        get { return localValue; }
+        set { localValue = value; }
     }
 }
