@@ -110,7 +110,7 @@ public class DependencyGraph
 /// <returns> true if the node has dependents. </returns>
     public bool HasDependents(string nodeName)
     {
-        // If the node is a key in dependees, then that means it has at least one dependent node
+        // 1
         return dependees.ContainsKey(nodeName);
     }
 

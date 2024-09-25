@@ -26,7 +26,9 @@
 namespace CS3500.Spreadsheet;
 
 using CS3500.Formula;
+using CS3500.DependencyGraph;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 /// <summary>
 ///   <para>
@@ -120,8 +122,7 @@ public class Spreadsheet
     // Creates a dictionary of cell names and pairs them with their contents / values
     private Dictionary<string, Cells> sheet = [];
     private HashSet<string> nonEmptyCells = [];
-    private List<string> dependentCells = [];
-    private int allIndiciesVisited = 0;
+    private DependencyGraph dg = new();
 
     /// <summary>
     ///   Provides a copy of the names of all of the cells in the spreadsheet
@@ -198,7 +199,7 @@ public class Spreadsheet
 
             sheet.Add(name, cell);
             nonEmptyCells.Add(name);
-            return Visit()
+            return (IList<string>)GetCellsToRecalculate(name);
         }
         else
         {
@@ -276,33 +277,33 @@ public class Spreadsheet
     /// </returns>
     private IEnumerable<string> GetDirectDependents(string name)
     {
-        allIndiciesVisited++;
-
-        if (sheet[name].Content is Formula)
+        HashSet<string> dependents = new();
+        if (dg.HasDependents(name))
         {
-            Formula contentFormula = new($"{sheet[name].Content}");
+            // Initial population of HashSet
+            dependents.UnionWith(dg.GetDependents(name));
 
-            // Checking to make sure that there is at least one cell in formula
-            if (contentFormula.GetVariables().Count > 0)
+            // dependents will keep growing if more dependent values are found and will end once all dependent values are found
+            foreach (string dependent in dependents)
             {
-                // Add all dependent cells in formula
-                foreach (string cell in contentFormula.GetVariables())
+                // If the dependent value also has dependent values, then they also rely on the initial cell.
+                if (dg.HasDependents(dependent))
                 {
-                    dependentCells.Add(cell);
-                }
+                    // Create two lists so that HashSets can be combined at certain index
+                    List<string> dependentsList = new List<string>(dependents);
+                    List<string> newDependents = new List<string>(dg.GetDependents(dependent));
 
-                if (dependentCells.Count == (allIndiciesVisited - 1))
-                {
-                    return dependentCells;
-                }
-                else
-                {
-                    GetCellContents(dependentCells[allIndiciesVisited - 1]);
+                    // Inserts after dependent index
+                    int indexToInsert = dependentsList.IndexOf(dependent) + 1;
+                    dependentsList.InsertRange(indexToInsert, newDependents);
+
+                    // Convert list back to HashSet and set it equal to the original HashSet
+                    dependents = new HashSet<string>(dependentsList);
                 }
             }
         }
-        // recursively add var to list
-        throw new NotImplementedException();
+
+        return dependents;
     }
 
     /// <summary>
