@@ -2,25 +2,25 @@
 // Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
 
-/// <summary>
-/// Author:    Alex Lancaster
-/// Partner:   None
-/// Date:      21-Aug-2024
-/// Course:    CS 3500, University of Utah, School of Computing
-/// Copyright: CS 3500 and Alex Lancaster - This work may not
-///            be copied for use in Academic Coursework.
-///
-/// I, Alex Lancaster, certify that I wrote this code from scratch and
-/// did not copy it in part or whole from another source.  All
-/// references used in the completion of the assignments are cited
-/// in my README file.
-///
-/// File Contents
-///
-///  FormulaTests runs 42 various tests on Formula.dll to ensure that the formula constructor is properly working.
-///  This is done by checking the 8 Formula Syntax and Validation Rules for a formula in infix notation.
-///  This test additionally checks for valid variables as well as numbers in proper scientific notation.
-/// </summary>
+// <summary>
+// Author:    Alex Lancaster
+// Partner:   None
+// Date:      21-Aug-2024
+// Course:    CS 3500, University of Utah, School of Computing
+// Copyright: CS 3500 and Alex Lancaster - This work may not
+//            be copied for use in Academic Coursework.
+//
+// I, Alex Lancaster, certify that I wrote this code from scratch and
+// did not copy it in part or whole from another source.  All
+// references used in the completion of the assignments are cited
+// in my README file.
+//
+// File Contents
+//
+//  FormulaTests runs 42 various tests on Formula.dll to ensure that the formula constructor is properly working.
+//  This is done by checking the 8 Formula Syntax and Validation Rules for a formula in infix notation.
+//  This test additionally checks for valid variables as well as numbers in proper scientific notation.
+// </summary>
 namespace CS3500.Formula;
 using CS3500.Formula;
 

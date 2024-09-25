@@ -2,27 +2,27 @@
 // Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
 
-/// <summary>
-/// Author:    Alex Lancaster
-/// Partner:   None
-/// Date:      18-Sept-2024
-/// Course:    CS 3500, University of Utah, School of Computing
-/// Copyright: CS 3500 and Alex Lancaster - This work may not
-///            be copied for use in Academic Coursework.
-///
-/// I, Alex Lancaster, certify that I wrote this code from scratch and
-/// did not copy it in part or whole from another source.  All
-/// references used in the completion of the assignments are cited
-/// in my README file.
-///
-/// File Contents
-///      The EvaluationTests contains 35 tests, ranging from testing the evaluator method
-///      as well as equals, not equals, and getHashCode. Various versions of the same test exist
-///      except inverted to test that the inverse returns the opposite result.
-///
-///      Complex formulas are used so that the likelihood of an off case being caught is increased
-///      if the code is ever tweaked.
-/// </summary>
+// <summary>
+// Author:    Alex Lancaster
+// Partner:   None
+// Date:      18-Sept-2024
+// Course:    CS 3500, University of Utah, School of Computing
+// Copyright: CS 3500 and Alex Lancaster - This work may not
+//            be copied for use in Academic Coursework.
+//
+// I, Alex Lancaster, certify that I wrote this code from scratch and
+// did not copy it in part or whole from another source.  All
+// references used in the completion of the assignments are cited
+// in my README file.
+//
+// File Contents
+//      The EvaluationTests contains 35 tests, ranging from testing the evaluator method
+//      as well as equals, not equals, and getHashCode. Various versions of the same test exist
+//      except inverted to test that the inverse returns the opposite result.
+//
+//      Complex formulas are used so that the likelihood of an off case being caught is increased
+//      if the code is ever tweaked.
+// </summary>
 namespace CS3500.Formula;
 using CS3500.Formula;
 using System.Text.RegularExpressions;

@@ -29,6 +29,9 @@ using CS3500.Formula;
 using CS3500.DependencyGraph;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Xml.Linq;
+using Microsoft.VisualBasic;
 
 /// <summary>
 ///   <para>
@@ -197,9 +200,10 @@ public class Spreadsheet
                 Content = number,
             };
 
-            sheet.Add(name, cell);
+            // sheet.Add(name, cell);
+            sheet[name] = cell;
             nonEmptyCells.Add(name);
-            return (IList<string>)GetCellsToRecalculate(name);
+            return GetCellsToRecalculate(name).ToList();
         }
         else
         {
@@ -221,7 +225,24 @@ public class Spreadsheet
     /// </returns>
     public IList<string> SetCellContents(string name, string text)
     {
-        throw new NotImplementedException();
+        if (IsVar(name))
+        {
+            Cells cell = new()
+            {
+                Content = text,
+            };
+
+            // sheet.Add(name, cell);
+            sheet[name] = cell;
+            nonEmptyCells.Add(name);
+
+            // TODO: REMOVE IF STRING.EMPTY
+            return GetCellsToRecalculate(name).ToList();
+        }
+        else
+        {
+            throw new InvalidNameException($"The cell name '{name}' is invalid.");
+        }
     }
 
     /// <summary>
@@ -249,6 +270,12 @@ public class Spreadsheet
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    ///   Reports whether "token" is a variable.  It must be one or more letters
+    ///   followed by one or more numbers.
+    /// </summary>
+    /// <param name="cellName"> A string that may be a valid cellName. </param>
+    /// <returns> true if the string matches the requirements, e.g., A1 or a1. </returns>
     private static bool IsVar(string cellName)
     {
         // notice the use of ^ and $ to denote that the entire string being matched is just the variable
