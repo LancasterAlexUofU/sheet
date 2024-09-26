@@ -461,6 +461,16 @@ public class SpreadsheetTests
 
         values = ["H1"];
         CollectionAssert.AreEquivalent(values, sheet.SetCellContents("H1", formula5).ToList());
+
+        values = ["C1"];
+        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("C1", string.Empty).ToList());
+
+        values = ["B1"];
+        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("B1", string.Empty).ToList());
+
+        // Removed B1, so G1 should only depend on itself
+        values = ["G1"];
+        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("G1", 3).ToList());
     }
 
     // TODO: Removal of a cell that isn't initialized shouldn't throw an error.
