@@ -16,7 +16,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 5 | 10 | 9.5 |
+| Assignment 5 | 10 | 11.5 |
 
 
  ## Hour Breakdown
@@ -25,9 +25,10 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | :--------:| :--------:
 | Reading assignment and <br/> understanding code | 1 |
 | Implementing Spreadsheet Program | 4.5 |
+| Debugging | 1 |
 
 # Comments for Evaluators
-
+Work stands on its own.
 
 # Consulted Peers
 

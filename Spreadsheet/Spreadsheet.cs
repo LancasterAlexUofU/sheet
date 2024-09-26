@@ -17,6 +17,7 @@
 //
 // File Contents
 //      TODO: ADD TO ME!!!!!!!!!!
+//      TODO: ADD NEW TESTS FOR ASSIGNMENT 4
 // <summary>
 
 // Written by Joe Zachary for CS 3500, September 2013
@@ -32,6 +33,7 @@ using System.Collections.Generic;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Xml.Linq;
 using Microsoft.VisualBasic;
+using static System.Net.Mime.MediaTypeNames;
 
 /// <summary>
 ///   <para>
@@ -156,7 +158,16 @@ public class Spreadsheet
     {
         if (IsVar(name))
         {
-            return sheet[name].Content;
+            if (nonEmptyCells.Contains(name))
+            {
+                return sheet[name].Content;
+            }
+
+            // If the cell in not in the spreadsheet, automatically return empty string
+            else
+            {
+                return string.Empty;
+            }
         }
         else
         {
@@ -200,7 +211,6 @@ public class Spreadsheet
                 Content = number,
             };
 
-            // sheet.Add(name, cell);
             sheet[name] = cell;
             nonEmptyCells.Add(name);
             return GetCellsToRecalculate(name).ToList();
@@ -227,17 +237,38 @@ public class Spreadsheet
     {
         if (IsVar(name))
         {
-            Cells cell = new()
+            if (text.Equals(string.Empty))
             {
-                Content = text,
-            };
+                // Check that the cell actually exists so that removal doesn't cause an error.
+                if (sheet.ContainsKey(name))
+                {
+                    // Remove from spreadsheet dictionary and nonEmptyCell HashSet
+                    sheet.Remove(name);
+                    nonEmptyCells.Remove(name);
 
-            // sheet.Add(name, cell);
-            sheet[name] = cell;
-            nonEmptyCells.Add(name);
+                    // Remove every dependency for cells which relied on name
+                    foreach (string dependentCell in dg.GetDependents(name))
+                    {
+                        dg.RemoveDependency(name, dependentCell);
+                    }
+                }
 
-            // TODO: REMOVE IF STRING.EMPTY
-            return GetCellsToRecalculate(name).ToList();
+                // Just returning the name of the cell if it contains the empty string.
+                List<string> emptyCell = [];
+                emptyCell.Add(name);
+                return emptyCell;
+            }
+            else
+            {
+                Cells cell = new()
+                {
+                    Content = text,
+                };
+
+                sheet[name] = cell;
+                nonEmptyCells.Add(name);
+                return GetCellsToRecalculate(name).ToList();
+            }
         }
         else
         {
@@ -267,7 +298,28 @@ public class Spreadsheet
     /// </returns>
     public IList<string> SetCellContents(string name, Formula formula)
     {
-        throw new NotImplementedException();
+        if (IsVar(name))
+        {
+            Cells cell = new()
+            {
+                Content = formula,
+            };
+
+            sheet[name] = cell;
+            nonEmptyCells.Add(name);
+
+            // Takes all variables (cells) in formula and adds them to the dependency graph.
+            foreach (string dependentCell in formula.GetVariables())
+            {
+                dg.AddDependency(name, dependentCell);
+            }
+
+            return GetCellsToRecalculate(name).ToList();
+        }
+        else
+        {
+            throw new InvalidNameException($"The cell name '{name}' is invalid.");
+        }
     }
 
     /// <summary>
@@ -304,33 +356,33 @@ public class Spreadsheet
     /// </returns>
     private IEnumerable<string> GetDirectDependents(string name)
     {
-        HashSet<string> dependents = new();
-        if (dg.HasDependents(name))
+        HashSet<string> dependees = new();
+        if (dg.HasDependees(name))
         {
             // Initial population of HashSet
-            dependents.UnionWith(dg.GetDependents(name));
+            dependees.UnionWith(dg.GetDependees(name));
 
             // dependents will keep growing if more dependent values are found and will end once all dependent values are found
-            foreach (string dependent in dependents)
+            foreach (string dependee in dependees)
             {
-                // If the dependent value also has dependent values, then they also rely on the initial cell.
-                if (dg.HasDependents(dependent))
+                // If the dependee value also has dependee values, then they also rely on the initial cell.
+                if (dg.HasDependees(dependee))
                 {
                     // Create two lists so that HashSets can be combined at certain index
-                    List<string> dependentsList = new List<string>(dependents);
-                    List<string> newDependents = new List<string>(dg.GetDependents(dependent));
+                    List<string> dependeesList = new List<string>(dependees);
+                    List<string> newDependees = new List<string>(dg.GetDependees(dependee));
 
                     // Inserts after dependent index
-                    int indexToInsert = dependentsList.IndexOf(dependent) + 1;
-                    dependentsList.InsertRange(indexToInsert, newDependents);
+                    int indexToInsert = dependeesList.IndexOf(dependee) + 1;
+                    dependeesList.InsertRange(indexToInsert, newDependees);
 
                     // Convert list back to HashSet and set it equal to the original HashSet
-                    dependents = new HashSet<string>(dependentsList);
+                    dependees = new HashSet<string>(dependeesList);
                 }
             }
         }
 
-        return dependents;
+        return dependees;
     }
 
     /// <summary>
@@ -420,7 +472,8 @@ public class Spreadsheet
 internal class Cells
 {
     private object content = string.Empty;
-    private double localValue = 0.0;
+
+    // private double localValue = 0.0;
 
     /// <summary>
     /// Gets or sets content.
@@ -431,12 +484,12 @@ internal class Cells
         set { content = value; }
     }
 
-    /// <summary>
-    /// Gets or sets value.
-    /// </summary>
-    public double Value
-    {
-        get { return localValue; }
-        set { localValue = value; }
-    }
+    ///// <summary>
+    ///// Gets or sets value.
+    ///// </summary>
+    // public double Value
+    // {
+    //    get { return localValue; }
+    //    set { localValue = value; }
+    // }
 }

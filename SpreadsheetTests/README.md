@@ -16,7 +16,7 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 5 | 10 | 9.5 |
+| Assignment 5 | 10 | 11.5 |
 
 
  ## Hour Breakdown
@@ -24,8 +24,13 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | Task | Number of Hours |
 | :--------:| :--------:
 | Implementing Spreadsheet Tests | 4 |
+| Debugging | 1 |
 
 # Comments for Evaluators
+I am assuming, following the assignment instructions, that even if a cell is removed
+by passing string.Empty, SetCellContents should still return the cell that was passed in
+instead of not returning anything. So, in tests, I will be checking that SetCellContents
+still returns the passed-in cell as the correct output  even if it was removed.
 
 # Consulted Peers
 
