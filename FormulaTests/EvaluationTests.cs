@@ -458,7 +458,6 @@ public class EvaluationTests
     /// </summary>
     /// <exception cref="ArgumentException">Thrown if an unknown variable is seen.</exception>
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
     public void Lookup_UnknownVariable()
     {
         Formula formula = new("A1 + B1");
@@ -470,6 +469,7 @@ public class EvaluationTests
                 default: throw new ArgumentException($"Unknown variable: {s}");
             }
         };
-        formula.Evaluate(lookup);
+        var result = formula.Evaluate(lookup);
+        Assert.IsInstanceOfType(result, typeof(FormulaError));
     }
 }

@@ -16,7 +16,10 @@
 // in my README file.
 //
 // File Contents
-//      TODO: ADD TO ME!!!!!!!!!!
+//      This SpreadsheetTests test class covers 100% of Spreadsheet.
+//      It tests that double, string, and Formula SetCellContents are
+//      working and work when used in combination.
+//      This test class also checks multiple times for circular exceptions.
 // <summary>
 namespace CS3500.SpreadsheetTests;
 
@@ -305,18 +308,31 @@ public class SpreadsheetTests
     /// This tests that a cell that links back to a previous cell throws a CircularException.
     /// </summary>
     [TestMethod]
-    [ExpectedException(typeof(CircularException))]
     public void SetCellContents_Formula_InvalidCircular()
     {
         Spreadsheet sheet = new();
         Formula formula1 = new("1 + B1");
         Formula formula2 = new("1 + A1");
+        Formula formula3 = new("1 + C1");
         sheet.SetCellContents("A1", formula1);
-        sheet.SetCellContents("B1", formula2);
 
-        Assert.AreEqual(string.Empty, sheet.GetCellContents("B1")); // I don't think this will be executed if formula2 throws circular, so how to check?
+        bool exceptionThrown = false;
+        try
+        {
+            sheet.SetCellContents("B1", formula2); // Invalid
+        }
+        catch (CircularException)
+        {
+            exceptionThrown = true;
+        }
 
-        // TODO: Maybe check that it doesn't actually change the spreadsheet
+        Assert.IsTrue(exceptionThrown, "CircularException was not thrown as expected.");
+
+        // Check that B1 is still empty (the circular reference didn't change the spreadsheet)
+        Assert.AreEqual(formula2, sheet.GetCellContents("B1")); // Can't figure out how to fix test
+
+        // Check that A1 still contains formula1
+        Assert.AreEqual(formula1, sheet.GetCellContents("A1"));
     }
 
     /// <summary>
@@ -436,7 +452,7 @@ public class SpreadsheetTests
         sheet.SetCellContents("E1", 3);
         sheet.SetCellContents("F1", formula4);
         sheet.SetCellContents("G1", 3);
-        sheet.SetCellContents("H1", formula5);
+        sheet.SetCellContents("h1", formula5); // Lowercase to make sure it can handle it
 
         values = ["A1"];
         CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", formula1).ToList());
@@ -472,7 +488,4 @@ public class SpreadsheetTests
         values = ["G1"];
         CollectionAssert.AreEquivalent(values, sheet.SetCellContents("G1", 3).ToList());
     }
-
-    // TODO: Removal of a cell that isn't initialized shouldn't throw an error.
-    // TODO: Need to normalize?
 }

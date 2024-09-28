@@ -9,14 +9,22 @@ Project:    Spreadsheet
 Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in Academic Coursework.
 ```
 
-# Overview of the DependencyGraph Project
+# Overview of the Spreadsheet Project
+The Spreadsheet project has many different methods for setting and getting contents of cells
+in a spreadsheet. The spreadsheet is able to set cell contents to be either a double, a string,
+or a formula. 
+
+The Spreadsheet project can also detect when a cell has referenced back to a prevous cell before it, 
+creating a loop, even if the cells are indirectly related. If this happens, a CircularException is thrown.
 
 
 # Time Expenditures
 
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
-| Assignment 5 | 10 | 11.5 |
+| Assignment 5 | 10 | 12.5 |
+
+(Rest of the hours come from SpreadsheetTests)
 
 
  ## Hour Breakdown
@@ -25,12 +33,13 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 | :--------:| :--------:
 | Reading assignment and <br/> understanding code | 1 |
 | Implementing Spreadsheet Program | 4.5 |
-| Debugging | 1 |
+| Debugging | 2 |
 
 # Comments for Evaluators
 Work stands on its own.
 
 # Consulted Peers
+- Landon
 
 # References
 1) C# Classes and Objects - https://www.w3schools.com/cs/cs_classes.php

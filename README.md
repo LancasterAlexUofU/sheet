@@ -19,10 +19,11 @@ The Spreadsheet program is currently capable of:
 - Retuning a canonical string representation of a formula
 - Determining which cells must be evaluated before other cells
 - Evaluating a formula with numbers and variables
+- Getting and Setting Cell Contents in a spreadsheet
+- Detecting loops for cell dependency values
 
 Future extensions are:
 
-- Detecting loops for cell dependency values
 - Adding a GUI
 
 # Time Expenditures
@@ -33,6 +34,7 @@ Future extensions are:
 | Assignment 2 | 12 | 17 |
 | Assignment 3 | 14 | 16 |
 | Assignment 4 | 18 | 11 |
+| Assignment 5 | 10 | 12.5 |
 
 # Comments for Evaluators
 Read FormulaTests README for comment about code coverage.
@@ -41,12 +43,30 @@ Read DependencyGraph README about autograder and reason for excessive commit his
 
 Read Formula README about very minor code coverage comment.
 
+Read SpreadsheetTests about cell removal assumption.
+
 # Consulted Peers
 - Landon H.
 - Eli
 - Yen
 
 # Examples of Good Software Practice (GSP)
+
+### - Separation of concerns
+Many functions that were complex were broken down into smaller helper methods. For example, in formula evaluation,
+each algorithm check was put into a switch case and each check was its own separate functions. This is done all throughout
+the projects in this solution and makes complex functions easier to understand.
+
+### - Well Commented and Short Methods
+All of the project methods are well commented in detail. All test cases have comments that tell exactly what they do
+and complex RegEx variables in Formula explicitly explain what they take in. All methods and helper methods have be 
+purposely shortened so that they can fit on a single page for better readability.
+
+### - Testing strategies
+Many testing strategies were employed so that the project's code would be properly working. For example, in FormulaTests,
+many complex formulas were created with many different types of interactions between variables, parentheses, operands, and numbers.
+This was done so that many small tedious tests weren't needed and a large complex blanket test would cover almost all scenarios.
+This was done multiple times throughout the different test classes.
 
 
 # References

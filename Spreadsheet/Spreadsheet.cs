@@ -16,8 +16,11 @@
 // in my README file.
 //
 // File Contents
-//      TODO: ADD TO ME!!!!!!!!!!
-//      TODO: ADD NEW TESTS FOR ASSIGNMENT 4
+//      This class creates the main functions of a spreadsheet.
+//      Spreadsheet can set the contents of cells to either be
+//      a double, a string, or a formula. Cell contents
+//      can be retrieved and spreadsheet also checks
+//      for any circular loops for cells calling itself.
 // <summary>
 
 // Written by Joe Zachary for CS 3500, September 2013
@@ -34,6 +37,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Xml.Linq;
 using Microsoft.VisualBasic;
 using static System.Net.Mime.MediaTypeNames;
+using System.Linq.Expressions;
 
 /// <summary>
 ///   <para>
@@ -156,6 +160,7 @@ public class Spreadsheet
     /// </returns>
     public object GetCellContents(string name)
     {
+        name = name.ToUpper();
         if (IsVar(name))
         {
             if (nonEmptyCells.Contains(name))
@@ -204,6 +209,7 @@ public class Spreadsheet
     /// </returns>
     public IList<string> SetCellContents(string name, double number)
     {
+        name = name.ToUpper();
         if (IsVar(name))
         {
             Cells cell = new()
@@ -235,6 +241,7 @@ public class Spreadsheet
     /// </returns>
     public IList<string> SetCellContents(string name, string text)
     {
+        name = name.ToUpper();
         if (IsVar(name))
         {
             if (text.Equals(string.Empty))
@@ -298,6 +305,7 @@ public class Spreadsheet
     /// </returns>
     public IList<string> SetCellContents(string name, Formula formula)
     {
+        name = name.ToUpper();
         if (IsVar(name))
         {
             Cells cell = new()
@@ -356,33 +364,8 @@ public class Spreadsheet
     /// </returns>
     private IEnumerable<string> GetDirectDependents(string name)
     {
-        HashSet<string> dependees = new();
-        if (dg.HasDependees(name))
-        {
-            // Initial population of HashSet
-            dependees.UnionWith(dg.GetDependees(name));
-
-            // dependents will keep growing if more dependent values are found and will end once all dependent values are found
-            foreach (string dependee in dependees)
-            {
-                // If the dependee value also has dependee values, then they also rely on the initial cell.
-                if (dg.HasDependees(dependee))
-                {
-                    // Create two lists so that HashSets can be combined at certain index
-                    List<string> dependeesList = new List<string>(dependees);
-                    List<string> newDependees = new List<string>(dg.GetDependees(dependee));
-
-                    // Inserts after dependent index
-                    int indexToInsert = dependeesList.IndexOf(dependee) + 1;
-                    dependeesList.InsertRange(indexToInsert, newDependees);
-
-                    // Convert list back to HashSet and set it equal to the original HashSet
-                    dependees = new HashSet<string>(dependeesList);
-                }
-            }
-        }
-
-        return dependees;
+        // Name will be valid as name is checked in GetCellContents
+        return dg.GetDependees(name);
     }
 
     /// <summary>
@@ -444,9 +427,27 @@ public class Spreadsheet
     }
 
     /// <summary>
-    ///   A helper for the GetCellsToRecalculate method.
-    ///   FIXME: You should fully comment what is going on below using XML tags as appropriate.
+    /// <para>
+    /// This function visits all the dependents of the dependents. <br/>
+    /// For example, if <br/>
+    /// A1 -> 3 <br/>
+    /// B1 -> A1 * 2 <br/>
+    /// C1 -> B1 + 7, <br/>
+    /// C1 not only relies on B1 but indirectly relies on A1 as well. <br/>
+    /// This method recursively finds all values which indirectly depend on one another. <br/>
+    /// </para>
     /// </summary>
+    /// <param name="start">This is the starting cell (to check for a circular exception).</param>
+    /// <param name="name">This is the cell that is currently being processed.</param>
+    /// <param name="visited">Creates a set of all visited cells so that if a cell hasn't been
+    /// visited, then it can be explored and the recursive method doesn't repeat itself.</param>
+    /// <param name="changed">If a cell is determined to be directly or indirectly dependent,
+    /// it will be added to a list changed.
+    /// </param>
+    /// <exception cref="CircularException">If the current dependent cell is equal to the starting cell,
+    /// the dependent cell has looped back to the start which will cause an infinite recursion
+    /// so a CircularException is thrown.
+    /// </exception>
     private void Visit(string start, string name, ISet<string> visited, LinkedList<string> changed)
     {
         visited.Add(name);

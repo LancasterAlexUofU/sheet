@@ -295,9 +295,17 @@ public class Formula
                 // Checks if token is a variable
                 case string when IsVar(token):
 
-                    double value = lookup(token);
-                    TokenNumberStackEvaluation(value);
-                    break;
+                    // Checks to see if token is an unknown variable
+                    try
+                    {
+                        double value = lookup(token);
+                        TokenNumberStackEvaluation(value);
+                        break;
+                    }
+                    catch (ArgumentException)
+                    {
+                        return new FormulaError($"Unknown variable: {token}");
+                    }
 
                 // Checks if token is '+' or '-'
                 case string when IsPlusOrMinus(token):
