@@ -5,7 +5,7 @@ Start Date:  27-Aug-2024
 Course:      CS 3500, University of Utah, School of Computing
 GitHub ID:   LancasterAlexUofU
 Repo:        https://github.com/uofu-cs3500-20-fall2024/spreadsheet-LancasterAlexUofU
-Commit Date: 13-Sept-2024
+Commit Date: 27-Sept-2024
 Solution:    Spreadsheet
 Copyright:   CS 3500 and Alex Lancaster - This work may not be copied for use in Academic Coursework.
 ```
