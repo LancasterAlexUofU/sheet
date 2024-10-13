@@ -212,6 +212,12 @@ public class Spreadsheet
         name = name.ToUpper();
         if (IsVar(name))
         {
+            // Removing any old dependencies
+            foreach (string dependent in dg.GetDependents(name))
+            {
+                dg.RemoveDependency(name, dependent);
+            }
+
             Cells cell = new()
             {
                 Content = number,
@@ -244,6 +250,12 @@ public class Spreadsheet
         name = name.ToUpper();
         if (IsVar(name))
         {
+            // Removing any old dependencies
+            foreach (string dependent in dg.GetDependents(name))
+            {
+                dg.RemoveDependency(name, dependent);
+            }
+
             if (text.Equals(string.Empty))
             {
                 // Check that the cell actually exists so that removal doesn't cause an error.
@@ -308,6 +320,12 @@ public class Spreadsheet
         name = name.ToUpper();
         if (IsVar(name))
         {
+            // Removing any old dependencies
+            foreach (string dependent in dg.GetDependents(name))
+            {
+                dg.RemoveDependency(name, dependent);
+            }
+
             Cells cell = new()
             {
                 Content = formula,
