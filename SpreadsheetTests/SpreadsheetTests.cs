@@ -329,7 +329,7 @@ public class SpreadsheetTests
         Assert.IsTrue(exceptionThrown, "CircularException was not thrown as expected.");
 
         // Check that B1 is still empty (the circular reference didn't change the spreadsheet)
-        Assert.AreEqual(formula2, sheet.GetCellContents("B1")); // Can't figure out how to fix test
+        Assert.AreEqual(string.Empty, sheet.GetCellContents("B1")); // Can't figure out how to fix test
 
         // Check that A1 still contains formula1
         Assert.AreEqual(formula1, sheet.GetCellContents("A1"));

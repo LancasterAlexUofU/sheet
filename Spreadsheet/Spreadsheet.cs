@@ -250,12 +250,6 @@ public class Spreadsheet
         name = name.ToUpper();
         if (IsVar(name))
         {
-            // Removing any old dependencies
-            foreach (string dependent in dg.GetDependents(name))
-            {
-                dg.RemoveDependency(name, dependent);
-            }
-
             if (text.Equals(string.Empty))
             {
                 // Check that the cell actually exists so that removal doesn't cause an error.
@@ -320,6 +314,10 @@ public class Spreadsheet
         name = name.ToUpper();
         if (IsVar(name))
         {
+            // Holds previous value in case CircularException is thrown.
+            // If thrown, sheet will be restored to previous form.
+            var temp = GetCellContents(name);
+
             // Removing any old dependencies
             foreach (string dependent in dg.GetDependents(name))
             {
@@ -331,6 +329,7 @@ public class Spreadsheet
                 Content = formula,
             };
 
+            // Add cell to spreadsheet
             sheet[name] = cell;
             nonEmptyCells.Add(name);
 
@@ -340,7 +339,28 @@ public class Spreadsheet
                 dg.AddDependency(name, dependentCell);
             }
 
-            return GetCellsToRecalculate(name).ToList();
+            try
+            {
+                return GetCellsToRecalculate(name).ToList();
+            }
+            catch(CircularException)
+            {
+                // Remove cell from spreadsheet
+                if (temp is double)
+                {
+                    SetCellContents(name, (double)temp);
+                }
+                else if (temp is string)
+                {
+                    SetCellContents(name, (string)temp);
+                }
+                else if (temp is Formula)
+                {
+                    SetCellContents(name, (Formula)temp);
+                }
+
+                throw new CircularException();
+            }
         }
         else
         {
