@@ -23,17 +23,25 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
+| Assignment 6 | 14 | 2 |
 
 (Rest of the hours come from SpreadsheetTests)
 
 
  ## Hour Breakdown
 
+ ### Assignment 5
 | Task | Number of Hours |
 | :--------:| :--------:
 | Reading assignment and <br/> understanding code | 1 |
 | Implementing Spreadsheet Program | 4.5 |
 | Debugging | 2 |
+
+### Assignment 6
+| Task | Number of Hours |
+| :--------:| :--------:
+| Reading assignment and <br/> setting up environment | 2 |
+
 
 # Comments for Evaluators
 Work stands on its own.

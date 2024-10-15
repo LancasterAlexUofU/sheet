@@ -68,6 +68,10 @@ many complex formulas were created with many different types of interactions bet
 This was done so that many small tedious tests weren't needed and a large complex blanket test would cover almost all scenarios.
 This was done multiple times throughout the different test classes.
 
+### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSERT WHITEBOARD PHOTO HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+### Paragraph describing what you have learned about your time management and estimation skills.
+### THREE MORE EXAMPLES OF GSP
+
 
 # References
 1) Markdown Cheat Sheet - https://www.markdownguide.org/cheat-sheet/
