@@ -40,6 +40,8 @@ using Microsoft.VisualBasic;
 using static System.Net.Mime.MediaTypeNames;
 using System.Linq.Expressions;
 using System.Threading.Channels;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 /// <summary>
 ///   <para>
@@ -150,7 +152,6 @@ public class Spreadsheet
     private Dictionary<string, Cells> sheet = [];
     private HashSet<string> nonEmptyCells = [];
     private DependencyGraph dg = new();
-    private bool changed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Spreadsheet"/> class.
@@ -159,7 +160,7 @@ public class Spreadsheet
     public Spreadsheet()
     {
         spreadsheetName = "default";
-        changed = false;
+        Changed = false;
     }
 
     /// <summary>
@@ -170,7 +171,51 @@ public class Spreadsheet
     public Spreadsheet(string userEnteredName)
     {
         spreadsheetName = userEnteredName;
-        changed = false;
+        Changed = false;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether if any changes have been made to the spreadsheet.
+    /// </summary>
+    public bool Changed { get; private set; } = false;
+
+    /// <summary>
+    ///   <para>
+    ///     Shortcut syntax to for getting the value of the cell
+    ///     using the [] operator.
+    ///   </para>
+    ///   <para>
+    ///     See: <see cref="GetCellValue(string)"/>.
+    ///   </para>
+    ///   <para>
+    ///     Example Usage:
+    ///   </para>
+    ///   <code>
+    ///      sheet.SetContentsOfCell( "A1", "=5+5" );
+    ///
+    ///      sheet["A1"] == 10;
+    ///      // vs.
+    ///      sheet.GetCellValue("A1") == 10;
+    ///   </code>
+    /// </summary>
+    /// <param name="cellName"> Any valid cell name. </param>
+    /// <returns>
+    ///   Returns the value of a cell.  Note: If the cell is a formula, the value should
+    ///   already have been computed.
+    /// </returns>
+    /// <exception cref="InvalidNameException">
+    ///     If the name parameter is invalid, throw an InvalidNameException.
+    /// </exception>
+    public object this[string cellName]
+    {
+        get
+        {
+            return 0;
+        }
+
+        set
+        {
+        }
     }
 
     /// <summary>
@@ -222,37 +267,6 @@ public class Spreadsheet
 
     /// <summary>
     ///   <para>
-    ///     Shortcut syntax to for getting the value of the cell
-    ///     using the [] operator.
-    ///   </para>
-    ///   <para>
-    ///     See: <see cref="GetCellValue(string)"/>.
-    ///   </para>
-    ///   <para>
-    ///     Example Usage:
-    ///   </para>
-    ///   <code>
-    ///      sheet.SetContentsOfCell( "A1", "=5+5" );
-    ///
-    ///      sheet["A1"] == 10;
-    ///      // vs.
-    ///      sheet.GetCellValue("A1") == 10;
-    ///   </code>
-    /// </summary>
-    /// <param name="cellName"> Any valid cell name. </param>
-    /// <returns>
-    ///   Returns the value of a cell.  Note: If the cell is a formula, the value should
-    ///   already have been computed.
-    /// </returns>
-    /// <exception cref="InvalidNameException">
-    ///     If the name parameter is invalid, throw an InvalidNameException.
-    /// </exception>
-    public object this[string cellName];
-    {
-    }
-
-    /// <summary>
-    ///   <para>
     ///     Writes the contents of this spreadsheet to the named file using a JSON format.
     ///     If the file already exists, overwrite it.
     ///   </para>
@@ -260,8 +274,8 @@ public class Spreadsheet
     ///     The output JSON should look like the following.
     ///   </para>
     ///   <para>
-    ///     For example, consider a spreadsheet that contains a cell "A1" 
-    ///     with contents being the double 5.0, and a cell "B3" with contents 
+    ///     For example, consider a spreadsheet that contains a cell "A1"
+    ///     with contents being the double 5.0, and a cell "B3" with contents
     ///     being the Formula("A1+2"), and a cell "C4" with the contents "hello".
     ///   </para>
     ///   <para>
@@ -283,13 +297,13 @@ public class Spreadsheet
     ///   }
     ///   </code>
     ///   <para>
-    ///     You can achieve this by making sure your data structure is a dictionary 
+    ///     You can achieve this by making sure your data structure is a dictionary
     ///     and that the contained objects (Cells) have property named "StringForm"
-    ///     (if this name does not match your existing code, use the JsonPropertyName 
+    ///     (if this name does not match your existing code, use the JsonPropertyName
     ///     attribute).
     ///   </para>
     ///   <para>
-    ///     There can be 0 cells in the dictionary, resulting in { "Cells" : {} } 
+    ///     There can be 0 cells in the dictionary, resulting in { "Cells" : {} }.
     ///   </para>
     ///   <para>
     ///     Further, when writing the value of each cell...
@@ -311,11 +325,18 @@ public class Spreadsheet
     /// </summary>
     /// <param name="filename"> The name (with path) of the file to save to.</param>
     /// <exception cref="SpreadsheetReadWriteException">
-    ///   If there are any problems opening, writing, or closing the file, 
+    ///   If there are any problems opening, writing, or closing the file,
     ///   the method should throw a SpreadsheetReadWriteException with an
     ///   explanatory message.
     /// </exception>
-    public void Save(string filename);
+    public void Save(string filename)
+    {
+        // SetCellContents("A1", 3);
+        SetCellContents("A2", "hello");
+        Changed = false;
+        string message = JsonSerializer.Serialize(sheet);
+        Cells? result = JsonSerializer.Deserialize<Cells>(message);
+    }
 
     /// <summary>
     ///   <para>
@@ -332,7 +353,10 @@ public class Spreadsheet
     /// </summary>
     /// <param name="filename"> The saved file name including the path. </param>
     /// <exception cref="SpreadsheetReadWriteException"> When the file cannot be opened or the json is bad.</exception>
-    public void Load(string filename);
+    public void Load(string filename)
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     ///   <para>
@@ -349,7 +373,10 @@ public class Spreadsheet
     /// <exception cref="InvalidNameException">
     ///   If the provided name is invalid, throws an InvalidNameException.
     /// </exception>
-    public object GetCellValue(string cellName);
+    public object GetCellValue(string cellName)
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     ///   <para>
@@ -387,7 +414,7 @@ public class Spreadsheet
     ///     begin with an "=" (equal sign), save the content as a string.
     ///   </para>
     ///   <para>
-    ///     On successfully changing the contents of a cell, the spreadsheet will be <see cref="Changed"/>.
+    ///     On successfully changing the contents of a cell, the spreadsheet will be changed. (Removed changed link).
     ///   </para>
     /// </summary>
     /// <param name="name"> The cell name that is being changed.</param>
@@ -414,7 +441,11 @@ public class Spreadsheet
     ///   cause a circular dependency, throw a CircularException.
     ///   (NOTE: No change is made to the spreadsheet.)
     /// </exception>
-    public IList<string> SetContentsOfCell(string name, string content);
+    public IList<string> SetContentsOfCell(string name, string content)
+    {
+        // throw new NotImplementedException();
+        return new List<string>();
+    }
 
     /// <summary>
     ///   Reports whether "token" is a variable.  It must be one or more letters
@@ -709,11 +740,12 @@ internal class Cells
 {
     private object content = string.Empty;
 
-    // private double localValue = 0.0;
+    // private object localValue = string.Empty;
 
     /// <summary>
     /// Gets or sets content.
     /// </summary>
+    [JsonPropertyName("StringForm")]
     public object Content
     {
         get { return content; }
@@ -723,7 +755,8 @@ internal class Cells
     ///// <summary>
     ///// Gets or sets value.
     ///// </summary>
-    // public double Value
+
+    // public object Value
     // {
     //    get { return localValue; }
     //    set { localValue = value; }

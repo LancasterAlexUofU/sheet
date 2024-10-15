@@ -17,7 +17,7 @@
 //
 // File Contents
 //      This SpreadsheetTests test class covers 100% of Spreadsheet.
-//      It tests that double, string, and Formula SetCellContents are
+//      It tests that double, string, and Formula SetContentsOfCell are
 //      working and work when used in combination.
 //      This test class also checks multiple times for circular exceptions.
 // <summary>
@@ -31,7 +31,7 @@ using System.Linq.Expressions;
 /// <summary>
 /// This test class ensures that the Spreadsheet project is properly working but testing all public methods. <br/>
 /// Many of the tests look for Invalid name and circular exceptions to be thrown.
-/// For SetCellContents, all return types are tested for doubles, strings, and formulas.
+/// For SetContentsOfCell, all return types are tested for doubles, strings, and formulas.
 /// </summary>
 [TestClass]
 public class SpreadsheetTests
@@ -54,9 +54,9 @@ public class SpreadsheetTests
     public void GetNames_DoubleOnly()
     {
         Spreadsheet sheet = new();
-        sheet.SetCellContents("A1", 1.0);
-        sheet.SetCellContents("B1", 0);
-        sheet.SetCellContents("A1", 2E1);
+        sheet.SetContentsOfCell("A1", "1.0");
+        sheet.SetContentsOfCell("B1", "0");
+        sheet.SetContentsOfCell("A1", "2E1");
 
         List<string> correctCells = ["A1", "B1"];
         CollectionAssert.AreEquivalent(correctCells, sheet.GetNamesOfAllNonemptyCells().ToList());
@@ -69,12 +69,12 @@ public class SpreadsheetTests
     public void GetNames_StringOnly()
     {
         Spreadsheet sheet = new();
-        sheet.SetCellContents("A1", "A1");
-        sheet.SetCellContents("B1", "This is a string");
-        sheet.SetCellContents("A1", "A1 + B1");
-        sheet.SetCellContents("C1", "1234");
-        sheet.SetCellContents("C1", string.Empty);
-        sheet.SetCellContents("D1", string.Empty);
+        sheet.SetContentsOfCell("A1", "A1");
+        sheet.SetContentsOfCell("B1", "This is a string");
+        sheet.SetContentsOfCell("A1", "A1 + B1");
+        sheet.SetContentsOfCell("C1", "1234");
+        sheet.SetContentsOfCell("C1", string.Empty);
+        sheet.SetContentsOfCell("D1", string.Empty);
 
         List<string> correctCells = ["A1", "B1"];
         CollectionAssert.AreEquivalent(correctCells, sheet.GetNamesOfAllNonemptyCells().ToList());
@@ -92,10 +92,10 @@ public class SpreadsheetTests
         Formula expression3 = new("1 + C1");
         Formula expression4 = new("2 * 2");
 
-        sheet.SetCellContents("A1", expression1);
-        sheet.SetCellContents("B1", expression2);
-        sheet.SetCellContents("A1", expression3);
-        sheet.SetCellContents("C1", expression4);
+        sheet.SetContentsOfCell("A1", $"={expression1}");
+        sheet.SetContentsOfCell("B1", $"={expression2}");
+        sheet.SetContentsOfCell("A1", $"={expression3}");
+        sheet.SetContentsOfCell("C1", $"={expression4}");
 
         List<string> correctCells = ["A1", "B1", "C1"];
         CollectionAssert.AreEquivalent(correctCells, sheet.GetNamesOfAllNonemptyCells().ToList());
@@ -111,14 +111,14 @@ public class SpreadsheetTests
         Formula expression1 = new("1 + 1");
         Formula expression2 = new("A1 + C1");
 
-        sheet.SetCellContents("A1", expression1);
-        sheet.SetCellContents("A1", expression1); // Replace with formula
-        sheet.SetCellContents("A1", "1 + 1"); // Replace with string
-        sheet.SetCellContents("A1", 2); // Replace with double
+        sheet.SetContentsOfCell("A1", $"={expression1}");
+        sheet.SetContentsOfCell("A1", $"={expression1}"); // Replace with formula
+        sheet.SetContentsOfCell("A1", "1 + 1"); // Replace with string
+        sheet.SetContentsOfCell("A1", "2"); // Replace with double
 
-        sheet.SetCellContents("B1", expression2);
-        sheet.SetCellContents("C1", 4);
-        sheet.SetCellContents("D1", string.Empty);
+        sheet.SetContentsOfCell("B1", $"={expression2}");
+        sheet.SetContentsOfCell("C1", "4");
+        sheet.SetContentsOfCell("D1", string.Empty);
         List<string> correctCells = ["A1", "B1", "C1"];
         CollectionAssert.AreEquivalent(correctCells, sheet.GetNamesOfAllNonemptyCells().ToList());
     }
@@ -151,12 +151,12 @@ public class SpreadsheetTests
     public void GetCellContents_StringOnly()
     {
         Spreadsheet sheet = new();
-        sheet.SetCellContents("A1", "A1");
-        sheet.SetCellContents("B1", "This is a string");
-        sheet.SetCellContents("A1", "A1 + B1");
-        sheet.SetCellContents("C1", "1234");
-        sheet.SetCellContents("C1", string.Empty);
-        sheet.SetCellContents("D1", string.Empty);
+        sheet.SetContentsOfCell("A1", "A1");
+        sheet.SetContentsOfCell("B1", "This is a string");
+        sheet.SetContentsOfCell("A1", "A1 + B1");
+        sheet.SetContentsOfCell("C1", "1234");
+        sheet.SetContentsOfCell("C1", string.Empty);
+        sheet.SetContentsOfCell("D1", string.Empty);
 
         Assert.AreEqual("A1 + B1", sheet.GetCellContents("A1"));
         Assert.AreEqual("This is a string", sheet.GetCellContents("B1"));
@@ -171,9 +171,9 @@ public class SpreadsheetTests
     public void GetCellContents_DoubleOnly()
     {
         Spreadsheet sheet = new();
-        sheet.SetCellContents("A1", 1.0);
-        sheet.SetCellContents("B1", 0);
-        sheet.SetCellContents("A1", 2E1);
+        sheet.SetContentsOfCell("A1", "1.0");
+        sheet.SetContentsOfCell("B1", "0");
+        sheet.SetContentsOfCell("A1", "2E1");
 
         Assert.AreEqual(2E1, sheet.GetCellContents("A1"));
         Assert.AreEqual(0.0, sheet.GetCellContents("B1"));
@@ -191,10 +191,10 @@ public class SpreadsheetTests
         Formula expression3 = new("1 + C1");
         Formula expression4 = new("2 * 2");
 
-        sheet.SetCellContents("A1", expression1);
-        sheet.SetCellContents("B1", expression2);
-        sheet.SetCellContents("A1", expression3);
-        sheet.SetCellContents("C1", expression4);
+        sheet.SetContentsOfCell("A1", $"={expression1}");
+        sheet.SetContentsOfCell("B1", $"={expression2}");
+        sheet.SetContentsOfCell("A1", $"={expression3}");
+        sheet.SetContentsOfCell("C1", $"={expression4}");
 
         Assert.AreEqual(expression3, sheet.GetCellContents("A1"));
         Assert.AreEqual(expression2, sheet.GetCellContents("B1"));
@@ -211,18 +211,18 @@ public class SpreadsheetTests
         Formula expression1 = new("1 + 1");
         Formula expression2 = new("A1 + C1");
 
-        sheet.SetCellContents("A1", expression1);
+        sheet.SetContentsOfCell("A1", $"={expression1}");
         Assert.AreEqual(expression1, sheet.GetCellContents("A1"));
 
-        sheet.SetCellContents("A1", "1 + 1"); // Replace with string
+        sheet.SetContentsOfCell("A1", "1 + 1"); // Replace with string
         Assert.AreEqual("1 + 1", sheet.GetCellContents("A1"));
 
-        sheet.SetCellContents("A1", 2); // Replace with double
+        sheet.SetContentsOfCell("A1", "2"); // Replace with double
         Assert.AreEqual(2.0, sheet.GetCellContents("A1"));
 
-        sheet.SetCellContents("B1", expression2);
-        sheet.SetCellContents("C1", 4);
-        sheet.SetCellContents("D1", string.Empty);
+        sheet.SetContentsOfCell("B1", $"={expression2}");
+        sheet.SetContentsOfCell("C1", "4");
+        sheet.SetContentsOfCell("D1", string.Empty);
 
         Assert.AreEqual(expression2, sheet.GetCellContents("B1"));
         Assert.AreEqual(4.0, sheet.GetCellContents("C1"));
@@ -230,65 +230,65 @@ public class SpreadsheetTests
     }
 
     /// <summary>
-    /// This tests that the SetCellContents (double method) returns an InvalidNameException for an invalid cell name.
+    /// This tests that the SetContentsOfCell (double method) returns an InvalidNameException for an invalid cell name.
     /// </summary>
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
-    public void SetCellContents_Double_InvalidName()
+    public void SetContentsOfCell_Double_InvalidName()
     {
         Spreadsheet sheet = new();
-        sheet.SetCellContents("1E1", 2);
+        sheet.SetContentsOfCell("1E1", "2");
     }
 
     /// <summary>
     /// This tests that the SellCellContents (double method) returns a list of itself.
     /// </summary>
     [TestMethod]
-    public void SetCellContents_Double()
+    public void SetContentsOfCell_Double()
     {
         Spreadsheet sheet = new();
 
         List<string> values = [];
         values.Add("A1");
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", 2).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("A1", "2").ToList());
 
         values.Clear();
         values.Add("A1");
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", 2E1).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("A1", "2E1").ToList());
 
         values.Clear();
         values.Add("B1");
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("B1", 3.0).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("B1", "3.0").ToList());
     }
 
     /// <summary>
-    /// This tests that the SetCellContents (string method) returns an InvalidNameException for an invalid cell name.
+    /// This tests that the SetContentsOfCell (string method) returns an InvalidNameException for an invalid cell name.
     /// </summary>
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
-    public void SetCellContents_String_InvalidName()
+    public void SetContentsOfCell_String_InvalidName()
     {
         Spreadsheet sheet = new();
-        sheet.SetCellContents("1E1", "2");
+        sheet.SetContentsOfCell("1E1", "2");
     }
 
     /// <summary>
     /// This tests that the SellCellContents (string method) returns a list of itself (cell name).
     /// </summary>
     [TestMethod]
-    public void SetCellContents_String()
+    public void SetContentsOfCell_String()
     {
         Spreadsheet sheet = new();
 
         List<string> values = [];
         values.Add("A1");
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", "2").ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("A1", "2").ToList());
 
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", "1 + 1").ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("A1", "1 + 1").ToList());
 
         values.Clear();
         values.Add("B1");
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("B1", "(A1 * 2)").ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("B1", "(A1 * 2)").ToList());
     }
 
     /// <summary>
@@ -297,29 +297,29 @@ public class SpreadsheetTests
     /// </summary>
     [TestMethod]
     [ExpectedException(typeof(InvalidNameException))]
-    public void SetCellContents_Formula_InvalidName()
+    public void SetContentsOfCell_Formula_InvalidName()
     {
         Spreadsheet sheet = new();
         Formula formula = new("1 + 1");
-        sheet.SetCellContents("1E1", formula);
+        sheet.SetContentsOfCell("1E1", $"={formula}");
     }
 
     /// <summary>
     /// This tests that a cell that links back to a previous cell throws a CircularException.
     /// </summary>
     [TestMethod]
-    public void SetCellContents_Formula_InvalidCircular()
+    public void SetContentsOfCell_Formula_InvalidCircular()
     {
         Spreadsheet sheet = new();
         Formula formula1 = new("1 + B1");
         Formula formula2 = new("1 + A1");
         Formula formula3 = new("1 + C1");
-        sheet.SetCellContents("A1", formula1);
+        sheet.SetContentsOfCell("A1", $"={formula1}");
 
         bool exceptionThrown = false;
         try
         {
-            sheet.SetCellContents("B1", formula2); // Invalid
+            sheet.SetContentsOfCell("B1", $"={formula2}"); // Invalid
         }
         catch (CircularException)
         {
@@ -340,18 +340,18 @@ public class SpreadsheetTests
     /// </summary>
     [TestMethod]
     [ExpectedException(typeof(CircularException))]
-    public void SetCellContents_Formula_InvalidCircularSingleCell()
+    public void SetContentsOfCell_Formula_InvalidCircularSingleCell()
     {
         Spreadsheet sheet = new();
         Formula formula = new("A1");
-        sheet.SetCellContents("A1", formula);
+        sheet.SetContentsOfCell("A1", $"={formula}");
     }
 
     /// <summary>
-    /// This method tests that SetCellContents are returning correct lists of dependent cells based on only formula inputs.
+    /// This method tests that SetContentsOfCell are returning correct lists of dependent cells based on only formula inputs.
     /// </summary>
     [TestMethod]
-    public void SetCellContents_FormulaOnly()
+    public void SetContentsOfCell_FormulaOnly()
     {
         Spreadsheet sheet = new();
         Formula formula1 = new("(B1 * 4) + 2");
@@ -362,26 +362,26 @@ public class SpreadsheetTests
 
         // It should only return A1 and not A1, B1, since even if things are changed in A1, B1 won't be changed and therefore no recalculations are needed.
         values.Add("A1");
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", formula1).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("A1", $"={formula1}").ToList());
 
         // Since B1 depends on C1, should return B1, C1
         values.Insert(0, "B1"); // Inserts B1 at the beginning of the list
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("B1", formula2).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("B1", $"={formula2}").ToList());
 
         values.Insert(0, "C1"); // C1 goes at front of list
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("C1", formula3).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("C1", $"={formula3}").ToList());
 
         // "Replace" A1, see that it still returns A1 even when linked to other established cells.
         values.Clear();
         values.Add("A1");
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", formula4).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("A1", $"={formula4}").ToList());
     }
 
     /// <summary>
     /// This test creates a spreadsheet that sets cells of all types and ensures that the returned dependency lists are returning correctly.
     /// </summary>
     [TestMethod]
-    public void SetCellContents_AllTypes()
+    public void SetContentsOfCell_AllTypes()
     {
         Spreadsheet sheet = new();
         Formula formula1 = new("(B1 * 4) + 2");
@@ -389,38 +389,38 @@ public class SpreadsheetTests
         Formula formula3 = new("(D1 * 4) + 4");
         List<string> values = [];
 
-        sheet.SetCellContents("A1", formula1);
+        sheet.SetContentsOfCell("A1", $"={formula1}");
 
         values.Add("B1");
         values.Add("A1");
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("B1", formula2).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("B1", $"={formula2}").ToList());
 
         values.Insert(0, "C1"); // values = ["C1", "B1", "A1"]
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("C1", 50).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("C1", "50").ToList());
 
         values = ["D1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("D1", "STRING!").ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("D1", "STRING!").ToList());
 
         values = ["E1"]; // values = ["E1"]
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("E1", formula3).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("E1", $"={formula3}").ToList());
     }
 
     /// <summary>
     /// This test add and removes a cell, then checks whether it was removed from the spreadsheet properly.
     /// </summary>
     [TestMethod]
-    public void SetCellContents_Remove()
+    public void SetContentsOfCell_Remove()
     {
         Spreadsheet sheet = new();
         Formula formula = new("1");
         List<string> values = [];
 
-        // Even though that cell will be removed, SetCellContents still returns the cell.
+        // Even though that cell will be removed, SetContentsOfCell still returns the cell.
         values.Add("A1");
-        sheet.SetCellContents("A1", formula);
+        sheet.SetContentsOfCell("A1", $"={formula}");
 
         // Setting A1 to string.Empty removes it
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", string.Empty).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("A1", string.Empty).ToList());
 
         values.Clear();
 
@@ -434,7 +434,7 @@ public class SpreadsheetTests
     /// This is to ensure that even with many dependencies, the correct list of dependent cells are returned.
     /// </summary>
     [TestMethod]
-    public void SetCellContents_Formula_Complex()
+    public void SetContentsOfCell_Formula_Complex()
     {
         Spreadsheet sheet = new();
         List<string> values = [];
@@ -445,47 +445,230 @@ public class SpreadsheetTests
         Formula formula4 = new("C1");
         Formula formula5 = new("B1");
 
-        sheet.SetCellContents("A1", formula1);
-        sheet.SetCellContents("B1", formula2);
-        sheet.SetCellContents("C1", 5);
-        sheet.SetCellContents("D1", formula3);
-        sheet.SetCellContents("E1", 3);
-        sheet.SetCellContents("F1", formula4);
-        sheet.SetCellContents("G1", 3);
-        sheet.SetCellContents("h1", formula5); // Lowercase to make sure it can handle it
+        sheet.SetContentsOfCell("A1", $"={formula1}");
+        sheet.SetContentsOfCell("B1", $"={formula2}");
+        sheet.SetContentsOfCell("C1", "5");
+        sheet.SetContentsOfCell("D1", $"={formula3}");
+        sheet.SetContentsOfCell("E1", "3");
+        sheet.SetContentsOfCell("F1", $"={formula4}");
+        sheet.SetContentsOfCell("G1", "3");
+        sheet.SetContentsOfCell("h1", $"={formula5}"); // Lowercase to make sure it can handle it
 
         values = ["A1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("A1", formula1).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("A1", $"={formula1}").ToList());
 
         values = ["B1", "A1", "H1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("B1", formula2).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("B1", $"={formula2}").ToList());
 
         values = ["C1", "B1", "A1", "H1", "F1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("C1", 5).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("C1", "5").ToList());
 
         values = ["D1", "A1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("D1", formula3).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("D1", $"={formula3}").ToList());
 
         values = ["E1", "D1", "A1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("E1", 3).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("E1", "3").ToList());
 
         values = ["F1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("F1", formula4).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("F1", $"={formula4}").ToList());
 
         values = ["G1", "B1", "A1", "H1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("G1", 3).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("G1", "3").ToList());
 
         values = ["H1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("H1", formula5).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("H1", $"={formula5}").ToList());
 
         values = ["C1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("C1", string.Empty).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("C1", string.Empty).ToList());
 
         values = ["B1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("B1", string.Empty).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("B1", string.Empty).ToList());
 
         // Removed B1, so G1 should only depend on itself
         values = ["G1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetCellContents("G1", 3).ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("G1", "3").ToList());
     }
+
+    /// <summary>
+    /// This test checks that the index notation properly returns a double value of a cell.
+    /// </summary>
+    [TestMethod]
+    public void GetValueIndex_Double_Valid()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "10");
+        Assert.AreEqual(sheet["A1"], 10.0);
+    }
+
+    /// <summary>
+    /// This test checks that the index notation properly returns the value of a formula with addition.
+    /// </summary>
+    [TestMethod]
+    public void GetValueIndex_Formula_Valid()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "=5+5");
+        Assert.AreEqual(sheet["A1"], 10.0);
+    }
+
+    /// <summary>
+    /// This test checks that the index notation properly returns the value of a formula that has cell dependencies.
+    /// </summary>
+    [TestMethod]
+    public void GetValueIndex_FormulaDependencies_Valid()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "=A2+A3"); // I think this valid if I declare it beforehand?
+        sheet.SetContentsOfCell("A2", "5");
+        sheet.SetContentsOfCell("A3", "5");
+        Assert.AreEqual(sheet["A1"], 10.0);
+    }
+
+    /// <summary>
+    /// Checks to see that an empty cell returns an empty string.
+    /// </summary>
+    [TestMethod]
+    public void GetValueIndex_EmptyCell()
+    {
+        Spreadsheet sheet = new();
+        Assert.AreEqual(sheet["A1"], string.Empty);
+    }
+
+    /// <summary>
+    /// This test checks that the index notation properly returns the value of a string.
+    /// </summary>
+    [TestMethod]
+    public void GetValueIndex_String_Valid()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "AB");
+        Assert.AreEqual(sheet["A1"], "AB");
+    }
+
+    /// <summary>
+    /// This tests that an invalid cell name for the index notation throws an InvalidNameException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void GetValueIndex_CellName_Invalid()
+    {
+        Spreadsheet sheet = new();
+        _ = sheet["E1E"];
+    }
+
+    /// <summary>
+    /// This method tests that the StringForm of a string is saved properly.
+    /// </summary>
+    [TestMethod]
+    public void Save_String_StringForm_Valid()
+    {
+        string expectedOutput = @"{""A1"":{""StringForm"":""hello""}}";
+        File.WriteAllText("known_values.txt", expectedOutput);
+
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "hello");
+        string filename = "sheet.txt";
+        sheet.Save(filename);
+
+        // Read the contents of the saved file and the known_values file
+        string savedOutput = File.ReadAllText(filename);
+        string expectedFileOutput = File.ReadAllText("known_values.txt");
+
+        // Assert that both files' contents are the same
+        Assert.AreEqual(expectedFileOutput, savedOutput);
+    }
+
+    /// <summary>
+    /// This method tests that the StringForm of a formula is saved properly.
+    /// </summary>
+    [TestMethod]
+    public void Save_Formula_StringForm_Valid()
+    {
+        string expectedOutput = @"{""A1"":{""StringForm"":""=A2 + 3""}}";
+        File.WriteAllText("known_values.txt", expectedOutput);
+
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "=A2 + 3");
+        string filename = "sheet.txt";
+        sheet.Save(filename);
+
+        // Read the contents of the saved file and the known_values file
+        string savedOutput = File.ReadAllText(filename);
+        string expectedFileOutput = File.ReadAllText("known_values.txt");
+
+        // Assert that both files' contents are the same
+        Assert.AreEqual(expectedFileOutput, savedOutput);
+    }
+
+    /// <summary>
+    /// Tests that multiple sheets with various stages of saves do not affect the Changed variable for each other.
+    /// Checks that Changed is false after using save.
+    /// </summary>
+    [TestMethod]
+    public void Save_ChangedIsFalse()
+    {
+        Spreadsheet sheet = new();
+        Spreadsheet sheet2 = new("sheet2");
+        sheet.SetContentsOfCell("A1", "10"); // Changed is equal to true
+        Assert.IsFalse(sheet2.Changed);
+
+        string filename = "sheet.txt";
+        sheet.Save(filename);
+
+        Assert.IsFalse(sheet.Changed);
+        Assert.IsFalse(sheet2.Changed);
+    }
+
+    // Tests:
+
+    // [] operator
+    // Test that a number returns properly
+    // Tests that a formula (5+5, and/or A1 + A2 with different numbers in each cell) returns a proper value
+    // Tests that an empty cell returns empty
+    // Tests that a string returns properly
+    // Tests that a cell with an invalid name returns the proper exception
+
+    // Save
+    // Somehow check that strings in Stringform is correct
+    // somehow check that doubles are in correct stringform
+    // somehow check that formulas are in correct string form with =
+    // Save with mixed
+    // check that after save is done, changed is set to false
+    // create a scenario where the file is already open, then try to open it again and expect error
+    // try saving in a path with an invalid character (error)
+    // create a scenario where the file is trying to close but can't be (maybe because it is still "writing")?
+    // Saving to a file that doesn't exist should create a new one
+    // Does it automatically override?
+    // check and see if there is a path?
+    // Save properly test and yeah
+
+    // Load
+    // Check to see that an incorrect path name will throw error
+    // Check to see that a path that doesn't contain the file throws an error
+    // Check that changed is set to false
+    // Maybe trying to write to a read only file
+    // trying to load something with an invalid symbol
+    // See that things have properly loaded
+    // idk maybe see something about deletion?
+
+    // Get cell value
+    // See that a cell with a string returns a proper string value
+    // See that a cell with a double returns a proper double value
+    // See that a cell with a formula (such as 5+5) returns the proper double value
+    // See that a cell with a formula (such as A2 + A3) returns the proper double value
+    // See that an invalid cell name throws an error
+
+    // SetContentsOfCell
+    // Check that a simple double is parsed as a double
+    // Check that a double with an e is parsed as a double
+    // Check that if a string starts with = but isn't a formula, throws FormulaFormatException
+    // Check that exception is thrown if a cell content's is changed so that it creates a circular exception
+    // Also check that if an circular exception is thrown, no change is made. (Could check saving and loading too?)
+    // Then, just see that a proper formula is set to a formula
+    // Make sure a string is saved as a string (maybe try different strings)
+    // Make sure changed is set to true
+    // If name is invalid, check for exception
+    // Make sure that value is set
+
+    // Create stress test
 }
