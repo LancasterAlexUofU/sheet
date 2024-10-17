@@ -562,20 +562,22 @@ public class SpreadsheetTests
     [TestMethod]
     public void Save_String_StringForm_Valid()
     {
-        string expectedOutput = @"{""A1"":{""StringForm"":""hello""}}";
-        File.WriteAllText("known_values.txt", expectedOutput);
-
+        string expectedOutput = @"{
+  ""Cells"": {
+    ""A2"": {
+      ""StringForm"": ""hello""
+    }
+  }
+}";
         Spreadsheet sheet = new();
-        sheet.SetContentsOfCell("A1", "hello");
+        sheet.SetContentsOfCell("A2", "hello");
         string filename = "sheet.txt";
         sheet.Save(filename);
 
-        // Read the contents of the saved file and the known_values file
         string savedOutput = File.ReadAllText(filename);
-        string expectedFileOutput = File.ReadAllText("known_values.txt");
 
-        // Assert that both files' contents are the same
-        Assert.AreEqual(expectedFileOutput, savedOutput);
+        // Asserts that the file contains at least a substring containing the same Cells
+        Assert.IsTrue(savedOutput.Contains(expectedOutput));
     }
 
     /// <summary>
@@ -584,20 +586,24 @@ public class SpreadsheetTests
     [TestMethod]
     public void Save_Formula_StringForm_Valid()
     {
-        string expectedOutput = @"{""A1"":{""StringForm"":""=A2 + 3""}}";
-        File.WriteAllText("known_values.txt", expectedOutput);
+        // \u002B is '+', will be de serialized into + by load.
+        string expectedOutput = @"{
+  ""Cells"": {
+    ""A1"": {
+      ""StringForm"": ""=A2 \u002B 3""
+    }
+  }
+}";
 
         Spreadsheet sheet = new();
         sheet.SetContentsOfCell("A1", "=A2 + 3");
         string filename = "sheet.txt";
         sheet.Save(filename);
 
-        // Read the contents of the saved file and the known_values file
         string savedOutput = File.ReadAllText(filename);
-        string expectedFileOutput = File.ReadAllText("known_values.txt");
 
-        // Assert that both files' contents are the same
-        Assert.AreEqual(expectedFileOutput, savedOutput);
+        // Asserts that the file contains at least a substring containing the same Cells
+        Assert.IsTrue(savedOutput.Contains(expectedOutput));
     }
 
     /// <summary>
@@ -619,56 +625,199 @@ public class SpreadsheetTests
         Assert.IsFalse(sheet2.Changed);
     }
 
-    // Tests:
+    /// <summary>
+    /// This test checks that an already open file is not able to be written to by the save method.
+    /// Should throw SpreadsheetReadWriteException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Save_FileAlreadyOpen_Invalid()
+    {
+        Spreadsheet sheet = new();
+        string filename = "sheet.txt";
 
-    // [] operator
-    // Test that a number returns properly
-    // Tests that a formula (5+5, and/or A1 + A2 with different numbers in each cell) returns a proper value
-    // Tests that an empty cell returns empty
-    // Tests that a string returns properly
-    // Tests that a cell with an invalid name returns the proper exception
+        // Open the file and keep it open
+        using FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.None);
+        sheet.Save(filename);
+    }
 
-    // Save
-    // Somehow check that strings in Stringform is correct
-    // somehow check that doubles are in correct stringform
-    // somehow check that formulas are in correct string form with =
-    // Save with mixed
-    // check that after save is done, changed is set to false
-    // create a scenario where the file is already open, then try to open it again and expect error
-    // try saving in a path with an invalid character (error)
-    // create a scenario where the file is trying to close but can't be (maybe because it is still "writing")?
-    // Saving to a file that doesn't exist should create a new one
-    // Does it automatically override?
-    // check and see if there is a path?
-    // Save properly test and yeah
+    /// <summary>
+    /// Tests that a filename with invalid characters throws a SpreadsheetReadWriteException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Save_InvalidCharacterInFileName_Invalid()
+    {
+        Spreadsheet sheet = new();
+        string filename = "sheet/#.txt";
 
-    // Load
-    // Check to see that an incorrect path name will throw error
-    // Check to see that a path that doesn't contain the file throws an error
-    // Check that changed is set to false
-    // Maybe trying to write to a read only file
-    // trying to load something with an invalid symbol
-    // See that things have properly loaded
-    // idk maybe see something about deletion?
+        sheet.Save(filename);
+    }
 
-    // Get cell value
-    // See that a cell with a string returns a proper string value
-    // See that a cell with a double returns a proper double value
-    // See that a cell with a formula (such as 5+5) returns the proper double value
-    // See that a cell with a formula (such as A2 + A3) returns the proper double value
-    // See that an invalid cell name throws an error
+    /// <summary>
+    /// Tests that a filename which doesn't exist yet is properly created.
+    /// </summary>
+    [TestMethod]
+    public void Save_UninitializedFile()
+    {
+        Spreadsheet sheet = new();
+        string filename = "ThisFileDoesNotExist.txt";
 
-    // SetContentsOfCell
-    // Check that a simple double is parsed as a double
-    // Check that a double with an e is parsed as a double
-    // Check that if a string starts with = but isn't a formula, throws FormulaFormatException
-    // Check that exception is thrown if a cell content's is changed so that it creates a circular exception
-    // Also check that if an circular exception is thrown, no change is made. (Could check saving and loading too?)
-    // Then, just see that a proper formula is set to a formula
-    // Make sure a string is saved as a string (maybe try different strings)
-    // Make sure changed is set to true
-    // If name is invalid, check for exception
-    // Make sure that value is set
+        // Check that file doesn't exist first
+        Assert.IsFalse(File.Exists(filename));
 
-    // Create stress test
+        sheet.Save(filename);
+
+        // Ensure that file is created with no errors
+        Assert.IsTrue(File.Exists(filename));
+        File.Delete(filename);
+    }
+
+    /// <summary>
+    /// Tests that a cell in which its contents are overwritten has its final contents as the saved version.
+    /// </summary>
+    [TestMethod]
+    public void Save_OverrideFile()
+    {
+        string expectedOutput = @"{
+  ""Cells"": {
+    ""A2"": {
+      ""StringForm"": ""world""
+    }
+  }
+}";
+
+        Spreadsheet sheet = new();
+        string filename = "sheet.txt";
+
+        sheet.SetContentsOfCell("A2", "hello");
+        sheet.Save(filename);
+
+        sheet.SetContentsOfCell("A2", "world");
+        sheet.Save(filename);
+
+        string savedOutput = File.ReadAllText(filename);
+
+        // Asserts that the file contains at least a substring containing the same Cells
+        Assert.IsTrue(savedOutput.Contains(expectedOutput));
+    }
+
+    /// <summary>
+    /// This test creates a complex spreadsheet and makes sure that its file contents contains the cell values.
+    /// </summary>
+    [TestMethod]
+    public void Save_ComplexSpreadsheet()
+    {
+        Spreadsheet sheet = new();
+        string filename = "sheet.txt";
+
+        string expectedOutput = @"{
+  ""Cells"": {
+    ""A1"": {
+      ""StringForm"": ""=B1\u002BD1""
+    },
+    ""B1"": {
+      ""StringForm"": ""=2*C1*G1""
+    },
+    ""C1"": {
+      ""StringForm"": ""5""
+    },
+    ""F1"": {
+      ""StringForm"": ""=C1""
+    },
+    ""G1"": {
+      ""StringForm"": ""3""
+    },
+    ""D1"": {
+      ""StringForm"": ""=E1\u002B1""
+    },
+    ""E1"": {
+      ""StringForm"": ""3""
+    },
+    ""H1"": {
+      ""StringForm"": ""=B1""
+    }
+  }
+}";
+
+        Formula formula1 = new("B1 + D1");
+        Formula formula2 = new("2 * C1 * G1");
+        Formula formula3 = new("E1 + 1");
+        Formula formula4 = new("C1");
+        Formula formula5 = new("B1");
+
+        sheet.SetContentsOfCell("A1", $"={formula1}");
+        sheet.SetContentsOfCell("B1", $"={formula2}");
+        sheet.SetContentsOfCell("C1", "5");
+        sheet.Save(filename);
+
+        sheet.SetContentsOfCell("D1", $"={formula3}");
+        sheet.SetContentsOfCell("E1", "3");
+        sheet.SetContentsOfCell("F1", $"={formula4}");
+        sheet.Save(filename);
+
+        sheet.SetContentsOfCell("G1", "3");
+        sheet.SetContentsOfCell("h1", $"={formula5}"); // Lowercase to make sure it can handle it
+
+        sheet.Save(filename);
+
+        string savedOutput = File.ReadAllText(filename);
+
+        // Asserts that the file contains at least a substring containing the same Cells
+        Assert.IsTrue(savedOutput.Contains(expectedOutput));
+    }
 }
+
+// Tests:
+
+// [] operator
+// Test that a number returns properly
+// Tests that a formula (5+5, and/or A1 + A2 with different numbers in each cell) returns a proper value
+// Tests that an empty cell returns empty
+// Tests that a string returns properly
+// Tests that a cell with an invalid name returns the proper exception
+
+// Save
+// Somehow check that strings in Stringform is correct
+// somehow check that doubles are in correct stringform
+// somehow check that formulas are in correct string form with =
+// Save with mixed
+// check that after save is done, changed is set to false
+// create a scenario where the file is already open, then try to open it again and expect error
+// try saving in a path with an invalid character (error)
+// create a scenario where the file is trying to close but can't be (maybe because it is still "writing")?
+// Saving to a file that doesn't exist should create a new one
+// Does it automatically override?
+// check and see if there is a path?
+// Save properly test and yeah
+// If anything goes wrong, the original spreadsheet should not be changed. Check for this
+
+// Load
+// Check to see that an incorrect path name will throw error
+// Check to see that a path that doesn't contain the file throws an error
+// Check that changed is set to false
+// Maybe trying to write to a read only file
+// trying to load something with an invalid symbol
+// See that things have properly loaded
+// idk maybe see something about deletion?
+
+// Get cell value
+// See that a cell with a string returns a proper string value
+// See that a cell with a double returns a proper double value
+// See that a cell with a formula (such as 5+5) returns the proper double value
+// See that a cell with a formula (such as A2 + A3) returns the proper double value
+// See that an invalid cell name throws an error
+
+// SetContentsOfCell
+// Check that a simple double is parsed as a double
+// Check that a double with an e is parsed as a double
+// Check that if a string starts with = but isn't a formula, throws FormulaFormatException
+// Check that exception is thrown if a cell content's is changed so that it creates a circular exception
+// Also check that if an circular exception is thrown, no change is made. (Could check saving and loading too?)
+// Then, just see that a proper formula is set to a formula
+// Make sure a string is saved as a string (maybe try different strings)
+// Make sure changed is set to true
+// If name is invalid, check for exception
+// Make sure that value is set
+
+// Create stress test

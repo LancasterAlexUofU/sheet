@@ -14,7 +14,7 @@ The Spreadsheet project has many different methods for setting and getting conte
 in a spreadsheet. The spreadsheet is able to set cell contents to be either a double, a string,
 or a formula. 
 
-The Spreadsheet project can also detect when a cell has referenced back to a prevous cell before it, 
+The Spreadsheet project can also detect when a cell has referenced back to a previous cell before it, 
 creating a loop, even if the cells are indirectly related. If this happens, a CircularException is thrown.
 
 
@@ -23,7 +23,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 5.5 |
+| Assignment 6 | 14 | 7 |
 
 (Rest of the hours come from SpreadsheetTests)
 
@@ -48,6 +48,7 @@ Work stands on its own.
 
 # Consulted Peers
 - Landon
+- Eli Parker
 
 # References
 1) C# Classes and Objects - https://www.w3schools.com/cs/cs_classes.php

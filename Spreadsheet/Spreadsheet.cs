@@ -149,7 +149,9 @@ public class Spreadsheet
     private string spreadsheetName;
 
     // Creates a dictionary of cell names and pairs them with their contents / values
+    [JsonPropertyName("Cells")]
     private Dictionary<string, Cells> sheet = [];
+
     private HashSet<string> nonEmptyCells = [];
     private DependencyGraph dg = new();
 
@@ -332,10 +334,25 @@ public class Spreadsheet
     public void Save(string filename)
     {
         // SetCellContents("A1", 3);
-        SetCellContents("A2", "hello");
-        Changed = false;
-        string message = JsonSerializer.Serialize(sheet);
-        Cells? result = JsonSerializer.Deserialize<Cells>(message);
+        // Changed = false;
+        Formula formula1 = new("B1 + D1");
+        Formula formula2 = new("2 * C1 * G1");
+        Formula formula3 = new("E1 + 1");
+        Formula formula4 = new("C1");
+        Formula formula5 = new("B1");
+
+        SetCellContents("A1", $"={formula1}");
+        SetCellContents("B1", $"={formula2}");
+        SetCellContents("C1", "5");
+        SetCellContents("F1", $"={formula4}");
+        SetCellContents("G1", "3");
+        SetCellContents("D1", $"={formula3}");
+        SetCellContents("E1", "3");
+        SetCellContents("h1", $"={formula5}");
+        string jsonString = JsonSerializer.Serialize(new { Cells = sheet }, new JsonSerializerOptions { WriteIndented = true });
+
+        // string message = JsonSerializer.Serialize(sheet);
+        Cells? result = JsonSerializer.Deserialize<Cells>(jsonString);
     }
 
     /// <summary>
@@ -433,7 +450,7 @@ public class Spreadsheet
     ///     A1, then B1, then C1, the integrity of the Spreadsheet is maintained.
     ///   </para>
     /// </returns>
-    /// <exception cref="InvalidNameException">
+    /// <exception cref="InvalidNameException">sa
     ///   If the name parameter is invalid, throw an InvalidNameException.
     /// </exception>
     /// <exception cref="CircularException">
@@ -740,7 +757,7 @@ internal class Cells
 {
     private object content = string.Empty;
 
-    // private object localValue = string.Empty;
+    private object localValue = string.Empty;
 
     /// <summary>
     /// Gets or sets content.
@@ -752,13 +769,14 @@ internal class Cells
         set { content = value; }
     }
 
-    ///// <summary>
-    ///// Gets or sets value.
-    ///// </summary>
-
-    // public object Value
-    // {
-    //    get { return localValue; }
-    //    set { localValue = value; }
-    // }
+    /// <summary>
+    /// Gets or sets value.
+    /// JsonIgnore is included as values can be computed at runtime.
+    /// </summary>
+    [JsonIgnore]
+    public object Value
+    {
+        get { return localValue; }
+        set { localValue = value; }
+    }
 }
