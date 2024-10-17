@@ -335,20 +335,9 @@ public class Spreadsheet
     {
         // SetCellContents("A1", 3);
         // Changed = false;
-        Formula formula1 = new("B1 + D1");
-        Formula formula2 = new("2 * C1 * G1");
-        Formula formula3 = new("E1 + 1");
-        Formula formula4 = new("C1");
-        Formula formula5 = new("B1");
+        Formula formula1 = new("A2");
 
         SetCellContents("A1", $"={formula1}");
-        SetCellContents("B1", $"={formula2}");
-        SetCellContents("C1", "5");
-        SetCellContents("F1", $"={formula4}");
-        SetCellContents("G1", "3");
-        SetCellContents("D1", $"={formula3}");
-        SetCellContents("E1", "3");
-        SetCellContents("h1", $"={formula5}");
         string jsonString = JsonSerializer.Serialize(new { Cells = sheet }, new JsonSerializerOptions { WriteIndented = true });
 
         // string message = JsonSerializer.Serialize(sheet);
@@ -449,6 +438,14 @@ public class Spreadsheet
     ///     list {A1, B1, C1} is returned.  If the cells are then evaluate din the order:
     ///     A1, then B1, then C1, the integrity of the Spreadsheet is maintained.
     ///   </para>
+    /// <para>
+    ///   This method returns a list of all cells that have been updated
+    ///   (of course including the cell that was just updated).
+    /// </para>
+    /// <para>
+    ///   For example, if cellName is "A1", and B1 contains A1*2, and C1 contains B1+A1, the
+    ///   list containing [A1, B1, C1] is returned.
+    /// </para>
     /// </returns>
     /// <exception cref="InvalidNameException">sa
     ///   If the name parameter is invalid, throw an InvalidNameException.

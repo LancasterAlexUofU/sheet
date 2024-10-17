@@ -23,7 +23,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 7 |
+| Assignment 6 | 14 | 9 |
 
 (Rest of the hours come from SpreadsheetTests)
 

@@ -26,6 +26,7 @@ namespace CS3500.SpreadsheetTests;
 using CS3500.Formula;
 using CS3500.Spreadsheet;
 using Newtonsoft.Json.Linq;
+using System.IO.Enumeration;
 using System.Linq.Expressions;
 
 /// <summary>
@@ -766,58 +767,260 @@ public class SpreadsheetTests
         // Asserts that the file contains at least a substring containing the same Cells
         Assert.IsTrue(savedOutput.Contains(expectedOutput));
     }
+
+    /// <summary>
+    /// This attempts to save to an invalid file path.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Save_InvalidPaths()
+    {
+        Spreadsheet sheet = new();
+        string filename = @"C:\thisIsNotAProperPath\\\";
+        sheet.Save(filename);
+    }
+
+    /// <summary>
+    /// This test checks that after an exception is thrown (in this case CircularException), the spreadsheet
+    /// remains unchanged.
+    /// </summary>
+    [TestMethod]
+    public void Save_NoChangesIfThingGoWrong()
+    {
+        Spreadsheet sheet = new();
+        string filename = "sheet.txt";
+
+        Formula formula1 = new("A2");
+        sheet.SetContentsOfCell("A1", $"={formula1}");
+        Assert.ThrowsException<CircularException>(() => sheet.SetContentsOfCell("A2", "=A1"));
+        sheet.Save(filename);
+        sheet.Load(filename);
+
+        List<string> correctCells = ["A1"];
+        CollectionAssert.AreEquivalent(correctCells, sheet.GetNamesOfAllNonemptyCells().ToList());
+        Assert.AreEqual(sheet.GetCellContents("A2"), string.Empty);
+    }
+
+    /// <summary>
+    /// This test method attempts to load a file that doesn't exist and expects  a SpreadsheetReadWriteException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Load_PathFile_Invalid()
+    {
+        Spreadsheet sheet = new();
+        string filename = @"C:\ThisFolderDoesNotExist\ThisFileDoesNotExist.txt";
+        sheet.Load(filename);
+    }
+
+    /// <summary>
+    /// This method ensures that if the spreadsheet is loaded, that the changed parameter is false.
+    /// </summary>
+    [TestMethod]
+    public void Load_ChangedIsFalse()
+    {
+        Spreadsheet sheet = new();
+        string filename = "sheet.txt";
+
+        sheet.SetContentsOfCell("A1", "5");
+        sheet.Save(filename);
+
+        sheet.SetContentsOfCell("A2", "5"); // This shouldn't be included in JSON, so will be deleted when sheet is loaded.
+        sheet.Load(filename);
+
+        Assert.IsFalse(sheet.Changed);
+    }
+
+    /// <summary>
+    /// This test method ensures that a readonly file, when loaded, throws a SpreadsheetReadWriteException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Load_ReadOnlyFile_Invalid()
+    {
+        Spreadsheet sheet = new();
+        string filename = "ReadOnlyFile.txt";
+        File.SetAttributes(filename, FileAttributes.ReadOnly);
+
+        sheet.Load(filename);
+    }
+
+    /// <summary>
+    /// This checks that a spreadsheet which that has unsaved data isn't included when an older save is loaded.
+    /// </summary>
+    [TestMethod]
+    public void Load_RestoreOldSpreadSheet()
+    {
+        Spreadsheet sheet = new();
+        string filename = "sheet.txt";
+
+        sheet.SetContentsOfCell("A1", "5");
+        sheet.SetContentsOfCell("A2", "=C1");
+        sheet.SetContentsOfCell("C1", "=3+3");
+        sheet.Save(filename);
+
+        sheet.SetContentsOfCell("A1", "10");
+        sheet.SetContentsOfCell("D1", "10");
+        sheet.SetContentsOfCell("C1", "6+6");
+        sheet.Load(filename);
+
+        List<string> correctCells = ["A1", "A2", "C1"];
+        CollectionAssert.AreEquivalent(correctCells, sheet.GetNamesOfAllNonemptyCells().ToList());
+        Assert.AreEqual(sheet.GetCellContents("A1"), 5.0);
+        Assert.AreEqual(sheet.GetCellValue("A1"), 5.0);
+
+        Formula formula1 = new("C1");
+        Assert.AreEqual(sheet.GetCellContents("A2"), formula1);
+        Assert.AreEqual(sheet.GetCellValue("A2"), 6.0);
+
+        Assert.AreEqual(sheet.GetCellContents("D1"), string.Empty);
+    }
+
+    /// <summary>
+    /// This test checks that a cell that contains a string returns its value as the same string.
+    /// </summary>
+    [TestMethod]
+    public void GetCellValue_StringSimple()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "hello");
+        Assert.AreEqual(sheet.GetCellValue("A1"), "hello");
+    }
+
+    /// <summary>
+    /// This test checks that a cell that contains a double returns its value as the same double.
+    /// </summary>
+    [TestMethod]
+    public void GetCellValue_DoubleSimple()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "10");
+        Assert.AreEqual(sheet.GetCellValue("A1"), 10.0);
+    }
+
+    /// <summary>
+    /// This tests that a Formula with no dependencies returns the correct double evaluation.
+    /// Asserts that new value is used instead of old value.
+    /// </summary>
+    [TestMethod]
+    public void GetCellValue_FormulaWithNoDependents()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "=5+5");
+        Assert.AreEqual(sheet.GetCellValue("A1"), 10.0);
+
+        sheet.SetContentsOfCell("A1", "=10*10");
+        Assert.AreEqual(sheet.GetCellValue("A1"), 100.0);
+    }
+
+    /// <summary>
+    /// This test checks that a formula with dependencies returns the correct double evaluation.
+    /// This test nests formulas to ensure the value is properly being computed for complicated relationships.
+    /// </summary>
+    [TestMethod]
+    public void GetCellValue_FormulaWithDependents()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "=A2+A3");
+        sheet.SetContentsOfCell("A2", "5");
+        sheet.SetContentsOfCell("A3", "=A4");
+        sheet.SetContentsOfCell("A4", "5");
+        Assert.AreEqual(sheet.GetCellValue("A1"), 10.0);
+
+        sheet.SetContentsOfCell("A4", "10");
+        Assert.AreEqual(sheet.GetCellValue("A1"), 15.0);
+    }
+
+    /// <summary>
+    /// This test ensures that an intended cell name with an invalid name throws an InvalidNameException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void GetCellValue_CellName_Invalid()
+    {
+        Spreadsheet sheet = new();
+        sheet.GetCellValue("E1E");
+    }
+
+    /// <summary>
+    /// This method checks that an empty cell returns an empty string as its value.
+    /// </summary>
+    [TestMethod]
+    public void GetCellValue_CellEmpty()
+    {
+        Spreadsheet sheet = new();
+        Assert.AreEqual(sheet.GetCellValue("A1"), string.Empty);
+    }
+
+    /// <summary>
+    /// Tests that a doubles (include a double in scientific notation) are parsed as doubles.
+    /// </summary>
+    [TestMethod]
+    public void SetContentsOfCell_SimpleDouble()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "5E1");
+        sheet.SetContentsOfCell("A2", "5");
+        Assert.AreEqual(sheet.GetCellContents("A1"), 50.0);
+        Assert.AreEqual(sheet.GetCellContents("A1"), 5.0);
+    }
+
+    /// <summary>
+    /// This test checks that a formula (indicated by the =), which is invalid, throws a FormulaFormatException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void SetContentsOfCell_FormulaFormat_Invalid()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "=1+1 - A1CAT");
+    }
+
+    /// <summary>
+    /// This test checks that an empty formula throws a FormulaFormatException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(FormulaFormatException))]
+    public void SetContentsOfCell_FormulaFormatEmpty_Invalid()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "=");
+    }
+
+    /// <summary>
+    /// This method checks that the SetContentsOfCell is setting contents to their correct respective types.
+    /// </summary>
+    [TestMethod]
+    public void SetContentsOfCell_IsCorrectType()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "=5+5");
+        sheet.SetContentsOfCell("A2", "=A3+A4");
+        sheet.SetContentsOfCell("B1", "5");
+        sheet.SetContentsOfCell("C1", "5+5");
+
+        Assert.IsInstanceOfType(sheet.GetCellContents("A1"), typeof(Formula));
+        Assert.IsInstanceOfType(sheet.GetCellContents("A2"), typeof(Formula));
+        Assert.IsInstanceOfType(sheet.GetCellContents("B1"), typeof(double));
+        Assert.IsInstanceOfType(sheet.GetCellContents("C1"), typeof(string));
+    }
+
+    /// <summary>
+    /// This test checks that changed is set to true whenever SetContentsOfCell is called.
+    /// </summary>
+    [TestMethod]
+    public void SetContentsOfCell_ChangedIsTrue()
+    {
+        Spreadsheet sheet = new();
+        Spreadsheet sheet2 = new();
+        sheet.SetContentsOfCell("A1", "5");
+        Assert.IsTrue(sheet.Changed);
+    }
 }
 
 // Tests:
 
-// [] operator
-// Test that a number returns properly
-// Tests that a formula (5+5, and/or A1 + A2 with different numbers in each cell) returns a proper value
-// Tests that an empty cell returns empty
-// Tests that a string returns properly
-// Tests that a cell with an invalid name returns the proper exception
-
-// Save
-// Somehow check that strings in Stringform is correct
-// somehow check that doubles are in correct stringform
-// somehow check that formulas are in correct string form with =
-// Save with mixed
-// check that after save is done, changed is set to false
-// create a scenario where the file is already open, then try to open it again and expect error
-// try saving in a path with an invalid character (error)
-// create a scenario where the file is trying to close but can't be (maybe because it is still "writing")?
-// Saving to a file that doesn't exist should create a new one
-// Does it automatically override?
-// check and see if there is a path?
-// Save properly test and yeah
-// If anything goes wrong, the original spreadsheet should not be changed. Check for this
-
-// Load
-// Check to see that an incorrect path name will throw error
-// Check to see that a path that doesn't contain the file throws an error
-// Check that changed is set to false
-// Maybe trying to write to a read only file
-// trying to load something with an invalid symbol
-// See that things have properly loaded
-// idk maybe see something about deletion?
-
-// Get cell value
-// See that a cell with a string returns a proper string value
-// See that a cell with a double returns a proper double value
-// See that a cell with a formula (such as 5+5) returns the proper double value
-// See that a cell with a formula (such as A2 + A3) returns the proper double value
-// See that an invalid cell name throws an error
-
-// SetContentsOfCell
-// Check that a simple double is parsed as a double
-// Check that a double with an e is parsed as a double
-// Check that if a string starts with = but isn't a formula, throws FormulaFormatException
-// Check that exception is thrown if a cell content's is changed so that it creates a circular exception
-// Also check that if an circular exception is thrown, no change is made. (Could check saving and loading too?)
-// Then, just see that a proper formula is set to a formula
-// Make sure a string is saved as a string (maybe try different strings)
-// Make sure changed is set to true
-// If name is invalid, check for exception
-// Make sure that value is set
-
 // Create stress test
+
+// If it is empty, throw argument exception
+// with invalid formula, throw formula error object
