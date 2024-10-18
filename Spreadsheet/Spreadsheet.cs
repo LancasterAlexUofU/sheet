@@ -42,6 +42,8 @@ using System.Linq.Expressions;
 using System.Threading.Channels;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.IO;
+using System.Security;
 
 /// <summary>
 ///   <para>
@@ -321,8 +323,56 @@ public class Spreadsheet
     /// </exception>
     public void Save(string filename)
     {
-        // SetCellContents("A1", 3);
-        // Changed = false;
+        string fullPath;
+
+        // GetFullPath throws an exception if the path contains invalid characters or is otherwise malformed.
+        // If no exception is thrown, then filename is a valid file path.
+        try
+        {
+            fullPath = Path.GetFullPath(filename);
+        }
+
+        // Exceptions that can be thrown:
+        // ArgumentException
+        // path is a zero - length string, contains only white space on Windows systems, or contains one or more of the invalid characters defined in GetInvalidPathChars().
+        // - or -
+        // The system could not retrieve the absolute path.
+
+        // SecurityException
+        // The caller does not have the required permissions.
+
+        // ArgumentNullException
+        // path is null.
+
+        // NotSupportedException
+        // .NET Framework only: path contains a colon(":") that is not part of a volume identifier(for example, "c:\").
+
+        // PathTooLongException
+        // The specified path, file name, or both exceed the system - defined maximum length.
+        catch(Exception)
+        {
+            throw new SpreadsheetReadWriteException($"The system could not retrieve the absolute path for \"{filename}\"");
+        }
+
+        if (File.Exists(fullPath))
+        {
+            try
+            {
+                FileAttributes attributes = File.GetAttributes(fullPath);
+
+                // Creates a bitmask that combines both ReadOnly and System attributes
+                // Then checks if the attributes of the file is not equal to the bitmask
+                if ((attributes & (FileAttributes.ReadOnly | FileAttributes.System)) != 0)
+                {
+
+                }
+            }
+            catch(Exception)
+            {
+                throw new SpreadsheetReadWriteException($"Spreadsheet does not have proper permissions for \"{filename}\"");
+            }
+        }
+
         Formula formula1 = new("A2");
 
         SetCellContents("A1", $"={formula1}");

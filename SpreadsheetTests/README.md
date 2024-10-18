@@ -24,7 +24,7 @@ even with multiple indirect dependences
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 11 |
+| Assignment 6 | 14 | 13 |
 
 (Rest of the hours come from Spreadsheet)
 
