@@ -210,14 +210,7 @@ public class Spreadsheet
     /// </exception>
     public object this[string cellName]
     {
-        get
-        {
-            return 0;
-        }
-
-        set
-        {
-        }
+        get { return this.GetCellValue(cellName); }
     }
 
     /// <summary>
@@ -248,22 +241,17 @@ public class Spreadsheet
     public object GetCellContents(string name)
     {
         name = name.ToUpper();
-        if (IsVar(name))
-        {
-            if (nonEmptyCells.Contains(name))
-            {
-                return sheet[name].Content;
-            }
+        IsVar(name);
 
-            // If the cell in not in the spreadsheet, automatically return empty string
-            else
-            {
-                return string.Empty;
-            }
+        if (nonEmptyCells.Contains(name))
+        {
+            return sheet[name].Content;
         }
+
+        // If the cell in not in the spreadsheet, automatically return empty string
         else
         {
-            throw new InvalidNameException($"The cell name '{name}' is invalid.");
+            return string.Empty;
         }
     }
 
@@ -381,7 +369,7 @@ public class Spreadsheet
     /// </exception>
     public object GetCellValue(string cellName)
     {
-        throw new NotImplementedException();
+        return sheet[cellName].Value;
     }
 
     /// <summary>
@@ -420,7 +408,7 @@ public class Spreadsheet
     ///     begin with an "=" (equal sign), save the content as a string.
     ///   </para>
     ///   <para>
-    ///     On successfully changing the contents of a cell, the spreadsheet will be changed. (Removed changed link).
+    ///     On successfully changing the contents of a cell, the spreadsheet will be changed. <see cref="Changed"/>.
     ///   </para>
     /// </summary>
     /// <param name="name"> The cell name that is being changed.</param>
@@ -457,8 +445,33 @@ public class Spreadsheet
     /// </exception>
     public IList<string> SetContentsOfCell(string name, string content)
     {
-        // throw new NotImplementedException();
-        return new List<string>();
+        IsVar(name);
+
+        // Checks if content is a number
+        if (double.TryParse(content, out double value))
+        {
+            return SetCellContents(name, value);
+        }
+
+        // Checks if contents is not a formula (and is therefore a string)
+        // by seeing if first character is not "=".
+        else if (content.Equals(string.Empty) || content[0] != '=' )
+        {
+            return SetCellContents(name, content);
+        }
+
+        // If this else statement is reached, then an "=" must be present.
+        // Therefore, treating string as a formula (valid or invalid)
+
+        // This creates a new formula that excludes the "="
+
+        // If content is not a valid formula, a FormulaFormatException will be thrown
+        // TODO: If an exception is thrown, do I just contain like nothing happened in the try parse? And like send and empty string?
+        else
+        {
+            Formula formula = new(content.Substring(1));
+            return SetCellContents(name, formula);
+        }
     }
 
     /// <summary>
@@ -467,22 +480,29 @@ public class Spreadsheet
     /// </summary>
     /// <param name="cellName"> A string that may be a valid cellName. </param>
     /// <returns> true if the string matches the requirements, e.g., A1 or a1. </returns>
+    /// <exception cref="InvalidNameException">Thrown if a cellName does not fit the correct format.</exception>
     private static bool IsVar(string cellName)
     {
         string variableRegexPattern = @"^[a-zA-Z]+\d+$";
-        return Regex.IsMatch(cellName, variableRegexPattern);
+        if (Regex.IsMatch(cellName, variableRegexPattern))
+        {
+            return true;
+        }
+        else
+        {
+            throw new InvalidNameException($"The cell name '{cellName}' is invalid.");
+        }
     }
 
     /// <summary>
-    ///  Set the contents of the named cell to the given number.
+    ///   The contents of the named cell becomes the given contents.
     /// </summary>
     ///
     /// <exception cref="InvalidNameException">
     ///   If the name is invalid, throw an InvalidNameException.
     /// </exception>
-    ///
     /// <param name="name"> The name of the cell. </param>
-    /// <param name="number"> The new content of the cell. </param>
+    /// <param name="contents"> The new content of the cell. </param>
     /// <returns>
     ///   <para>
     ///     This method returns an ordered list consisting of the passed in name
@@ -500,79 +520,18 @@ public class Spreadsheet
     ///     evaluated, followed by B1 re-evaluated, followed by C1 re-evaluated.
     ///   </para>
     /// </returns>
-    private IList<string> SetCellContents(string name, double number)
+    private IList<string> SetCellContents(string name, object contents)
     {
         name = name.ToUpper();
-        if (IsVar(name))
-        {
-            Cells cell = new()
-            {
-                Content = number,
-            };
+        IsVar(name);
 
-            sheet[name] = cell;
-            nonEmptyCells.Add(name);
-            return GetCellsToRecalculate(name).ToList();
+        if (contents.Equals(string.Empty))
+        {
+            return RemoveCell(name);
         }
         else
         {
-            throw new InvalidNameException($"The cell name '{name}' is invalid.");
-        }
-    }
-
-    /// <summary>
-    ///   The contents of the named cell becomes the given text.
-    /// </summary>
-    ///
-    /// <exception cref="InvalidNameException">
-    ///   If the name is invalid, throw an InvalidNameException.
-    /// </exception>
-    /// <param name="name"> The name of the cell. </param>
-    /// <param name="text"> The new content of the cell. </param>
-    /// <returns>
-    ///   The same list as defined in <see cref="SetCellContents(string, double)"/>.
-    /// </returns>
-    private IList<string> SetCellContents(string name, string text)
-    {
-        name = name.ToUpper();
-        if (IsVar(name))
-        {
-            if (text.Equals(string.Empty))
-            {
-                // Check that the cell actually exists so that removal doesn't cause an error.
-                if (sheet.ContainsKey(name))
-                {
-                    // Remove from spreadsheet dictionary and nonEmptyCell HashSet
-                    sheet.Remove(name);
-                    nonEmptyCells.Remove(name);
-
-                    // Remove every dependency for cells which relied on name
-                    foreach (string dependentCell in dg.GetDependents(name))
-                    {
-                        dg.RemoveDependency(name, dependentCell);
-                    }
-                }
-
-                // Just returning the name of the cell if it contains the empty string.
-                List<string> emptyCell = [];
-                emptyCell.Add(name);
-                return emptyCell;
-            }
-            else
-            {
-                Cells cell = new()
-                {
-                    Content = text,
-                };
-
-                sheet[name] = cell;
-                nonEmptyCells.Add(name);
-                return GetCellsToRecalculate(name).ToList();
-            }
-        }
-        else
-        {
-            throw new InvalidNameException($"The cell name '{name}' is invalid.");
+            return AddCell(name, contents);
         }
     }
 
@@ -594,33 +553,86 @@ public class Spreadsheet
     /// <param name="name"> The name of the cell. </param>
     /// <param name="formula"> The new content of the cell. </param>
     /// <returns>
-    ///   The same list as defined in <see cref="SetCellContents(string, double)"/>.
+    ///   The same list as defined in <see cref="SetCellContents(string, object)"/>.
     /// </returns>
     private IList<string> SetCellContents(string name, Formula formula)
     {
         name = name.ToUpper();
-        if (IsVar(name))
+        IsVar(name);
+
+        Cells cell = new()
         {
-            Cells cell = new()
-            {
-                Content = formula,
-            };
+            Content = "=" + formula,
 
-            sheet[name] = cell;
-            nonEmptyCells.Add(name);
+            // TODO: Is this how the evaluate method works?
+            Value = formula.Evaluate((string s) => Convert.ToDouble(s)),
+        };
 
-            // Takes all variables (cells) in formula and adds them to the dependency graph.
-            foreach (string dependentCell in formula.GetVariables())
+        sheet[name] = cell;
+        nonEmptyCells.Add(name);
+
+        // Takes all variables (cells) in formula and adds them to the dependency graph.
+        foreach (string dependentCell in formula.GetVariables())
+        {
+            dg.AddDependency(name, dependentCell);
+        }
+
+        return GetCellsToRecalculate(name).ToList();
+    }
+
+    /// <summary>
+    /// This method adds a new cell to the spreadsheet and updates the contents and value of the cell. <br/>
+    /// This method only is used for doubles and strings.
+    /// </summary>
+    /// <param name="name">Name of the cell that will be added.</param>
+    /// <param name="newContent">The content that will be set to the Cell content and value parameters.</param>
+    /// <returns>
+    ///  <para>
+    ///     This method returns an ordered list consisting of the passed in name
+    ///     followed by the names of all other cells whose value depends, directly
+    ///     or indirectly, on the named cell.
+    ///   </para>
+    /// </returns>
+    private IList<string> AddCell(string name, object newContent)
+    {
+        Cells cell = new()
+        {
+            Content = newContent,
+            Value = newContent,
+        };
+
+        sheet[name] = cell;
+        nonEmptyCells.Add(name);
+        return GetCellsToRecalculate(name).ToList();
+    }
+
+    /// <summary>
+    /// This method removes a cell from the spreadsheet and dependency graph.
+    /// </summary>
+    /// <param name="name">Name of the cell to be removed.</param>
+    /// <returns>A list containing the single cell name that was removed (for SetCellContents purposes).</returns>
+    private IList<string> RemoveCell(string name)
+    {
+        // Check that the cell actually exists so that removal doesn't cause an error.
+        // Even if it isn't in the spreadsheet, it will still return itself since it is
+        // technically equal to the empty string already.
+        if (sheet.ContainsKey(name))
+        {
+            // Remove from spreadsheet dictionary and nonEmptyCell HashSet
+            sheet.Remove(name);
+            nonEmptyCells.Remove(name);
+
+            // Remove every dependency for cells which relied on name
+            foreach (string dependentCell in dg.GetDependents(name))
             {
-                dg.AddDependency(name, dependentCell);
+                dg.RemoveDependency(name, dependentCell);
             }
 
-            return GetCellsToRecalculate(name).ToList();
+            Changed = true;
         }
-        else
-        {
-            throw new InvalidNameException($"The cell name '{name}' is invalid.");
-        }
+
+        // Just returning the name of the cell if it contains the empty string.
+        return new List<string> { name };
     }
 
     /// <summary>
@@ -703,6 +715,9 @@ public class Spreadsheet
         LinkedList<string> changed = new();
         HashSet<string> visited = [];
         Visit(name, name, visited, changed);
+
+        // If Visit found no circular dependencies, then spreadsheet was changed.
+        Changed = true;
         return changed;
     }
 
