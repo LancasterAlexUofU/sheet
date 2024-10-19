@@ -23,7 +23,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 13 |
+| Assignment 6 | 14 | 15.5 |
 
 (Rest of the hours come from SpreadsheetTests)
 
@@ -41,7 +41,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Task | Number of Hours |
 | :--------:| :--------:
 | Reading assignment and <br/> setting up environment | 2 |
-| Implementing Spreadsheet Program | 4 |
+| Implementing Spreadsheet Program | 6.5 |
 
 
 # Comments for Evaluators
@@ -56,3 +56,4 @@ Work stands on its own.
 2) Dictionary Class - https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-8.0
 3) Path Class - https://learn.microsoft.com/en-us/dotnet/api/system.io.path?view=net-8.0
 4) File Class - https://learn.microsoft.com/en-us/dotnet/api/system.io.file?view=net-8.0
+5) Streamwriter Class - https://learn.microsoft.com/en-us/dotnet/api/system.io.streamwriter?view=net-8.0

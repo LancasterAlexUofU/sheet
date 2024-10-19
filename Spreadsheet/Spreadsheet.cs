@@ -323,63 +323,17 @@ public class Spreadsheet
     /// </exception>
     public void Save(string filename)
     {
-        string fullPath;
+        IsValidFile(filename);
 
-        // GetFullPath throws an exception if the path contains invalid characters or is otherwise malformed.
-        // If no exception is thrown, then filename is a valid file path.
-        try
-        {
-            fullPath = Path.GetFullPath(filename);
-        }
-
-        // Exceptions that can be thrown:
-        // ArgumentException
-        // path is a zero - length string, contains only white space on Windows systems, or contains one or more of the invalid characters defined in GetInvalidPathChars().
-        // - or -
-        // The system could not retrieve the absolute path.
-
-        // SecurityException
-        // The caller does not have the required permissions.
-
-        // ArgumentNullException
-        // path is null.
-
-        // NotSupportedException
-        // .NET Framework only: path contains a colon(":") that is not part of a volume identifier(for example, "c:\").
-
-        // PathTooLongException
-        // The specified path, file name, or both exceed the system - defined maximum length.
-        catch(Exception)
-        {
-            throw new SpreadsheetReadWriteException($"The system could not retrieve the absolute path for \"{filename}\"");
-        }
-
-        if (File.Exists(fullPath))
-        {
-            try
-            {
-                FileAttributes attributes = File.GetAttributes(fullPath);
-
-                // Creates a bitmask that combines both ReadOnly and System attributes
-                // Then checks if the attributes of the file is not equal to the bitmask
-                if ((attributes & (FileAttributes.ReadOnly | FileAttributes.System)) != 0)
-                {
-
-                }
-            }
-            catch(Exception)
-            {
-                throw new SpreadsheetReadWriteException($"Spreadsheet does not have proper permissions for \"{filename}\"");
-            }
-        }
-
-        Formula formula1 = new("A2");
-
-        SetCellContents("A1", $"={formula1}");
         string jsonString = JsonSerializer.Serialize(new { Cells = sheet }, new JsonSerializerOptions { WriteIndented = true });
 
-        // string message = JsonSerializer.Serialize(sheet);
-        Cells? result = JsonSerializer.Deserialize<Cells>(jsonString);
+        // Adding false allows file contents to be overwritten
+        // StreamWriter will also add new file if it doesn't exist already
+        using (StreamWriter writer = new StreamWriter(filename, false))
+        {
+            writer.Write(jsonString);
+            Changed = false;
+        }
     }
 
     /// <summary>
@@ -399,7 +353,40 @@ public class Spreadsheet
     /// <exception cref="SpreadsheetReadWriteException"> When the file cannot be opened or the json is bad.</exception>
     public void Load(string filename)
     {
-        throw new NotImplementedException();
+        // Have to check first that filename exists so that IsValidFile can be reused.
+        try
+        {
+            // "if the path of the file name does not exist"
+            if (!File.Exists(Path.GetFullPath(filename)))
+            {
+                throw new SpreadsheetReadWriteException($"The file \"{filename}\" does not exist.");
+            }
+        }
+
+        // Thrown if GetFullPath returns any exceptions
+        catch
+        {
+            throw new SpreadsheetReadWriteException($"The system could not retrieve the absolute path for \"{filename}\"");
+        }
+
+        // Mainly checks that it isn't readonly, a system level file, or already opened
+        IsValidFile(filename);
+
+        // Attempt to deserialize filename
+        string jsonData = File.ReadAllText(filename);
+        try
+        {
+            // Deserialized into cell names, cells (which itself is a dictionary)
+            // Spreadsheet data = JsonSerializer.Deserialize<Spreadsheet>(jsonData);
+        }
+        catch
+        {
+            throw new SpreadsheetReadWriteException($"The JSON file is invalid.");
+        }
+
+        sheet.Clear();
+        nonEmptyCells.Clear();
+        dg = new();
     }
 
     /// <summary>
@@ -525,6 +512,70 @@ public class Spreadsheet
     }
 
     /// <summary>
+    /// This method checks that any given file name/path is valid for writing to.
+    /// The path may or may not exist.
+    /// </summary>
+    /// <param name="filename">The filename or path.</param>
+    /// <returns>Returns true if filename is in a correct format.</returns>
+    /// <exception cref="SpreadsheetReadWriteException">Thrown if filename is not is a correct format, is readonly, or a system level file.</exception>
+    private static bool IsValidFile(string filename)
+    {
+        string fullPath;
+
+        // GetFullPath throws an exception if the path contains invalid characters or is otherwise malformed.
+        // If no exception is thrown, then filename is a valid file path.
+        try
+        {
+            fullPath = Path.GetFullPath(filename);
+        }
+        catch
+        {
+            throw new SpreadsheetReadWriteException($"The system could not retrieve the absolute path for \"{filename}\"");
+        }
+
+        if (File.Exists(fullPath))
+        {
+            try
+            {
+                FileAttributes attributes = File.GetAttributes(fullPath);
+
+                // Creates a bit mask that combines both ReadOnly and System attributes
+                // Then checks if the attributes of the file is not equal to the bit mask
+                if ((attributes & (FileAttributes.ReadOnly | FileAttributes.System)) != 0)
+                {
+                    throw new SpreadsheetReadWriteException($"Spreadsheet does not have proper permissions for \"{filename}\"");
+                }
+
+                // Check if the file is locked by another process by attempting to open it
+                using (FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    // If no exception is thrown, the file is not locked
+                }
+            }
+
+            // If the filename is passed (such as "sheet.txt") is not found in the current directory, a FileNotFoundException will be thrown.
+            catch (FileNotFoundException)
+            {
+                throw new SpreadsheetReadWriteException($"The file \"{filename}\" was not found. (Try using absolute path).");
+            }
+
+            // IOException is thrown if the file is already open by another process
+            catch (IOException)
+            {
+                throw new SpreadsheetReadWriteException($"The file \"{filename}\" is currently in use by another process.");
+            }
+
+            // Can be thrown if GetAttributes has trouble retrieving attributes from file
+            catch
+            {
+                throw new SpreadsheetReadWriteException($"Spreadsheet does not have proper permissions for \"{filename}\"");
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
     ///   Reports whether "token" is a variable.  It must be one or more letters
     ///   followed by one or more numbers.
     /// </summary>
@@ -612,7 +663,7 @@ public class Spreadsheet
 
         Cells cell = new()
         {
-            Content = "=" + formula,
+            Content = "=" + formula.ToString(),
 
             // TODO: Is this how the evaluate method works?
             Value = formula.Evaluate((string s) => Convert.ToDouble(s)),
