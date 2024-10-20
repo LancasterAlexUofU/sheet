@@ -149,6 +149,11 @@ public class SpreadsheetReadWriteException : Exception
 public class Spreadsheet
 {
     private string spreadsheetName;
+
+    // Creates a dictionary of cell names and pairs them with their contents / values
+    [JsonPropertyName("Cells")]
+    private Dictionary<string, Cells> sheet = [];
+
     private HashSet<string> nonEmptyCells = [];
     private DependencyGraph dg = new();
 
@@ -177,10 +182,6 @@ public class Spreadsheet
     /// Gets a value indicating whether if any changes have been made to the spreadsheet.
     /// </summary>=>
     public bool Changed { get; private set; } = false;
-
-    // Creates a dictionary of cell names and pairs them with their contents / values
-    [JsonPropertyName("Cells")]
-    private Dictionary<string, Cells> Sheet { get; set; } = [];
 
     /// <summary>
     ///   <para>
@@ -246,7 +247,7 @@ public class Spreadsheet
 
         if (nonEmptyCells.Contains(name))
         {
-            return Sheet[name].Content;
+            return sheet[name].Content;
         }
 
         // If the cell in not in the spreadsheet, automatically return empty string
@@ -324,7 +325,7 @@ public class Spreadsheet
     {
         IsValidFile(filename);
 
-        string jsonString = JsonSerializer.Serialize(new { Cells = Sheet }, new JsonSerializerOptions { WriteIndented = true });
+        string jsonString = JsonSerializer.Serialize<Dictionary<string, Cells>>(sheet, new JsonSerializerOptions { WriteIndented = true });
 
         // Adding false allows file contents to be overwritten
         // StreamWriter will also add new file if it doesn't exist already
@@ -373,12 +374,12 @@ public class Spreadsheet
 
         // Attempt to deserialize filename
         string jsonData = File.ReadAllText(filename);
-        Console.WriteLine($"JSON Data: {jsonData}");
 
         try
         {
             // Deserialized into cell names, cells (which itself is a dictionary)
-            Spreadsheet? loadedSheet = JsonSerializer.Deserialize<Spreadsheet>(jsonData);
+            Dictionary<string, Cells>? loadedSheet;
+            loadedSheet = JsonSerializer.Deserialize<Dictionary<string, Cells>>(jsonData);
 
             if (loadedSheet is null)
             {
@@ -386,12 +387,12 @@ public class Spreadsheet
             }
 
             // Clear existing data
-            Sheet.Clear();
+            sheet.Clear();
             nonEmptyCells.Clear();
             dg = new();
 
             // Process each cell
-            foreach (var pair in loadedSheet.Sheet)
+            foreach (var pair in loadedSheet)
             {
                 string cellName = pair.Key;
 
@@ -429,7 +430,7 @@ public class Spreadsheet
     /// </exception>
     public object GetCellValue(string cellName)
     {
-        return Sheet[cellName].Value;
+        return sheet[cellName].Value;
     }
 
     /// <summary>
@@ -702,10 +703,10 @@ public class Spreadsheet
             Content = formula,
 
             // TODO: Is this how the evaluate method works?
-            Value = formula.Evaluate(s => Convert.ToDouble(Sheet[s].Value)),
+            Value = formula.Evaluate(s => Convert.ToDouble(sheet[s].Value)),
         };
 
-        Sheet[name] = cell;
+        sheet[name] = cell;
         nonEmptyCells.Add(name);
 
         // Takes all variables (cells) in formula and adds them to the dependency graph.
@@ -756,7 +757,7 @@ public class Spreadsheet
             Value = newContent,
         };
 
-        Sheet[name] = cell;
+        sheet[name] = cell;
         nonEmptyCells.Add(name);
         return GetCellsToRecalculate(name).ToList();
     }
@@ -771,10 +772,10 @@ public class Spreadsheet
         // Check that the cell actually exists so that removal doesn't cause an error.
         // Even if it isn't in the spreadsheet, it will still return itself since it is
         // technically equal to the empty string already.
-        if (Sheet.ContainsKey(name))
+        if (sheet.ContainsKey(name))
         {
             // Remove from spreadsheet dictionary and nonEmptyCell HashSet
-            Sheet.Remove(name);
+            sheet.Remove(name);
             nonEmptyCells.Remove(name);
 
             // Remove every dependency for cells which relied on name
