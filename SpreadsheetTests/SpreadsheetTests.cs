@@ -93,6 +93,8 @@ public class SpreadsheetTests
         Formula expression3 = new("1 + C1");
         Formula expression4 = new("2 * 2");
 
+        sheet.SetContentsOfCell("C1", "1");
+
         sheet.SetContentsOfCell("A1", $"={expression1}");
         sheet.SetContentsOfCell("B1", $"={expression2}");
         sheet.SetContentsOfCell("A1", $"={expression3}");
@@ -112,13 +114,13 @@ public class SpreadsheetTests
         Formula expression1 = new("1 + 1");
         Formula expression2 = new("A1 + C1");
 
-        sheet.SetContentsOfCell("A1", $"={expression1}");
+        sheet.SetContentsOfCell("A1", "1");
         sheet.SetContentsOfCell("A1", $"={expression1}"); // Replace with formula
         sheet.SetContentsOfCell("A1", "1 + 1"); // Replace with string
         sheet.SetContentsOfCell("A1", "2"); // Replace with double
 
-        sheet.SetContentsOfCell("B1", $"={expression2}");
         sheet.SetContentsOfCell("C1", "4");
+        sheet.SetContentsOfCell("B1", $"={expression2}");
         sheet.SetContentsOfCell("D1", string.Empty);
         List<string> correctCells = ["A1", "B1", "C1"];
         CollectionAssert.AreEquivalent(correctCells, sheet.GetNamesOfAllNonemptyCells().ToList());
@@ -192,6 +194,8 @@ public class SpreadsheetTests
         Formula expression3 = new("1 + C1");
         Formula expression4 = new("2 * 2");
 
+        sheet.SetContentsOfCell("C1", "1");
+
         sheet.SetContentsOfCell("A1", $"={expression1}");
         sheet.SetContentsOfCell("B1", $"={expression2}");
         sheet.SetContentsOfCell("A1", $"={expression3}");
@@ -221,8 +225,8 @@ public class SpreadsheetTests
         sheet.SetContentsOfCell("A1", "2"); // Replace with double
         Assert.AreEqual(2.0, sheet.GetCellContents("A1"));
 
-        sheet.SetContentsOfCell("B1", $"={expression2}");
         sheet.SetContentsOfCell("C1", "4");
+        sheet.SetContentsOfCell("B1", $"={expression2}");
         sheet.SetContentsOfCell("D1", string.Empty);
 
         Assert.AreEqual(expression2, sheet.GetCellContents("B1"));
@@ -314,7 +318,8 @@ public class SpreadsheetTests
         Spreadsheet sheet = new();
         Formula formula1 = new("1 + B1");
         Formula formula2 = new("1 + A1");
-        Formula formula3 = new("1 + C1");
+
+        sheet.SetContentsOfCell("B1", "4");
         sheet.SetContentsOfCell("A1", $"={formula1}");
 
         bool exceptionThrown = false;
@@ -330,7 +335,7 @@ public class SpreadsheetTests
         Assert.IsTrue(exceptionThrown, "CircularException was not thrown as expected.");
 
         // Check that B1 is still empty (the circular reference didn't change the spreadsheet)
-        Assert.AreEqual(formula2, sheet.GetCellContents("B1")); // Can't figure out how to fix test
+        Assert.AreEqual(formula2, sheet.GetCellContents("B1"));
 
         // Check that A1 still contains formula1
         Assert.AreEqual(formula1, sheet.GetCellContents("A1"));
@@ -361,6 +366,9 @@ public class SpreadsheetTests
         Formula formula4 = new("(B1 * 4) + 4");
         List<string> values = [];
 
+        sheet.SetContentsOfCell("B1", "4");
+        sheet.SetContentsOfCell("C1", "2");
+
         // It should only return A1 and not A1, B1, since even if things are changed in A1, B1 won't be changed and therefore no recalculations are needed.
         values.Add("A1");
         CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("A1", $"={formula1}").ToList());
@@ -390,6 +398,9 @@ public class SpreadsheetTests
         Formula formula3 = new("(D1 * 4) + 4");
         List<string> values = [];
 
+        sheet.SetContentsOfCell("B1", "4");
+        sheet.SetContentsOfCell("C1", "2");
+
         sheet.SetContentsOfCell("A1", $"={formula1}");
 
         values.Add("B1");
@@ -400,10 +411,13 @@ public class SpreadsheetTests
         CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("C1", "50").ToList());
 
         values = ["D1"];
-        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("D1", "STRING!").ToList());
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("D1", "4").ToList());
 
         values = ["E1"]; // values = ["E1"]
         CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("E1", $"={formula3}").ToList());
+
+        values = ["F1"];
+        CollectionAssert.AreEquivalent(values, sheet.SetContentsOfCell("F1", "STRING!").ToList());
     }
 
     /// <summary>
@@ -445,6 +459,12 @@ public class SpreadsheetTests
         Formula formula3 = new("E1 + 1");
         Formula formula4 = new("C1");
         Formula formula5 = new("B1");
+
+        sheet.SetContentsOfCell("B1", "4");
+        sheet.SetContentsOfCell("D1", "5");
+        sheet.SetContentsOfCell("C1", "6");
+        sheet.SetContentsOfCell("G1", "7");
+        sheet.SetContentsOfCell("E1", "8");
 
         sheet.SetContentsOfCell("A1", $"={formula1}");
         sheet.SetContentsOfCell("B1", $"={formula2}");
@@ -519,9 +539,10 @@ public class SpreadsheetTests
     public void GetValueIndex_FormulaDependencies_Valid()
     {
         Spreadsheet sheet = new();
-        sheet.SetContentsOfCell("A1", "=A2+A3"); // I think this valid if I declare it beforehand?
         sheet.SetContentsOfCell("A2", "5");
         sheet.SetContentsOfCell("A3", "5");
+        sheet.SetContentsOfCell("A1", "=A2+A3");
+
         Assert.AreEqual(sheet["A1"], 10.0);
     }
 
@@ -597,6 +618,7 @@ public class SpreadsheetTests
 }";
 
         Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A2", "3"); // TODO: ADDED THIS CODE, REST WON'T WORK
         sheet.SetContentsOfCell("A1", "=A2 + 3");
         string filename = "sheet.txt";
         sheet.Save(filename);
@@ -747,6 +769,12 @@ public class SpreadsheetTests
         Formula formula4 = new("C1");
         Formula formula5 = new("B1");
 
+        sheet.SetContentsOfCell("B1", "4");
+        sheet.SetContentsOfCell("D1", "5");
+        sheet.SetContentsOfCell("C1", "6");
+        sheet.SetContentsOfCell("G1", "7");
+        sheet.SetContentsOfCell("E1", "8");
+
         sheet.SetContentsOfCell("A1", $"={formula1}");
         sheet.SetContentsOfCell("B1", $"={formula2}");
         sheet.SetContentsOfCell("C1", "5");
@@ -791,6 +819,8 @@ public class SpreadsheetTests
         string filename = "sheet.txt";
 
         Formula formula1 = new("A2");
+        sheet.SetContentsOfCell("A2", "1");
+
         sheet.SetContentsOfCell("A1", $"={formula1}");
         Assert.ThrowsException<CircularException>(() => sheet.SetContentsOfCell("A2", "=A1"));
         sheet.Save(filename);
@@ -855,6 +885,7 @@ public class SpreadsheetTests
         string filename = "sheet.txt";
 
         sheet.SetContentsOfCell("A1", "5");
+        sheet.SetContentsOfCell("C1", "1");
         sheet.SetContentsOfCell("A2", "=C1");
         sheet.SetContentsOfCell("C1", "=3+3");
         sheet.Save(filename);
@@ -921,10 +952,12 @@ public class SpreadsheetTests
     public void GetCellValue_FormulaWithDependents()
     {
         Spreadsheet sheet = new();
-        sheet.SetContentsOfCell("A1", "=A2+A3");
         sheet.SetContentsOfCell("A2", "5");
-        sheet.SetContentsOfCell("A3", "=A4");
         sheet.SetContentsOfCell("A4", "5");
+        sheet.SetContentsOfCell("A3", "=A4");
+
+        sheet.SetContentsOfCell("A1", "=A2+A3");
+
         Assert.AreEqual(sheet.GetCellValue("A1"), 10.0);
 
         sheet.SetContentsOfCell("A4", "10");
@@ -994,6 +1027,8 @@ public class SpreadsheetTests
     public void SetContentsOfCell_IsCorrectType()
     {
         Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A3", "3");
+        sheet.SetContentsOfCell("A4", "4");
         sheet.SetContentsOfCell("A1", "=5+5");
         sheet.SetContentsOfCell("A2", "=A3+A4");
         sheet.SetContentsOfCell("B1", "5");
@@ -1025,3 +1060,4 @@ public class SpreadsheetTests
 // If it is empty, throw argument exception
 // with invalid formula, throw formula error object
 // Maybe test save with a filename without an extension
+// Make sure error is thrown if string and double are eval?

@@ -24,7 +24,7 @@ even with multiple indirect dependences
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 16.5 |
+| Assignment 6 | 14 | 18 |
 
 (Rest of the hours come from Spreadsheet)
 
@@ -40,6 +40,7 @@ even with multiple indirect dependences
 | Task | Number of Hours |
 | :--------:| :--------:
 | Implementing Spreadsheet Tests | 8 |
+| Debugging | 0.5 |
 
 # Comments for Evaluators
 I am assuming, following the assignment instructions, that even if a cell is removed

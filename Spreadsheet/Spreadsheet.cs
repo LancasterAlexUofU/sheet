@@ -180,7 +180,7 @@ public class Spreadsheet
 
     /// <summary>
     /// Gets a value indicating whether if any changes have been made to the spreadsheet.
-    /// </summary>
+    /// </summary>=>
     public bool Changed { get; private set; } = false;
 
     /// <summary>
@@ -504,6 +504,7 @@ public class Spreadsheet
     /// </exception>
     public IList<string> SetContentsOfCell(string name, string content)
     {
+        name = name.ToUpper();
         IsVar(name);
 
         // Checks if content is a number
@@ -645,9 +646,6 @@ public class Spreadsheet
     /// </returns>
     private IList<string> SetCellContents(string name, object contents)
     {
-        name = name.ToUpper();
-        IsVar(name);
-
         if (contents.Equals(string.Empty))
         {
             return RemoveCell(name);
@@ -680,15 +678,12 @@ public class Spreadsheet
     /// </returns>
     private IList<string> SetCellContents(string name, Formula formula)
     {
-        name = name.ToUpper();
-        IsVar(name);
-
         Cells cell = new()
         {
-            Content = "=" + formula.ToString(),
+            Content = formula,
 
             // TODO: Is this how the evaluate method works?
-            Value = formula.Evaluate((string s) => Convert.ToDouble(s)),
+            Value = formula.Evaluate(s => Convert.ToDouble(sheet[s].Value)),
         };
 
         sheet[name] = cell;
@@ -897,7 +892,7 @@ internal class Cells
     /// <summary>
     /// Gets or sets content.
     /// </summary>
-    [JsonPropertyName("StringForm")]
+    [JsonIgnore]
     public object Content
     {
         get { return content; }
@@ -913,5 +908,24 @@ internal class Cells
     {
         get { return localValue; }
         set { localValue = value; }
+    }
+
+    /// <summary>
+    /// Gets the string form for JSON serialization.
+    /// </summary>
+    [JsonPropertyName("StringForm")]
+    public string StringForm
+    {
+        get
+        {
+            // If the content is a Formula, add "=" in front
+            if (content is Formula)
+            {
+                return "=" + content.ToString();
+            }
+
+            // Otherwise, return the content as a string
+            return content.ToString() ?? string.Empty;
+        }
     }
 }

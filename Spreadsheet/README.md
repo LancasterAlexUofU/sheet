@@ -23,7 +23,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 16.5 |
+| Assignment 6 | 14 | 18 |
 
 (Rest of the hours come from SpreadsheetTests)
 
@@ -41,7 +41,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Task | Number of Hours |
 | :--------:| :--------:
 | Reading assignment and <br/> setting up environment | 2 |
-| Implementing Spreadsheet Program | 6.5 |
+| Implementing Spreadsheet Program | 7.5 |
 
 
 # Comments for Evaluators
