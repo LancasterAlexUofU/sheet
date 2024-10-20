@@ -393,21 +393,7 @@ public class Spreadsheet
             nonEmptyCells.Clear();
             dg = new();
 
-            // Process each cell
-            foreach (var pair in loadedSheet)
-            {
-                string cellName = pair.Key;
-
-                // pair.Value gets "Cells" which is a dictionary
-                // inside Cells, getting Content
-                // Since Content is an object, convert to string
-                // ?? string.Empty converts any null values to the empty string
-                string cellContent = pair.Value.Content.ToString() ?? string.Empty;
-
-                SetContentsOfCell(cellName, cellContent);
-            }
-
-            Changed = false;
+            SetCellContentsInOrder(loadedSheet);
         }
         catch
         {
@@ -432,7 +418,19 @@ public class Spreadsheet
     /// </exception>
     public object GetCellValue(string cellName)
     {
-        return sheet[cellName].Value;
+        cellName = cellName.ToUpper();
+        IsVar(cellName);
+
+        if (nonEmptyCells.Contains(cellName))
+        {
+            return sheet[cellName].Value;
+        }
+
+        // If the cell in not in the spreadsheet, automatically return empty string
+        else
+        {
+            return string.Empty;
+        }
     }
 
     /// <summary>
@@ -510,6 +508,7 @@ public class Spreadsheet
     {
         name = name.ToUpper();
         IsVar(name);
+        IList<string> cellsToReEval = [];
 
         // Removing any old dependencies
         foreach (string dependent in dg.GetDependents(name))
@@ -520,14 +519,14 @@ public class Spreadsheet
         // Checks if content is a number
         if (double.TryParse(content, out double value))
         {
-            return SetCellContents(name, value);
+            cellsToReEval = SetCellContents(name, value);
         }
 
         // Checks if contents is not a formula (and is therefore a string)
         // by seeing if first character is not "=".
         else if (content.Equals(string.Empty) || content[0] != '=' )
         {
-            return SetCellContents(name, content);
+            cellsToReEval = SetCellContents(name, content);
         }
 
         // If this else statement is reached, then an "=" must be present.
@@ -540,8 +539,21 @@ public class Spreadsheet
         else
         {
             Formula formula = new(content.Substring(1));
-            return SetCellContents(name, formula);
+            cellsToReEval = SetCellContents(name, formula);
         }
+
+        // Reevaluate cells if their contents contain a formula
+        foreach(string cell in cellsToReEval)
+        {
+            // Need to include ContainsKey in-case a cell was removed
+            // Without ContainsKey, sheet[cell] can't find cell (obviously)
+            if (sheet.ContainsKey(cell) && (sheet[cell].Content is Formula formula))
+            {
+                sheet[cell].Value = formula.Evaluate(cell => Convert.ToDouble(sheet[cell].Value));
+            }
+        }
+
+        return cellsToReEval;
     }
 
     /// <summary>
@@ -554,9 +566,12 @@ public class Spreadsheet
     private static bool IsValidFile(string filename)
     {
         string fullPath;
+        char[] invalidChars = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
+        char[] invalidPathChars = Path.GetInvalidPathChars();
 
-        // GetFullPath throws an exception if the path contains invalid characters or is otherwise malformed.
-        // If no exception is thrown, then filename is a valid file path.
+        char[] combinedInvalidChars = invalidChars.Concat(invalidPathChars).Distinct().ToArray();
+
+        // GetFullPath throws an exception if the path formatting is malformed.
         try
         {
             fullPath = Path.GetFullPath(filename);
@@ -566,6 +581,14 @@ public class Spreadsheet
             throw new SpreadsheetReadWriteException($"The system could not retrieve the absolute path for \"{filename}\"");
         }
 
+        // If no invalid characters are found, IndexOfAny returns -1
+        if (filename.IndexOfAny(combinedInvalidChars) != -1)
+        {
+            throw new SpreadsheetReadWriteException($"\"{filename}\" contains an invalid filename character.");
+        }
+
+        // If the file path doesn't exist but is properly formatted, then it is okay to create.
+        // If it does exist, need to check a few more things such as its attributes.
         if (File.Exists(fullPath))
         {
             try
@@ -626,6 +649,72 @@ public class Spreadsheet
         {
             throw new InvalidNameException($"The cell name '{cellName}' is invalid.");
         }
+    }
+
+    /// <summary>
+    /// <para>
+    /// This private method calls SetContentsOfCell after loading in a JSON file and ensures that cells that are dependent on each other
+    /// are added to the Spreadsheet in the correct order.
+    /// </para>
+    /// <para>
+    /// The algorithm is the following: <br/>
+    /// For as many items in the loadedData JSON, try to set as many contents as possible. If at least one Cell was set, progress is being made. <br/>
+    /// However, if there was a pass where no cells were processed but there are still items in loadedSheet, then there is a cell that doesn't have a set value. <br/>
+    /// This allows for all double values to first be set, then if any cells rely on those value cells, they will be set next (and so on).
+    /// </para>
+    /// </summary>
+    /// <param name="loadedSheet">The unwrapped dictionary given by the JSON deserializer.</param>
+    /// <exception cref="SpreadsheetReadWriteException">Thrown if cell(s) were found that don't have any reference to a value (even through other cells) or if not all cells could be processed.</exception>
+    private void SetCellContentsInOrder(Dictionary<string, Cells> loadedSheet)
+    {
+        for (int i = 0; i < loadedSheet.Count; i++)
+        {
+            bool atLeastOneCellProcessed = false;
+
+            // Process each cell
+            foreach (var pair in loadedSheet)
+            {
+                string cellName = pair.Key;
+
+                // pair.Value gets "Cells" which is a dictionary
+                // inside Cells, getting Content
+                // Since Content is an object, convert to string
+                // ?? string.Empty converts any null values to the empty string
+                string cellContent = pair.Value.Content.ToString() ?? string.Empty;
+
+                try
+                {
+                    SetContentsOfCell(cellName, cellContent);
+
+                    // If nothing is caught, then remove and keep going
+                    atLeastOneCellProcessed = true;
+                    loadedSheet.Remove(pair.Key);
+                }
+
+                // If cell is dependent on another cell that isn't in the spreadsheet yet, KeyNotFoundException will be thrown.
+                catch (KeyNotFoundException)
+                {
+                }
+            }
+
+            if (!atLeastOneCellProcessed)
+            {
+                throw new SpreadsheetReadWriteException("Cell(s) found with unset value dependencies. (e.g. Cell A1 contains \"=A2\", but A2 does not hold any value)");
+            }
+
+            // If loadedSheet has been fully processed, end loop
+            if (loadedSheet.Count == 0)
+            {
+                break;
+            }
+        }
+
+        if (loadedSheet.Count > 0)
+        {
+            throw new SpreadsheetReadWriteException("Not all Cells were processed");
+        }
+
+        Changed = false;
     }
 
     /// <summary>
@@ -761,6 +850,7 @@ public class Spreadsheet
 
         sheet[name] = cell;
         nonEmptyCells.Add(name);
+
         return GetCellsToRecalculate(name).ToList();
     }
 

@@ -682,7 +682,7 @@ public class SpreadsheetTests
     public void Save_InvalidCharacterInFileName_Invalid()
     {
         Spreadsheet sheet = new();
-        string filename = "sheet/#.txt";
+        string filename = @"sheet/?\<.txt";
 
         sheet.Save(filename);
     }
@@ -812,7 +812,7 @@ public class SpreadsheetTests
         Assert.AreEqual(sheet.GetCellContents("D1"), formula3);
         Assert.AreEqual(sheet.GetCellContents("E1"), 3.0);
         Assert.AreEqual(sheet.GetCellContents("F1"), formula4);
-        Assert.AreEqual(sheet.GetCellContents("G1"), 3);
+        Assert.AreEqual(sheet.GetCellContents("G1"), 3.0);
         Assert.AreEqual(sheet.GetCellContents("H1"), formula5);
     }
 
@@ -883,14 +883,23 @@ public class SpreadsheetTests
     /// This test method ensures that a readonly file, when loaded, throws a SpreadsheetReadWriteException.
     /// </summary>
     [TestMethod]
-    [ExpectedException(typeof(SpreadsheetReadWriteException))]
     public void Load_ReadOnlyFile_Invalid()
     {
         Spreadsheet sheet = new();
         string filename = "ReadOnlyFile.txt";
-        File.SetAttributes(filename, FileAttributes.ReadOnly);
 
-        sheet.Load(filename);
+        using (FileStream fs = File.Create(filename))
+        {
+            // File stream will be automatically closed here
+        }
+
+        File.SetAttributes(filename, FileAttributes.ReadOnly);
+        Assert.ThrowsException<SpreadsheetReadWriteException>(() => sheet.Load(filename));
+
+        // Remove the read-only attribute before attempting to delete the file
+        File.SetAttributes(filename, FileAttributes.Normal);
+
+        File.Delete(filename);
     }
 
     /// <summary>
@@ -910,7 +919,7 @@ public class SpreadsheetTests
 
         sheet.SetContentsOfCell("A1", "10");
         sheet.SetContentsOfCell("D1", "10");
-        sheet.SetContentsOfCell("C1", "6+6");
+        sheet.SetContentsOfCell("C1", "=6+6");
         sheet.Load(filename);
 
         List<string> correctCells = ["A1", "A2", "C1"];

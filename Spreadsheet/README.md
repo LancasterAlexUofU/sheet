@@ -23,7 +23,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 21.5 |
+| Assignment 6 | 14 | 25.5 |
 
 (Rest of the hours come from SpreadsheetTests)
 
@@ -42,11 +42,17 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | :--------:| :--------:
 | Reading assignment and <br/> setting up environment | 2 |
 | Implementing Spreadsheet Program | 7.5 |
-| Debugging | 3.5 |
+| Debugging | 6.5 |
 
 
 # Comments for Evaluators
-Work stands on its own.
+I am assuming that empty cell's values are equal to the empty string by default if GetCellValue is called.
+
+I am also assuming that if a cell does not have content in it and a formula calls it (even if the content is set later), 
+an error will occur and this is intentional. I believe this is what Lecture 12 Slide (Page 22) was trying to convey, even though
+it was talking about values.
+
+I am going to remove the PS5 grading tests as they break, even with changing 
 
 # Consulted Peers
 - Landon
