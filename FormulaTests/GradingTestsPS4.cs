@@ -236,7 +236,7 @@ public class GradingTestsPS4
     [TestMethod]
     [Timeout(5000)]
     [TestCategory("17")]
-    public void Evaluate_OperatorAfterParens_Equals100()
+    public void Evaluate_OperatorAfterParentheses_Equals100()
     {
         Formula formula = new("(10*11)-10/1");
         Assert.AreEqual(100.0, formula.Evaluate(s => 0));
@@ -310,7 +310,7 @@ public class GradingTestsPS4
     [TestMethod]
     [Timeout(5000)]
     [TestCategory("23")]
-    public void Evaluate_TestComplexNestedParensRight_Equals6()
+    public void Evaluate_TestComplexNestedParenthesesRight_Equals6()
     {
         Formula formula = new("x1+(x2+(x3+(x4+(x5+x6))))");
         Assert.AreEqual(6.0, formula.Evaluate(s => 1));
@@ -322,7 +322,7 @@ public class GradingTestsPS4
     [TestMethod]
     [Timeout(5000)]
     [TestCategory("24")]
-    public void Evaluate_TestComplexNestedParensLeft_Equals12()
+    public void Evaluate_TestComplexNestedParenthesesLeft_Equals12()
     {
         Formula formula = new("((((x1+x2)+x3)+x4)+x5)+x6");
         Assert.AreEqual(12.0, formula.Evaluate(s => 2));

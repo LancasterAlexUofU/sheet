@@ -1061,3 +1061,4 @@ public class SpreadsheetTests
 // with invalid formula, throw formula error object
 // Maybe test save with a filename without an extension
 // Make sure error is thrown if string and double are eval?
+// Have I tried just passing in a single cell that doesn't exist?

@@ -149,11 +149,6 @@ public class SpreadsheetReadWriteException : Exception
 public class Spreadsheet
 {
     private string spreadsheetName;
-
-    // Creates a dictionary of cell names and pairs them with their contents / values
-    [JsonPropertyName("Cells")]
-    private Dictionary<string, Cells> sheet = [];
-
     private HashSet<string> nonEmptyCells = [];
     private DependencyGraph dg = new();
 
@@ -182,6 +177,10 @@ public class Spreadsheet
     /// Gets a value indicating whether if any changes have been made to the spreadsheet.
     /// </summary>=>
     public bool Changed { get; private set; } = false;
+
+    // Creates a dictionary of cell names and pairs them with their contents / values
+    [JsonPropertyName("Cells")]
+    private Dictionary<string, Cells> Sheet { get; set; } = [];
 
     /// <summary>
     ///   <para>
@@ -247,7 +246,7 @@ public class Spreadsheet
 
         if (nonEmptyCells.Contains(name))
         {
-            return sheet[name].Content;
+            return Sheet[name].Content;
         }
 
         // If the cell in not in the spreadsheet, automatically return empty string
@@ -325,7 +324,7 @@ public class Spreadsheet
     {
         IsValidFile(filename);
 
-        string jsonString = JsonSerializer.Serialize(new { Cells = sheet }, new JsonSerializerOptions { WriteIndented = true });
+        string jsonString = JsonSerializer.Serialize(new { Cells = Sheet }, new JsonSerializerOptions { WriteIndented = true });
 
         // Adding false allows file contents to be overwritten
         // StreamWriter will also add new file if it doesn't exist already
@@ -374,6 +373,8 @@ public class Spreadsheet
 
         // Attempt to deserialize filename
         string jsonData = File.ReadAllText(filename);
+        Console.WriteLine($"JSON Data: {jsonData}");
+
         try
         {
             // Deserialized into cell names, cells (which itself is a dictionary)
@@ -385,12 +386,12 @@ public class Spreadsheet
             }
 
             // Clear existing data
-            sheet.Clear();
+            Sheet.Clear();
             nonEmptyCells.Clear();
             dg = new();
 
             // Process each cell
-            foreach (var pair in loadedSheet.sheet)
+            foreach (var pair in loadedSheet.Sheet)
             {
                 string cellName = pair.Key;
 
@@ -428,7 +429,7 @@ public class Spreadsheet
     /// </exception>
     public object GetCellValue(string cellName)
     {
-        return sheet[cellName].Value;
+        return Sheet[cellName].Value;
     }
 
     /// <summary>
@@ -506,6 +507,12 @@ public class Spreadsheet
     {
         name = name.ToUpper();
         IsVar(name);
+
+        // Removing any old dependencies
+        foreach (string dependent in dg.GetDependents(name))
+        {
+            dg.RemoveDependency(name, dependent);
+        }
 
         // Checks if content is a number
         if (double.TryParse(content, out double value))
@@ -686,15 +693,19 @@ public class Spreadsheet
             throw new CircularException();
         }
 
+        // Holds previous value in case CircularException is thrown.
+        // If thrown, sheet will be restored to previous form.
+        var temp = GetCellContents(name);
+
         Cells cell = new()
         {
             Content = formula,
 
             // TODO: Is this how the evaluate method works?
-            Value = formula.Evaluate(s => Convert.ToDouble(sheet[s].Value)),
+            Value = formula.Evaluate(s => Convert.ToDouble(Sheet[s].Value)),
         };
 
-        sheet[name] = cell;
+        Sheet[name] = cell;
         nonEmptyCells.Add(name);
 
         // Takes all variables (cells) in formula and adds them to the dependency graph.
@@ -703,7 +714,25 @@ public class Spreadsheet
             dg.AddDependency(name, dependentCell);
         }
 
-        return GetCellsToRecalculate(name).ToList();
+        try
+        {
+            return GetCellsToRecalculate(name).ToList();
+        }
+
+        // If caught, revert back to previous spreadsheet, no changes made
+        catch(CircularException)
+        {
+            if (temp is Formula)
+            {
+                SetContentsOfCell(name, "=" + temp.ToString());
+            }
+            else
+            {
+                SetContentsOfCell(name, temp.ToString() ?? string.Empty);
+            }
+
+            throw new CircularException();
+        }
     }
 
     /// <summary>
@@ -727,7 +756,7 @@ public class Spreadsheet
             Value = newContent,
         };
 
-        sheet[name] = cell;
+        Sheet[name] = cell;
         nonEmptyCells.Add(name);
         return GetCellsToRecalculate(name).ToList();
     }
@@ -742,10 +771,10 @@ public class Spreadsheet
         // Check that the cell actually exists so that removal doesn't cause an error.
         // Even if it isn't in the spreadsheet, it will still return itself since it is
         // technically equal to the empty string already.
-        if (sheet.ContainsKey(name))
+        if (Sheet.ContainsKey(name))
         {
             // Remove from spreadsheet dictionary and nonEmptyCell HashSet
-            sheet.Remove(name);
+            Sheet.Remove(name);
             nonEmptyCells.Remove(name);
 
             // Remove every dependency for cells which relied on name
@@ -919,14 +948,13 @@ internal class Cells
     }
 
     /// <summary>
-    /// Gets the string form for JSON serialization.
+    /// Gets or sets the string form for JSON serialization.
     /// </summary>
     [JsonPropertyName("StringForm")]
     public string StringForm
     {
         get
         {
-            // If the content is a Formula, add "=" in front
             if (content is Formula)
             {
                 return "=" + content.ToString();
@@ -934,6 +962,19 @@ internal class Cells
 
             // Otherwise, return the content as a string
             return content.ToString() ?? string.Empty;
+        }
+
+        set
+        {
+            // If the content is a Formula, add "=" in front
+            if (value.StartsWith("="))
+            {
+                content = new Formula(value.Substring(1));
+            }
+            else
+            {
+                content = value;
+            }
         }
     }
 }
