@@ -325,7 +325,12 @@ public class Spreadsheet
     {
         IsValidFile(filename);
 
-        string jsonString = JsonSerializer.Serialize<Dictionary<string, Cells>>(sheet, new JsonSerializerOptions { WriteIndented = true });
+        // Adds "Cells" wrapping around JSON data
+        var wrapper = new Dictionary<string, Dictionary<string, Cells>>
+        {
+            { "Cells", sheet },
+        };
+        string jsonString = JsonSerializer.Serialize(wrapper, new JsonSerializerOptions { WriteIndented = true });
 
         // Adding false allows file contents to be overwritten
         // StreamWriter will also add new file if it doesn't exist already
@@ -377,14 +382,11 @@ public class Spreadsheet
 
         try
         {
-            // Deserialized into cell names, cells (which itself is a dictionary)
-            Dictionary<string, Cells>? loadedSheet;
-            loadedSheet = JsonSerializer.Deserialize<Dictionary<string, Cells>>(jsonData);
+            // First deserialize into the wrapper dictionary
+            var wrapper = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, Cells>>>(jsonData);
 
-            if (loadedSheet is null)
-            {
-                throw new SpreadsheetReadWriteException("Failed to deserialize the spreadsheet data.");
-            }
+            // Get the actual sheet data from the "Cells" key
+            Dictionary<string, Cells> loadedSheet = wrapper?["Cells"] ?? throw new SpreadsheetReadWriteException("Failed to access spreadsheet cells data.");
 
             // Clear existing data
             sheet.Clear();
@@ -967,15 +969,7 @@ internal class Cells
 
         set
         {
-            // If the content is a Formula, add "=" in front
-            if (value.StartsWith("="))
-            {
-                content = new Formula(value.Substring(1));
-            }
-            else
-            {
-                content = value;
-            }
+            content = value;
         }
     }
 }

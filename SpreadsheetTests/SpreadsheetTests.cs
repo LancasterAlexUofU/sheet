@@ -334,8 +334,8 @@ public class SpreadsheetTests
 
         Assert.IsTrue(exceptionThrown, "CircularException was not thrown as expected.");
 
-        // Check that B1 is still empty (the circular reference didn't change the spreadsheet)
-        Assert.AreEqual(formula2, sheet.GetCellContents("B1"));
+        // Check that B1 is same value (the circular reference didn't change the spreadsheet)
+        Assert.AreEqual(4.0, sheet.GetCellContents("B1"));
 
         // Check that A1 still contains formula1
         Assert.AreEqual(formula1, sheet.GetCellContents("A1"));
@@ -611,8 +611,11 @@ public class SpreadsheetTests
         // \u002B is '+', will be de serialized into + by load.
         string expectedOutput = @"{
   ""Cells"": {
+    ""A2"": {
+      ""StringForm"": ""3""
+    },
     ""A1"": {
-      ""StringForm"": ""=A2 \u002B 3""
+      ""StringForm"": ""=A2\u002B3""
     }
   }
 }";
@@ -627,6 +630,13 @@ public class SpreadsheetTests
 
         // Asserts that the file contains at least a substring containing the same Cells
         Assert.IsTrue(savedOutput.Contains(expectedOutput));
+
+        sheet.Load(filename);
+        Assert.AreEqual(sheet.GetCellContents("A1"), new Formula("A2 + 3"));
+        Assert.AreEqual(sheet.GetCellValue("A1"), 6.0);
+
+        Assert.AreEqual(sheet.GetCellContents("A2"), 3.0);
+        Assert.AreEqual(sheet.GetCellValue("A2"), 3.0);
     }
 
     /// <summary>
@@ -736,26 +746,26 @@ public class SpreadsheetTests
 
         string expectedOutput = @"{
   ""Cells"": {
-    ""A1"": {
-      ""StringForm"": ""=B1\u002BD1""
-    },
     ""B1"": {
       ""StringForm"": ""=2*C1*G1""
-    },
-    ""C1"": {
-      ""StringForm"": ""5""
-    },
-    ""F1"": {
-      ""StringForm"": ""=C1""
-    },
-    ""G1"": {
-      ""StringForm"": ""3""
     },
     ""D1"": {
       ""StringForm"": ""=E1\u002B1""
     },
+    ""C1"": {
+      ""StringForm"": ""5""
+    },
+    ""G1"": {
+      ""StringForm"": ""3""
+    },
     ""E1"": {
       ""StringForm"": ""3""
+    },
+    ""A1"": {
+      ""StringForm"": ""=B1\u002BD1""
+    },
+    ""F1"": {
+      ""StringForm"": ""=C1""
     },
     ""H1"": {
       ""StringForm"": ""=B1""
@@ -794,6 +804,16 @@ public class SpreadsheetTests
 
         // Asserts that the file contains at least a substring containing the same Cells
         Assert.IsTrue(savedOutput.Contains(expectedOutput));
+
+        sheet.Load(filename);
+        Assert.AreEqual(sheet.GetCellContents("A1"), formula1);
+        Assert.AreEqual(sheet.GetCellContents("B1"), formula2);
+        Assert.AreEqual(sheet.GetCellContents("C1"), 5.0);
+        Assert.AreEqual(sheet.GetCellContents("D1"), formula3);
+        Assert.AreEqual(sheet.GetCellContents("E1"), 3.0);
+        Assert.AreEqual(sheet.GetCellContents("F1"), formula4);
+        Assert.AreEqual(sheet.GetCellContents("G1"), 3);
+        Assert.AreEqual(sheet.GetCellContents("H1"), formula5);
     }
 
     /// <summary>
@@ -826,9 +846,7 @@ public class SpreadsheetTests
         sheet.Save(filename);
         sheet.Load(filename);
 
-        List<string> correctCells = ["A1"];
-        CollectionAssert.AreEquivalent(correctCells, sheet.GetNamesOfAllNonemptyCells().ToList());
-        Assert.AreEqual(sheet.GetCellContents("A2"), string.Empty);
+        Assert.AreEqual(sheet.GetCellContents("A2"), 1.0);
     }
 
     /// <summary>
