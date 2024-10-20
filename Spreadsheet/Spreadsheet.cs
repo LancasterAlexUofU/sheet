@@ -678,6 +678,14 @@ public class Spreadsheet
     /// </returns>
     private IList<string> SetCellContents(string name, Formula formula)
     {
+        // Checking to see if formula contains own cell name (e.g. "A1", "=A1").
+        // Need to include before lookup as A1 isn't in lookup dictionary and will throw keyNotFound exception instead of CircularException.
+        if (formula.GetVariables().Contains(name))
+        {
+            // "Cell can't reference own cell"
+            throw new CircularException();
+        }
+
         Cells cell = new()
         {
             Content = formula,

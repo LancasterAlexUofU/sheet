@@ -995,7 +995,7 @@ public class SpreadsheetTests
         sheet.SetContentsOfCell("A1", "5E1");
         sheet.SetContentsOfCell("A2", "5");
         Assert.AreEqual(sheet.GetCellContents("A1"), 50.0);
-        Assert.AreEqual(sheet.GetCellContents("A1"), 5.0);
+        Assert.AreEqual(sheet.GetCellContents("A2"), 5.0);
     }
 
     /// <summary>
