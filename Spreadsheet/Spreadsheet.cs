@@ -377,16 +377,38 @@ public class Spreadsheet
         try
         {
             // Deserialized into cell names, cells (which itself is a dictionary)
-            // Spreadsheet data = JsonSerializer.Deserialize<Spreadsheet>(jsonData);
+            Spreadsheet? loadedSheet = JsonSerializer.Deserialize<Spreadsheet>(jsonData);
+
+            if (loadedSheet is null)
+            {
+                throw new SpreadsheetReadWriteException("Failed to deserialize the spreadsheet data.");
+            }
+
+            // Clear existing data
+            sheet.Clear();
+            nonEmptyCells.Clear();
+            dg = new();
+
+            // Process each cell
+            foreach (var pair in loadedSheet.sheet)
+            {
+                string cellName = pair.Key;
+
+                // pair.Value gets "Cells" which is a dictionary
+                // inside Cells, getting Content
+                // Since Content is an object, convert to string
+                // ?? string.Empty converts any null values to the empty string
+                string cellContent = pair.Value.Content.ToString() ?? string.Empty;
+
+                SetContentsOfCell(cellName, cellContent);
+            }
+
+            Changed = false;
         }
         catch
         {
             throw new SpreadsheetReadWriteException($"The JSON file is invalid.");
         }
-
-        sheet.Clear();
-        nonEmptyCells.Clear();
-        dg = new();
     }
 
     /// <summary>
