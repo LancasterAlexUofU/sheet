@@ -578,11 +578,12 @@ public class Spreadsheet
         }
         catch
         {
-            throw new SpreadsheetReadWriteException($"The system could not retrieve the absolute path for \"{filename}\"");
+            throw new SpreadsheetReadWriteException($"The system could not write to path \"{filename}\"");
         }
 
         // If no invalid characters are found, IndexOfAny returns -1
-        if (filename.IndexOfAny(combinedInvalidChars) != -1)
+        // First checks that filename is a relative path
+        if (!Path.IsPathRooted(filename) && filename.IndexOfAny(combinedInvalidChars) != -1)
         {
             throw new SpreadsheetReadWriteException($"\"{filename}\" contains an invalid filename character.");
         }
@@ -607,12 +608,6 @@ public class Spreadsheet
                 {
                     // If no exception is thrown, the file is not locked
                 }
-            }
-
-            // If the filename is passed (such as "sheet.txt") is not found in the current directory, a FileNotFoundException will be thrown.
-            catch (FileNotFoundException)
-            {
-                throw new SpreadsheetReadWriteException($"The file \"{filename}\" was not found. (Try using absolute path).");
             }
 
             // IOException is thrown if the file is already open by another process
@@ -707,11 +702,6 @@ public class Spreadsheet
             {
                 break;
             }
-        }
-
-        if (loadedSheet.Count > 0)
-        {
-            throw new SpreadsheetReadWriteException("Not all Cells were processed");
         }
 
         Changed = false;
@@ -869,12 +859,6 @@ public class Spreadsheet
             // Remove from spreadsheet dictionary and nonEmptyCell HashSet
             sheet.Remove(name);
             nonEmptyCells.Remove(name);
-
-            // Remove every dependency for cells which relied on name
-            foreach (string dependentCell in dg.GetDependents(name))
-            {
-                dg.RemoveDependency(name, dependentCell);
-            }
 
             Changed = true;
         }

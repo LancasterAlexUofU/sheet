@@ -21,6 +21,7 @@
 //      working and work when used in combination.
 //      This test class also checks multiple times for circular exceptions.
 // <summary>
+// Ignore Spelling: JSON
 namespace CS3500.SpreadsheetTests;
 
 using CS3500.Formula;
@@ -824,7 +825,7 @@ public class SpreadsheetTests
     public void Save_InvalidPaths()
     {
         Spreadsheet sheet = new();
-        string filename = @"C:\thisIsNotAProperPath\\\";
+        string filename = "C:\\file*name.txt";  // Contains *
         sheet.Save(filename);
     }
 
@@ -888,6 +889,11 @@ public class SpreadsheetTests
         Spreadsheet sheet = new();
         string filename = "ReadOnlyFile.txt";
 
+        // if (File.Exists(filename))
+        // {
+        //    // Sometimes file is still readonly for whatever reason, and fs can't open, so normalizing file
+        //    File.SetAttributes(filename, FileAttributes.Normal);
+        // }
         using (FileStream fs = File.Create(filename))
         {
             // File stream will be automatically closed here
@@ -1078,6 +1084,79 @@ public class SpreadsheetTests
         sheet.SetContentsOfCell("A1", "5");
         Assert.IsTrue(sheet.Changed);
     }
+
+    /// <summary>
+    /// This method attempts to load an invalid JSON file and expects a SpreadsheetReadWriteException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Load_JSON_Invalid()
+    {
+        Spreadsheet sheet = new();
+        string filename = "Nonsense.txt";
+        string filetext = "THIS IS NOT A JSON";
+
+        using (StreamWriter writer = new StreamWriter(filename))
+        {
+            writer.WriteLine(filetext);
+        }
+
+        sheet.Load(filename);
+
+        // File.Delete(filename);
+    }
+
+    /// <summary>
+    /// This test attempts to load a file that does not exist and looks to catch a SpreadsheetReadWriteException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Load_FileDoesNotExist_Invalid()
+    {
+        Spreadsheet sheet = new();
+        string filename = "ThisFileDoesNotExist.txt";
+
+        sheet.Load(filename);
+    }
+
+    /// <summary>
+    /// Tests that if JSON file was somehow tampered with, load could still correctly identify that items can not be validly loaded.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Load_JSON_Dependencies_Invalid()
+    {
+        string expectedOutput = @"{
+  ""Cells"": {
+    ""A2"": {
+      ""StringForm"": ""=A1""
+    },
+    ""A1"": {
+      ""StringForm"": ""=A2""
+    }
+  }
+}";
+
+        Spreadsheet sheet = new();
+        string filename = "sheet.txt";
+        File.WriteAllText(filename, expectedOutput);
+        sheet.Load(filename);
+    }
+
+    /// <summary>
+    /// This test ensures that a cell with previous data is truly empty.
+    /// </summary>
+    [TestMethod]
+    public void SetContentsOfCell_Values_To_Empty()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A2", "2");
+        sheet.SetContentsOfCell("A3", "3");
+        sheet.SetContentsOfCell("A1", "=A2+A3");
+
+        sheet.SetContentsOfCell("A1", string.Empty);
+        Assert.AreEqual(sheet.GetCellContents("A1"), string.Empty);
+    }
 }
 
 // Tests:
@@ -1089,3 +1168,4 @@ public class SpreadsheetTests
 // Maybe test save with a filename without an extension
 // Make sure error is thrown if string and double are eval?
 // Have I tried just passing in a single cell that doesn't exist?
+// TODO: UPDATE SO THAT ALL PATHFILES CAN BE ACCEPTED
