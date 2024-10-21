@@ -817,17 +817,17 @@ public class SpreadsheetTests
         Assert.AreEqual(sheet.GetCellContents("H1"), formula5);
     }
 
-    ///// <summary>
-    ///// This attempts to save to an invalid file path.
-    ///// </summary>
-    // [TestMethod]
-    // [ExpectedException(typeof(SpreadsheetReadWriteException))]
-    // public void Save_InvalidPaths()
-    // {
-    //    Spreadsheet sheet = new();
-    //    string filename = "C:\\file*name.txt";  // Contains *
-    //    sheet.Save(filename);
-    // }
+    /// <summary>
+    /// This attempts to save to an invalid file path.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Save_InvalidPaths()
+    {
+        Spreadsheet sheet = new();
+        string filename = "C:\\file*name.txt";  // Contains *
+        sheet.Save(filename);
+    }
 
     /// <summary>
     /// This test checks that after an exception is thrown (in this case CircularException), the spreadsheet
@@ -1175,15 +1175,59 @@ public class SpreadsheetTests
         Assert.ThrowsException<CircularException>(() => sheet.SetContentsOfCell("A1", "=A3"));
         Assert.AreEqual(new Formula("A4"), sheet.GetCellContents("A1"));
     }
+
+    /// <summary>
+    /// Attempts to save to invalid absolute file path, SpreadsheetReadWriteException expected.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Save_PathFormat_Invalid()
+    {
+        Spreadsheet sheet = new();
+        string filename = @"C:\Users\\sheet.txt";
+        sheet.Save(filename);
+    }
+
+    /// <summary>
+    /// Attempts to save to invalid file name, expects SpreadsheetReadWriteException.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Save_FileNameFormat_Invalid()
+    {
+        Spreadsheet sheet = new();
+        string filename = "sheet";
+        sheet.Save(filename);
+    }
+
+    /// <summary>
+    /// Attempts to add an invalid character to an absolute path.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void Save_FilePathCharacter_Invalid()
+    {
+        Spreadsheet sheet = new();
+        string filename = @"C:\Users|sheet.txt";
+        sheet.Save(filename);
+    }
+
+    /// <summary>
+    /// This method chains values from A1 to A10000, and then changes one of the values to see how the program handles it.
+    /// </summary>
+    [TestMethod]
+    public void Stress_Test()
+    {
+        Spreadsheet sheet = new();
+        sheet.SetContentsOfCell("A1", "0");
+        int max = 9500;
+
+        for (int i = 2; i <= max; i++)
+        {
+            sheet.SetContentsOfCell($"A{i}", $"=A{i - 1}");
+        }
+
+        sheet.SetContentsOfCell("A1", "1");
+        Assert.AreEqual(1.0, sheet.GetCellValue($"A{max}"));
+    }
 }
-
-// Tests:
-
-// Create stress test
-
-// If it is empty, throw argument exception
-// with invalid formula, throw formula error object
-// Maybe test save with a filename without an extension
-// Make sure error is thrown if string and double are eval?
-// Have I tried just passing in a single cell that doesn't exist?
-// TODO: UPDATE SO THAT ALL PATHFILES CAN BE ACCEPTED

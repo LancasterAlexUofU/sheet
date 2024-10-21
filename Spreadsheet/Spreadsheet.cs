@@ -566,27 +566,40 @@ public class Spreadsheet
     private static bool IsValidFile(string filename)
     {
         string fullPath;
+        string validFilePathRegex = @"^[a-zA-Z]:\\(?:[^<>:""/\\|?*\n]+\\)*[^<>:""/\\|?*\n]+\.[a-zA-Z0-9]+$";
+        string validFileNameRegex = @"^[^<>:""/\\|?*\n]+(\.[a-zA-Z0-9]+)+$";
+
         char[] invalidChars = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
         char[] invalidPathChars = Path.GetInvalidPathChars();
 
         char[] combinedInvalidChars = invalidChars.Concat(invalidPathChars).Distinct().ToArray();
 
-        // GetFullPath throws an exception if the path formatting is malformed.
-        try
-        {
-            fullPath = Path.GetFullPath(filename);
-        }
-        catch
-        {
-            throw new SpreadsheetReadWriteException($"The system could not write to path \"{filename}\"");
-        }
-
         // If no invalid characters are found, IndexOfAny returns -1
-        // First checks that filename is a relative path
-        if (!Path.IsPathRooted(filename) && filename.IndexOfAny(combinedInvalidChars) != -1)
+        // First checks that filename is a relative path and contains valid characters
+        if (!Path.IsPathRooted(filename) && filename.IndexOfAny(invalidChars) != -1)
         {
             throw new SpreadsheetReadWriteException($"\"{filename}\" contains an invalid filename character.");
         }
+
+        // Checks for any invalid character for absolute file paths
+        else if (Path.IsPathRooted(filename) && filename.IndexOfAny(invalidPathChars) != -1)
+        {
+            throw new SpreadsheetReadWriteException($"\"{filename}\" contains an invalid filepath character.");
+        }
+
+        // Checks if file PATH is in a proper file path format (if it is absolute)
+        if (!Regex.IsMatch(filename, validFilePathRegex) && Path.IsPathRooted(filename))
+        {
+            throw new SpreadsheetReadWriteException($"\"{filename}\" is not a valid file path.");
+        }
+
+        // Checks if file NAME is in a proper file name format (if it is relative)
+        else if(!Regex.IsMatch(filename, validFileNameRegex) && !Path.IsPathRooted(filename))
+        {
+            throw new SpreadsheetReadWriteException($"\"{filename}\" is not a valid file name.");
+        }
+
+        fullPath = Path.GetFullPath(filename);
 
         // If the file path doesn't exist but is properly formatted, then it is okay to create.
         // If it does exist, need to check a few more things such as its attributes.
@@ -782,8 +795,6 @@ public class Spreadsheet
         Cells cell = new()
         {
             Content = formula,
-
-            // TODO: Is this how the evaluate method works?
             Value = formula.Evaluate(s => Convert.ToDouble(sheet[s].Value)),
         };
 

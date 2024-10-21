@@ -10,9 +10,9 @@ Copyright:  CS 3500 and Alex Lancaster - This work may not be copied for use in 
 ```
 
 # Overview of the SpreadsheetTests Project
-The SpreadsheetTests project consists of 22 tests covering all public methods extensively.
+The SpreadsheetTests project consists of 62 tests covering all public methods extensively.
 
-The main focus is on the SetCellContents, especially the Formula version. This is because 
+The main focus is on the SetContentsOfCell, especially for Formula values. This is because 
 circular exceptions are only thrown here and relies on many sub methods, so extensive testing
 was done particularly on this method.
 
@@ -24,7 +24,7 @@ even with multiple indirect dependences
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 28.5 |
+| Assignment 6 | 14 | 30.5 |
 
 (Rest of the hours come from Spreadsheet)
 
@@ -39,7 +39,7 @@ even with multiple indirect dependences
 ### Assignment 6
 | Task | Number of Hours |
 | :--------:| :--------:
-| Implementing Spreadsheet Tests | 9.5 |
+| Implementing Spreadsheet Tests | 10.5 |
 | Debugging | 2 |
 
 # Comments for Evaluators

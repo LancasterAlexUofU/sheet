@@ -23,7 +23,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 28.5 |
+| Assignment 6 | 14 | 30.5 |
 
 (Rest of the hours come from SpreadsheetTests)
 
@@ -41,7 +41,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Task | Number of Hours |
 | :--------:| :--------:
 | Reading assignment and <br/> setting up environment | 2 |
-| Implementing Spreadsheet Program | 7.5 |
+| Implementing Spreadsheet Program | 8.5 |
 | Debugging | 6.5 |
 | Drawing Whiteboard | 1 |
 
@@ -52,7 +52,8 @@ I am also assuming that if a cell does not have content in it and a formula call
 an error will occur and this is intentional. I believe this is what Lecture 12 Slide (Page 22) was trying to convey, even though
 it was talking about values.
 
-I am going to remove the PS5 grading tests as they break, even with changing 
+I am also assuming that if one tries to save to a spreadsheet with a filename such as "sheet", that is invalid
+versus "sheet.txt", which is valid.
 
 # Consulted Peers
 - Landon

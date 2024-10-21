@@ -21,6 +21,8 @@ The Spreadsheet program is currently capable of:
 - Evaluating a formula with numbers and variables
 - Getting and Setting Cell Contents in a spreadsheet
 - Detecting loops for cell dependency values
+- Setting contents of a cell
+- Automatically calculate cell values
 
 Future extensions are:
 
@@ -35,6 +37,7 @@ Future extensions are:
 | Assignment 3 | 14 | 16 |
 | Assignment 4 | 18 | 11 |
 | Assignment 5 | 10 | 12.5 |
+| Assignment 6 | 14 | 30.5 |
 
 # Comments for Evaluators
 Read FormulaTests README for comment about code coverage.
@@ -50,7 +53,7 @@ Read SpreadsheetTests about cell removal assumption.
 - Eli
 - Yen
 
-# Examples of Good Software Practice (GSP)
+# Examples of Good Software Practices (GSP)
 
 ### - Separation of concerns
 Many functions that were complex were broken down into smaller helper methods. For example, in formula evaluation,
@@ -68,9 +71,32 @@ many complex formulas were created with many different types of interactions bet
 This was done so that many small tedious tests weren't needed and a large complex blanket test would cover almost all scenarios.
 This was done multiple times throughout the different test classes.
 
-### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSERT WHITEBOARD PHOTO HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-### Paragraph describing what you have learned about your time management and estimation skills.
-### THREE MORE EXAMPLES OF GSP
+## More Examples of Good Software Practices
+
+### - DRY
+There were many methods in the spreadsheet project that fit the DRY aspect of GSP. For one, I combined the private SetCellContents method for double and string
+into one method so that there was no repeated code for a very similar function. I also removed any dependencies in SetContentOfCell instead of each private
+method and did the same thing for re-evaluation.
+
+## - Regression Testing
+The spreadsheet project implemented regression testing to ensure that old tests (updated to the new format) would still pass even with major changes
+to the spreadsheet project. This let me continuously test while developing to ensure small changes over time did not break any old functionality. Many bugs
+were caught using this method (such as the spreadsheet changing during a circularException) and allowed me to quickly revert and fix any errors.
+
+## - Abstraction
+Many of the functions are complex in nature, so I broke down the function into different smaller parts. This allowed me to abstract them away so that anyone working
+on the main function can easily look at abstracted function and understand its purpose. Such examples are checking that a cellName is 
+valid using IsVar(name), or by using AddCell or RemoveCell in SetCellContents.
+
+
+# Time Management and Estimation Skills
+
+There are a few things I have learned about my time management and estimation skills. First off, I have learned I need to estimate
+more time when I am learning something new. By this, I mean something that I will need to learn and understand through the growing
+pains of understanding how it works. For me in the spreadsheet assignment, it was learning how to save, load, know what a 
+properly formatted file path looks like, and how to check for it (as you can see from the awful amount of time I spent on this
+assignment). For my time management skills, I have learned the earlier I start on something, the easier it makes life. If I wait to start after
+the weekend, the projects can pile up and overlap. Overall though, I think my time management skills have been fairly on point.
 
 
 # References
@@ -89,3 +115,7 @@ This was done multiple times throughout the different test classes.
 13) Any - https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.any?view=net-8.0
 14) LINQ - https://learn.microsoft.com/en-us/dotnet/csharp/linq/get-started/introduction-to-linq-queries
 15) Asset Class - https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.testtools.unittesting.assert?view=visualstudiosdk-2022
+16) C# Classes and Objects - https://www.w3schools.com/cs/cs_classes.php
+17) Path Class - https://learn.microsoft.com/en-us/dotnet/api/system.io.path?view=net-8.0
+18) File Class - https://learn.microsoft.com/en-us/dotnet/api/system.io.file?view=net-8.0
+19) Streamwriter Class - https://learn.microsoft.com/en-us/dotnet/api/system.io.streamwriter?view=net-8.0
