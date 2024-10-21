@@ -23,7 +23,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Assignment | Predicted Hours | Actual Hours|
 | :---------:| :-------------: | :---------: |
 | Assignment 5 | 10 | 12.5 |
-| Assignment 6 | 14 | 26.5 |
+| Assignment 6 | 14 | 28.5 |
 
 (Rest of the hours come from SpreadsheetTests)
 
@@ -43,7 +43,7 @@ creating a loop, even if the cells are indirectly related. If this happens, a Ci
 | Reading assignment and <br/> setting up environment | 2 |
 | Implementing Spreadsheet Program | 7.5 |
 | Debugging | 6.5 |
-
+| Drawing Whiteboard | 1 |
 
 # Comments for Evaluators
 I am assuming that empty cell's values are equal to the empty string by default if GetCellValue is called.
