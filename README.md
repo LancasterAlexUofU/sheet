@@ -29,6 +29,12 @@ Future extensions are:
 
 - Small GUI improvements
 
+# Launching
+To launch from source:
+- Open up Visual Studio
+- Set the startup project to GUI
+- GUI will launch on localhost browser
+
 # Time Expenditures
 
 | Assignment | Predicted Hours | Actual Hours|
