@@ -1,0 +1,32 @@
+﻿@page "/"
+
+<PageTitle>CS 3500</PageTitle>
+
+<h1>CS 3500 - Spreadsheet GUI in Blazor!</h1>
+
+<p> Click on the spreadsheet nav link!</p>
+
+<environment names="Development">
+    <script src="_framework/aspnetcore-browser-refresh.js"></script>
+    <h1>Overview of the GUI and its features:</h1>
+    <p>The GUI is the view/controller of the spreadsheet project.</p>
+    <p>The GUI has all the same functionality of the spreadsheet, but can now be easily visualized.</p>
+    <p>To interact with the GUI, click on a cell and type in anything. Numbers, strings, and Formulas are all valid.</p>
+    <p>To generate a chart, simply click the Get Chart button, and a chart will appear. The clear button will clear the chart.</p>
+    
+    <h1>Features of the GUI:</h1>
+    <p>- Whenever a cell that contains a formula is updated, any other cells are dependent are automatically updated</p>
+    <p>- Able to clear the spreadsheet</p>
+    <p>- Able to save and load a spreadsheet to/from the file system</p>
+    <p>- Able to resize the size of the spreadsheet</p>
+
+    <h1>Extra Features of the GUI:</h1>
+    <p>- Able to generate chart of the spreadsheet data</p>
+    <p>- Whenever cell data is lost when the spreadsheet size is reduced, if it is expanded again, the original data will be restored.</p>
+
+    <h1>Notes:</h1>
+    <p>- Whenever a FormulaError occurs, the message is displayed in the cell but is cut off. </p>
+    <p>We tried many different ways in CSS and in razor to add text wrapping but nothing was changing.</p>
+    <p>We believe it is an easy fix and the correct data is still displayed, so we left it as is.</p>
+    <p>- We worked in person the entire time, so we did not branch in this project.</p>
+</environment>

@@ -271,6 +271,8 @@ public class Formula
     {
         Formula formula = this;
         List<string> tokens = this.tokens;
+        values = [];
+        operators = [];
 
         for (int i = 0; i < tokens.Count; i++)
         {
@@ -284,10 +286,9 @@ public class Formula
                     double tokenDub = Convert.ToDouble(token);
 
                     // Detects whether an FormulaError object was returned. If so, return it in evaluation.
-                    object valueOrError = TokenNumberStackEvaluation(tokenDub);
-                    if (valueOrError.GetType() == typeof(FormulaError))
+                    if (TokenNumberStackEvaluation(tokenDub) is FormulaError formulaError0)
                     {
-                        return valueOrError;
+                        return formulaError0;
                     }
 
                     break;
@@ -299,7 +300,12 @@ public class Formula
                     try
                     {
                         double value = lookup(token);
-                        TokenNumberStackEvaluation(value);
+
+                        if (TokenNumberStackEvaluation(value) is FormulaError formulaError1)
+                        {
+                            return formulaError1;
+                        }
+
                         break;
                     }
                     catch (ArgumentException)
@@ -328,11 +334,9 @@ public class Formula
                 // Checks if token is ')'
                 case string when IsClosedParen(token):
 
-                    // Detects whether an FormulaError object was returned. If so, return it in evaluation.
-                    valueOrError = TokenClosedParenEvaluation();
-                    if (valueOrError.GetType() == typeof(FormulaError))
+                    if (TokenClosedParenEvaluation() is FormulaError formulaError3)
                     {
-                        return valueOrError;
+                        return formulaError3;
                     }
 
                     break;

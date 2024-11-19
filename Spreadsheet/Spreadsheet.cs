@@ -318,12 +318,7 @@ public class Spreadsheet
     {
         IsValidFile(filename);
 
-        // Adds "Cells" wrapping around JSON data
-        var wrapper = new Dictionary<string, Dictionary<string, Cells>>
-        {
-            { "Cells", sheet },
-        };
-        string jsonString = JsonSerializer.Serialize(wrapper, new JsonSerializerOptions { WriteIndented = true });
+        string jsonString = GetJSON();
 
         // Adding false allows file contents to be overwritten
         // StreamWriter will also add new file if it doesn't exist already
@@ -375,23 +370,77 @@ public class Spreadsheet
 
         try
         {
+            InstantiateFromJSON(jsonData);
+        }
+        catch
+        {
+            throw new SpreadsheetReadWriteException("The JSON is invalid");
+        }
+
+        Changed = false;
+    }
+
+    /// <summary>
+    ///  Load contents of this spreadsheet from a json string.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    ///  If the json provided is invalid.
+    /// </exception>
+    /// <param name="jsonData">The serialized spreadsheet as a json string.</param>
+    public void InstantiateFromJSON(string jsonData)
+    {
+        try
+        {
             // First deserialize into the wrapper dictionary
             var wrapper = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, Cells>>>(jsonData);
 
             // Get the actual sheet data from the "Cells" key
-            Dictionary<string, Cells> loadedSheet = wrapper?["Cells"] ?? throw new SpreadsheetReadWriteException("Failed to access spreadsheet cells data.");
+            Dictionary<string, Cells> loadedSheet = wrapper?["Cells"] ?? [];
 
             // Clear existing data
             sheet.Clear();
             nonEmptyCells.Clear();
             dg = new();
 
-            SetCellContentsInOrder(loadedSheet);
+            foreach (var pair in loadedSheet)
+            {
+                string cellName = pair.Key;
+
+                // pair.Value gets "Cells" which is a dictionary
+                // inside Cells, getting Content
+                // Since Content is an object, convert to string
+                string cellContent = pair.Value.Content.ToString() ?? string.Empty;
+                SetContentsOfCell(cellName, cellContent);
+            }
+
+            Changed = false;
         }
-        catch
+        catch (Exception)
         {
-            throw new SpreadsheetReadWriteException($"The JSON file is invalid.");
+            throw new ArgumentException();
         }
+    }
+
+    /// <summary>
+    ///   <para>
+    ///     Gets the JSON string representation for spreadsheet.
+    ///     This is done by using the JsonSerializer.Serialize method.
+    ///   </para>
+    /// </summary>
+    /// <returns>
+    ///   Returns a string representation of spreadsheet.
+    /// </returns>
+    public string GetJSON()
+    {
+        // Adds "Cells" wrapping around JSON data
+        var wrapper = new Dictionary<string, Dictionary<string, Cells>>
+        {
+            { "Cells", sheet },
+        };
+        string jsonString = JsonSerializer.Serialize(wrapper, new JsonSerializerOptions { WriteIndented = true });
+
+        Changed = false;
+        return jsonString;
     }
 
     /// <summary>
@@ -542,7 +591,7 @@ public class Spreadsheet
             // Without ContainsKey, sheet[cell] can't find cell (obviously)
             if (sheet.ContainsKey(cell) && (sheet[cell].Content is Formula formula))
             {
-                sheet[cell].Value = formula.Evaluate(cell => Convert.ToDouble(sheet[cell].Value));
+                sheet[cell].Value = SetCellValueOfTypeFormula(formula);
             }
         }
 
@@ -653,67 +702,6 @@ public class Spreadsheet
     }
 
     /// <summary>
-    /// <para>
-    /// This private method calls SetContentsOfCell after loading in a JSON file and ensures that cells that are dependent on each other
-    /// are added to the Spreadsheet in the correct order.
-    /// </para>
-    /// <para>
-    /// The algorithm is the following: <br/>
-    /// For as many items in the loadedData JSON, try to set as many contents as possible. If at least one Cell was set, progress is being made. <br/>
-    /// However, if there was a pass where no cells were processed but there are still items in loadedSheet, then there is a cell that doesn't have a set value. <br/>
-    /// This allows for all double values to first be set, then if any cells rely on those value cells, they will be set next (and so on).
-    /// </para>
-    /// </summary>
-    /// <param name="loadedSheet">The unwrapped dictionary given by the JSON deserializer.</param>
-    /// <exception cref="SpreadsheetReadWriteException">Thrown if cell(s) were found that don't have any reference to a value (even through other cells) or if not all cells could be processed.</exception>
-    private void SetCellContentsInOrder(Dictionary<string, Cells> loadedSheet)
-    {
-        for (int i = 0; i < loadedSheet.Count; i++)
-        {
-            bool atLeastOneCellProcessed = false;
-
-            // Process each cell
-            foreach (var pair in loadedSheet)
-            {
-                string cellName = pair.Key;
-
-                // pair.Value gets "Cells" which is a dictionary
-                // inside Cells, getting Content
-                // Since Content is an object, convert to string
-                // ?? string.Empty converts any null values to the empty string
-                string cellContent = pair.Value.Content.ToString() ?? string.Empty;
-
-                try
-                {
-                    SetContentsOfCell(cellName, cellContent);
-
-                    // If nothing is caught, then remove and keep going
-                    atLeastOneCellProcessed = true;
-                    loadedSheet.Remove(pair.Key);
-                }
-
-                // If cell is dependent on another cell that isn't in the spreadsheet yet, KeyNotFoundException will be thrown.
-                catch (KeyNotFoundException)
-                {
-                }
-            }
-
-            if (!atLeastOneCellProcessed)
-            {
-                throw new SpreadsheetReadWriteException("Cell(s) found with unset value dependencies. (e.g. Cell A1 contains \"=A2\", but A2 does not hold any value)");
-            }
-
-            // If loadedSheet has been fully processed, end loop
-            if (loadedSheet.Count == 0)
-            {
-                break;
-            }
-        }
-
-        Changed = false;
-    }
-
-    /// <summary>
     ///   The contents of the named cell becomes the given contents.
     /// </summary>
     ///
@@ -785,11 +773,14 @@ public class Spreadsheet
         // If thrown, sheet will be restored to previous form.
         var temp = GetCellContents(name);
 
+        // Create cell first without value so that if value is a string, then the line cell.Value = str; is valid
+        // If it was done inside Cells cell = new(), then cell technically wouldn't exist and cell.Value wouldn't work
         Cells cell = new()
         {
             Content = formula,
-            Value = formula.Evaluate(s => Convert.ToDouble(sheet[s].Value)),
         };
+
+        cell.Value = SetCellValueOfTypeFormula(formula);
 
         sheet[name] = cell;
         nonEmptyCells.Add(name);
@@ -806,7 +797,7 @@ public class Spreadsheet
         }
 
         // If caught, revert back to previous spreadsheet, no changes made
-        catch(CircularException)
+        catch (CircularException)
         {
             if (temp is Formula)
             {
@@ -819,6 +810,55 @@ public class Spreadsheet
 
             throw new CircularException();
         }
+    }
+
+    /// <summary>
+    /// This method returns the values for Formula objects. It could be used as follows: <br/>
+    /// cell.Values = SetCellValueOfTypeFormula(formula); which will put the proper value into the cell.
+    /// </summary>
+    /// <param name="formula">The formula which will be evaluated.</param>
+    /// <returns>(1) A double (using lookup), (2) A String (e.g. cell A1 equals hello, then cell A2 equals =A1, then cell A2's value should also be hello) or (3) a FormulaError Object.</returns>
+    /// <exception cref="ArgumentException">When thrown, will propagate to evaluate which returns a FormulaError Object.</exception>
+    private object SetCellValueOfTypeFormula(Formula formula)
+    {
+        bool isString = false;
+        string tempStr = string.Empty;
+
+        object value = formula.Evaluate(s =>
+        {
+            // If the referenced cell doesn't exist, throw ArgumentException
+            // This will cause Formula.Evaluate to return a FormulaError
+            if (!sheet.ContainsKey(s))
+            {
+                throw new ArgumentException($"Cell {s} not found");
+            }
+
+            // If the cell's value is a FormulaError, throw ArgumentException
+            if (sheet[s].Value is FormulaError)
+            {
+                throw new ArgumentException($"Cell {s} contains an error");
+            }
+
+            if (sheet[s].Value is string str)
+            {
+                isString = true;
+                tempStr = str;
+
+                // Put in dummy value, will override later
+                return 0;
+            }
+            else
+            {
+                return Convert.ToDouble(sheet[s].Value);
+            }
+        });
+
+        if (isString)
+        {
+            return tempStr;
+        }
+
+        return value;
     }
 
     /// <summary>

@@ -1,13 +1,13 @@
 ```
 Author:      Alex Lancaster
-Partner:     None
+Partner:     Landon Huking
 Start Date:  27-Aug-2024
 Course:      CS 3500, University of Utah, School of Computing
 GitHub ID:   LancasterAlexUofU
 Repo:        https://github.com/uofu-cs3500-20-fall2024/spreadsheet-LancasterAlexUofU
 Commit Date: 27-Sept-2024
 Solution:    Spreadsheet
-Copyright:   CS 3500 and Alex Lancaster - This work may not be copied for use in Academic Coursework.
+Copyright:   CS 3500 and Alex Lancaster & Landon Huking - This work may not be copied for use in Academic Coursework.
 ```
 
 # Overview of the Spreadsheet Functionality
@@ -23,10 +23,11 @@ The Spreadsheet program is currently capable of:
 - Detecting loops for cell dependency values
 - Setting contents of a cell
 - Automatically calculate cell values
+- GUI interface to visualize spreadsheet model
 
 Future extensions are:
 
-- Adding a GUI
+- Small GUI improvements
 
 # Time Expenditures
 
@@ -38,6 +39,7 @@ Future extensions are:
 | Assignment 4 | 18 | 11 |
 | Assignment 5 | 10 | 12.5 |
 | Assignment 6 | 14 | 30.5 |
+| Assignment 7 | 15 | 11.5 |
 
 # Comments for Evaluators
 Read FormulaTests README for comment about code coverage.
@@ -48,8 +50,10 @@ Read Formula README about very minor code coverage comment.
 
 Read SpreadsheetTests about cell removal assumption.
 
+For assignment 7 README requirements, we put them in the GUI README.
+
 # Consulted Peers
-- Landon H.
+- Landon Huking
 - Eli
 - Yen
 

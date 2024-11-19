@@ -1,0 +1,370 @@
+﻿@page "/spreadsheet"
+@rendermode InteractiveAuto
+@inject IJSRuntime JS  // <remarks> Allows the "communication"/use of javascript </remarks>
+@inject NavigationManager Navigator
+
+@namespace SpreadsheetNS
+
+@using System.Diagnostics
+@using ApexCharts
+
+<NavigationLock ConfirmExternalNavigation="false"
+                OnBeforeInternalNavigation="OnBeforeLeavePage" />
+
+<PageTitle>Starter Code</PageTitle>
+
+<h1>Simple SpreadSheet GUI @(false ? "*" : "")</h1>
+
+@* <remarks> Example of how to have two pages or an "alert" GUI. </remarks> *@
+@if (SaveGUIView)
+{
+    <label for="SavefileName">Name:</label>
+    <input id="SaveFileName" @bind="SaveFileName" type="text">
+
+    <br/>
+
+    <button class="btn btn-primary" @onclick="HandleSaveFile">Save</button>
+    <button class="btn btn-primary" @onclick="() => ShowHideSaveGUI(false)">Cancel</button>
+}
+else
+{
+    <div id="toolbar">
+        <div>
+            <label for="FormulaContent">Content:</label>
+            <input name="FormulaContent" id="FormulaContent" @ref="FormulaContentEditableInput" value="@ToolBarCellContents" @onchange="ChangeSpreadsheetCellValue" />
+            <label for="CellName">Name</label>
+            <input name="CellName" id="CellName" value="@CellName" disabled/>
+            <label for="CellValue">Value</label>
+            <input name="CellValue" id="CellValue" value="@sheet.GetCellValue(CellName)" disabled />
+        </div>
+    </div>
+
+    <div class="container" style="cursor: pointer;">
+        <div class="table-container">
+            <div class="scrollable">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr class="fixed-header">
+                            <th scope="col">&nbsp;</th>
+                            @for (int col = 0; col < Columns; col++)
+                            {
+                                <th scope="col">@Alphabet[col]</th>
+                            }
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for ( int row = 0; row < Rows; row++ )
+                        {
+                            <tr style="padding:0px !important;">
+                                <th style="padding:0px !important;" scope="row" class="fixed-column">@(row + 1)</th>
+                                @for (int col = 0; col < Columns; col++)
+                                {
+                                    int r = row;
+                                    int c = col;
+                                    <td class="@CellsClassBackingStore[r,c]"  @onclick="() => FocusMainInput(r,c)">
+                                        <span title="@CellsBackingStore[r,c] "class="SpreadsheetCell">@CellsBackingStore[r, c]</span>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="FileMenu">
+        <h2>File Menu</h2>
+        <div id="FileHandlers">
+            <button class="btn btn-primary" @onclick="HandleClear">Clear</button>
+            <button class="btn btn-primary" @onclick="() => ShowHideSaveGUI(true)">Save</button>
+            <button class="btn btn-primary" @onclick="RenderChart">Get Chart</button>
+            <div id="hideUglyWidget">
+                <InputFile id="inputwidget" name="abc" class="custom-input" type="file" OnChange="HandleLoadFile" />
+            </div>
+            <label for="inputwidget" class="btn btn-primary">Load</label>
+            <br/>
+
+            <label for="RowsInput"> Number of Rows: </label>
+            <input name="RowsInput" type="number" @bind="Rows" id="RowsInput" min="1" max="99"/>
+            <label for="ColsInput"> Number of Cols: </label>
+            <input name="ColsInput" type="number" @bind="Columns" id="ColsInput" min="1" max="25"/>
+        </div>
+    </div>
+
+    @if (showChart)
+    {
+        <ApexChart TItem="ChartDataType"
+            Title="Spreadsheet Chart"
+            @ref=chart
+            Options="ChartOptions">
+            <ApexPointSeries TItem="ChartDataType"
+        	    Items="ChartData"
+        		    Name="List of Spreadsheet Data"
+        		    SeriesType="SeriesType.Bar"
+        		    XValue="e => e.Cell"
+        		    YValue="e=> e.Value" />
+        </ApexChart>
+    }
+}
+
+@code
+{
+    // <remark> 
+    //   The code in this section should be 100% GUI related.  Otherwise
+    //   place the code in the .cs file.
+    // </remark>
+
+    /// <summary>
+    ///   Direct reference to the html element (so we can focus it).
+    /// </summary>
+    private ElementReference FormulaContentEditableInput;
+
+    /// <summary>
+    ///   The value of the main input widget where users type
+    ///   their formulas and numbers and strings.
+    /// </summary>
+    private string InputWidgetBackingStore = "";
+
+    /// <summary>
+    ///   The name of the file that we want to download to.
+    /// </summary>
+    private string SaveFileName = "Spreadsheet.sprd";
+
+    /// <summary>
+    ///   The name of the cell that is selected.
+    /// </summary>
+    private string CellName = "A1";
+
+    /// <summary>
+    ///  Field that holds the number of rows.
+    /// </summary>
+    private int _rows = 10;
+
+    /// <summary>
+    ///  Field that holds the number of columns.
+    /// </summary>
+    private int _columns = 10;
+
+    /// <summary>
+    ///  The number of rows in the GUI spreadsheet.
+    /// </summary>
+    private int Rows 
+    { 
+        get
+        {
+            return _rows;
+        }
+        set
+        {
+            SetRows(value);
+        }
+    }
+
+    /// <summary>
+    ///  The number of columns in the GUI spreadsheet.
+    /// </summary>
+    private int Columns
+    {
+        get
+        {
+            return _columns;
+        }
+        set
+        {
+            SetColumns(value);
+        }
+    }
+
+    /// <summary>
+    ///  Sets the number of rows to between 1 and 99.
+    /// </summary>
+    private void SetRows(int value)
+    {
+        if (value < 1)
+        {
+            _rows = 1;
+        }
+
+        if (value >= 100)
+        {
+            _rows = 99;
+        }
+
+        else
+        {
+            _rows = value;
+        }
+    }
+
+    /// <summary>
+    ///  Sets the number of columns to between 1 and 25.
+    /// </summary>
+    private void SetColumns(int value)
+    {
+        if (value < 1)
+        {
+            _columns = 1;
+        }
+
+        else if (value >= 26)
+        {
+            _columns = 25;
+        }
+        else
+        {
+            _columns = value;
+        }
+    }
+
+    // Class to hold chart values
+    public class ChartDataType
+    {
+        public string Cell { get; init; } = string.Empty;
+        public int Value { get; init; }
+    }
+
+    // the chart itself
+    private ApexChart<ChartDataType> chart = new();
+
+    // List of data points
+    private List<ChartDataType> ChartData { get; set; } = [];
+
+    // Extra options
+    private ApexChartOptions<ChartDataType> ChartOptions { get; set; } = new();
+
+
+    /// <summary>
+    ///   When a cell is clicked on, put the focus on the main
+    ///   widget and update the toolbar.
+    /// </summary>
+    /// <param name="row"></param>
+    /// <param name="col"></param>
+    private void FocusMainInput( int row, int col )
+    {
+        InputWidgetBackingStore = $"{row},{col}";
+        UpdateToolbar();
+        HighlightCell(row, col);
+        FormulaContentEditableInput.FocusAsync(); // <remarks> move focus back to input widget. </remarks>
+    }
+
+    /// <summary>
+    ///   Make the value and content display/input of the tool bar match the
+    ///   spreadsheet.
+    /// </summary>
+    private void UpdateToolbar()
+    {
+        // First, gets the cell name from the InputWidgetBackingStore.
+        // Then, the cell name is passed to GetCellContents
+        // Finally, SetToolbarCellContents checks if the returned value was of type Formula
+        // and if so, adds an '='.
+        CellName = InputBackingToCellName();
+        SetToolbarCellContents(sheet.GetCellContents(CellName));
+        StateHasChanged();
+    }
+
+    /// <summary>
+    ///   Outline the current cell. erase outlines from everyone else.
+    /// </summary>
+    /// <param name="theRow">the cell's row.</param>
+    /// <param name="theCol">the cell's col.</param>
+    private void HighlightCell(int theRow, int theCol)
+    {
+        for (int row=0;row<Rows;row++)
+        {
+            for (int col=0;col<Columns;col++)
+            {
+                CellsClassBackingStore[row, col] = string.Empty;
+            }
+        }
+
+        CellsClassBackingStore[theRow, theCol] = "selected";
+    }
+
+    /// <summary>
+    ///   When the header widget for cell contents is changed, update
+    ///   the spreadsheet.
+    /// </summary>
+    /// <param name="eventArgs">The onclick event</param>
+    private void ChangeSpreadsheetCellValue( ChangeEventArgs eventArgs )
+    {
+        int row = 0;
+        int col = 0;
+
+        IndexOf2DArray(CellsClassBackingStore, ref row, ref col, "selected");
+
+        string newInput = eventArgs.Value?.ToString() ?? string.Empty;
+        InputWidgetBackingStore = newInput;
+
+        HandleUpdateCellInSpreadsheet( newInput, row, col );
+
+        UpdateToolbar();
+    }
+
+    /// <summary>
+    ///   What to do before the browser is allowed to leave the page.
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    private async Task OnBeforeLeavePage( LocationChangingContext context )
+    {
+        if (HasSpreadSheetChanged())
+        {
+            var isConfirmed = await JS.InvokeAsync<bool>(
+                "confirm",
+                "Are you sure you want to navigate away?");
+
+            if (!isConfirmed)
+            {
+                context.PreventNavigation();
+            }
+        }
+    }
+
+    /// <summary>
+    ///   Helper method to get the 2d index of a value.
+    /// </summary>
+    /// <param name="array">The array to search</param>
+    /// <param name="col">The returned col index</param>
+    /// <param name="row">The returned row index</param>
+    /// <param name="value">The value to be searched</param>
+    private void IndexOf2DArray(in Array array, ref int row, ref int col, string value)
+    {
+        for (int i = 0; i < Rows; i++)
+        {
+            for (int j = 0; j < Columns; j++)
+            {
+                if (CellsClassBackingStore[i, j].Equals(value))
+                {
+                    row = i;
+                    col = j;
+                    return;
+                }
+            }
+        }
+        row = -1;
+        col = -1;
+    }
+
+    ///<summary>
+    /// Gets the col and row number from the backingstore and converts it to cell name.
+    ///</summary>
+    private string InputBackingToCellName()
+    {
+        string[] parts = InputWidgetBackingStore.Split(',');
+        int.TryParse(parts[0], out int rows);
+        int.TryParse(parts[1], out int cols);
+
+        return CellNameFromRowCol(rows, cols);
+    }
+
+    ///<summary>
+    /// Renders the chart from the built data.
+    ///</summary>
+    private async Task RenderChart()
+    {
+        ChartData = GetChart();
+        await chart.UpdateSeriesAsync(true);
+    }
+}
